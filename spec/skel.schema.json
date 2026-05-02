@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://spore.dev/schemas/skel/v2.0/skel.schema.json",
+  "title": "SKEL — Skeleton",
+  "description": "A flat, relational JSON format for representing visual narratives.",
+  "type": "object",
+  "required": ["skel_version", "metadata", "acts", "scenes", "shots"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "skel_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Spec version (semver MAJOR.MINOR)."
+    },
+    "metadata": { "$ref": "#/definitions/Metadata" },
+    "bone_registry": {
+      "type": "object",
+      "description": "Embedded BONE definitions keyed by bone_id. Makes the file self-contained and portable.",
+      "additionalProperties": { "$ref": "#/definitions/BoneDefinition" }
+    },
+    "acts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Act" },
+      "minItems": 1
+    },
+    "scenes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Scene" },
+      "minItems": 1
+    },
+    "shots": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Shot" },
+      "minItems": 1
+    },
+    "key_file": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "$ref": "#/definitions/KeyFile" }
+      ],
+      "description": "Inline key file object or URI to external key file."
+    }
+  },
+  "definitions": {
+    "Extensions": {
+      "type": "object",
+      "description": "Vendor-namespaced extension data (keys must start with 'x-')."
+    },
+    "Bones": {
+      "type": "object",
+      "description": "BONE data keyed by bone_id. Values are open objects defined by the BONE definition.",
+      "additionalProperties": { "type": "object" }
+    },
+    "BoneFieldDef": {
+      "type": "object",
+      "required": ["type", "required"],
+      "additionalProperties": true,
+      "properties": {
+        "type": { "type": "string", "enum": ["string", "number", "boolean", "array", "object"] },
+        "required": { "type": "boolean" },
+        "ui": { "type": "string" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "default": {},
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "options": { "type": "array" }
+      }
+    },
+    "BoneDefinition": {
+      "type": "object",
+      "required": ["bone_version", "label", "target", "attaches_to", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "bone_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "target": { "type": "string", "enum": ["image", "video", "audio", "style", "custom"] },
+        "attaches_to": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] },
+          "minItems": 1
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/BoneFieldDef" }
+        },
+        "defaults": { "type": "object" }
+      }
+    },
+    "Constraints": {
+      "type": "object",
+      "properties": {
+        "max_shots_per_scene": { "type": "integer", "default": 4 }
+      },
+      "additionalProperties": false
+    },
+    "Metadata": {
+      "type": "object",
+      "required": ["story_id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "story_id": { "type": "string" },
+        "title": { "type": "string" },
+        "logline": { "type": "string", "maxLength": 280 },
+        "author": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "modified_at": { "type": "string", "format": "date-time" },
+        "skin_key": { "type": "string" },
+        "constraints": { "$ref": "#/definitions/Constraints" },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "Act": {
+      "type": "object",
+      "required": ["id", "title", "scene_refs"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "order": { "type": "integer" },
+        "title": { "type": "string" },
+        "scene_refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "Loc": {
+      "type": "object",
+      "required": ["type", "name", "tod"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["INT", "EXT", "INT/EXT"] },
+        "name": { "type": "string" },
+        "tod": { "type": "string", "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "CONT"], "default": "DAY" }
+      }
+    },
+    "Scene": {
+      "type": "object",
+      "required": ["id", "act_id", "header", "loc", "shot_refs"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "act_id": { "type": "string" },
+        "order": { "type": "integer" },
+        "header": { "type": "string" },
+        "loc": { "$ref": "#/definitions/Loc" },
+        "location_ref": { "type": "string" },
+        "environment_ref": { "type": "string" },
+        "shot_refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "narrative": { "type": "string" },
+        "notes": { "type": "string" },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "VSetup": {
+      "type": "object",
+      "required": ["size", "angle"],
+      "additionalProperties": false,
+      "properties": {
+        "size":   { "type": "string", "enum": ["ws", "mws", "ms", "mcu", "cu", "ecu", "pov", "ots", "2s"] },
+        "angle":  { "type": "string", "enum": ["eye", "low", "high", "dutch", "bird", "worm"] },
+        "lens":   { "type": "string", "enum": ["wide", "std", "tele", "macro", "anamorphic"], "default": "std" },
+        "move":   { "type": "string", "enum": ["static", "pan", "tilt", "dolly", "crane", "handheld", "steadicam", "drone"], "default": "static" },
+        "light":  { "type": "string", "enum": ["natural", "noir", "high_key", "low_key", "golden", "blue", "practical", "neon"], "default": "natural" },
+        "dof":    { "type": "string", "enum": ["deep", "shallow", "rack"], "default": "deep" },
+        "aspect": { "type": "string", "enum": ["16:9", "9:16", "1:1", "4:3", "2.39:1", "21:9"] },
+        "color":  { "type": "string" },
+        "mood":   { "type": "string" }
+      }
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string", "enum": ["pending", "generating", "review", "approved", "rejected"] },
+        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected"] }
+      },
+      "additionalProperties": false
+    },
+    "Shot": {
+      "type": "object",
+      "required": ["id", "scene_id", "action", "v_setup"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "scene_id": { "type": "string" },
+        "order": { "type": "integer" },
+        "action": { "type": "string", "maxLength": 200 },
+        "dialogue": { "type": "string" },
+        "character_refs": { "type": "array", "items": { "type": "string" } },
+        "duration": { "type": "number", "minimum": 0 },
+        "notes": { "type": "string" },
+        "status": { "$ref": "#/definitions/Status" },
+        "v_setup": { "$ref": "#/definitions/VSetup" },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "KeyFileToken": {
+      "type": "object",
+      "required": ["token", "label"],
+      "additionalProperties": true,
+      "properties": {
+        "token": { "type": "string" },
+        "label": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "KeyFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "size":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "angle":  { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "lens":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "move":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "light":  { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "tod":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "dof":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "custom": { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } }
+      }
+    }
+  }
+}

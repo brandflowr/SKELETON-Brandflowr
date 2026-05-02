@@ -1,0 +1,22 @@
+{
+  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "bone_id": "flux-dev",
+  "bone_version": "1.0",
+  "label": "Flux Dev (Image Generation)",
+  "description": "Black Forest Labs Flux Dev model. Text-to-image with guidance, seed, and negative prompt control.",
+  "target": "image",
+  "attaches_to": ["shot", "scene", "metadata"],
+  "fields": {
+    "text":      { "type": "string",  "required": true,  "ui": "textarea", "label": "Prompt", "description": "The image generation prompt." },
+    "negative":  { "type": "string",  "required": false, "ui": "textarea", "label": "Negative Prompt", "description": "What to exclude from generation." },
+    "guidance":  { "type": "number",  "required": false, "ui": "slider",   "label": "Guidance Scale", "min": 1, "max": 20, "default": 7.5, "description": "How closely to follow the prompt." },
+    "seed":      { "type": "number",  "required": false, "ui": "number",   "label": "Seed", "description": "Reproducibility seed. Leave empty for random." },
+    "aspect":    { "type": "string",  "required": false, "ui": "select",   "label": "Aspect Ratio", "options": ["1:1", "16:9", "9:16", "4:3", "3:4", "2.39:1", "21:9"], "default": "16:9" },
+    "lora":      { "type": "string",  "required": false, "ui": "text",     "label": "LoRA Reference", "description": "Path or ID of a LoRA model for style/character consistency." },
+    "style_ref": { "type": "string",  "required": false, "ui": "file",     "label": "Style Reference Image", "description": "Reference image for style transfer." }
+  },
+  "defaults": {
+    "guidance": 7.5,
+    "aspect": "16:9"
+  }
+}

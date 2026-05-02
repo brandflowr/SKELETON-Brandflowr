@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "title": "BONE — Base Object Narrative Export",
+  "description": "A plugin definition format for attaching AI generation config to VRAD entities.",
+  "type": "object",
+  "required": ["bone_id", "bone_version", "label", "target", "attaches_to", "fields"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "bone_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-]*$",
+      "description": "Unique identifier. Lowercase alphanumeric with hyphens."
+    },
+    "bone_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Semver MAJOR.MINOR version."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "description": {
+      "type": "string",
+      "description": "What this BONE does."
+    },
+    "target": {
+      "type": "string",
+      "enum": ["image", "video", "audio", "style", "custom"],
+      "description": "Primary category of this BONE."
+    },
+    "attaches_to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["metadata", "act", "scene", "shot"]
+      },
+      "minItems": 1,
+      "description": "Which VRAD entity types this BONE can attach to."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/FieldDef"
+      },
+      "description": "Field definitions describing the expected data shape."
+    },
+    "defaults": {
+      "type": "object",
+      "description": "Default values for fields."
+    }
+  },
+  "definitions": {
+    "FieldDef": {
+      "type": "object",
+      "required": ["type", "required"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "array", "object"]
+        },
+        "required": { "type": "boolean" },
+        "ui": {
+          "type": "string",
+          "enum": ["text", "textarea", "number", "slider", "select", "toggle", "color", "file"]
+        },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "default": {},
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "options": { "type": "array" }
+      }
+    }
+  }
+}

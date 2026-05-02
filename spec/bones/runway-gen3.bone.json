@@ -1,0 +1,24 @@
+{
+  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "bone_id": "runway-gen3",
+  "bone_version": "1.0",
+  "label": "Runway Gen-3 Alpha (Video Generation)",
+  "description": "Runway Gen-3 Alpha Turbo. Text-to-video and image-to-video with motion and duration control.",
+  "target": "video",
+  "attaches_to": ["shot", "scene", "metadata"],
+  "fields": {
+    "text":             { "type": "string",  "required": true,  "ui": "textarea", "label": "Prompt", "description": "The video generation prompt describing motion and action." },
+    "duration":         { "type": "number",  "required": false, "ui": "select",   "label": "Duration (seconds)", "options": [4, 10, 16], "default": 4 },
+    "reference_image":  { "type": "string",  "required": false, "ui": "file",     "label": "Start Frame", "description": "Image to use as the first frame." },
+    "end_image":        { "type": "string",  "required": false, "ui": "file",     "label": "End Frame", "description": "Image to use as the last frame." },
+    "motion_strength":  { "type": "number",  "required": false, "ui": "slider",   "label": "Motion Strength", "min": 0, "max": 1, "default": 0.5, "description": "How much motion to apply. 0 = nearly still, 1 = maximum movement." },
+    "aspect":           { "type": "string",  "required": false, "ui": "select",   "label": "Aspect Ratio", "options": ["16:9", "9:16", "1:1"], "default": "16:9" },
+    "model":            { "type": "string",  "required": false, "ui": "select",   "label": "Model", "options": ["gen3-alpha", "gen3-alpha-turbo"], "default": "gen3-alpha-turbo" }
+  },
+  "defaults": {
+    "duration": 4,
+    "motion_strength": 0.5,
+    "aspect": "16:9",
+    "model": "gen3-alpha-turbo"
+  }
+}

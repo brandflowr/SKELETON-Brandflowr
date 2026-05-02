@@ -1,0 +1,264 @@
+{
+  "version": "2.0",
+  "size": [
+    {
+      "token": "ws",
+      "label": "Wide Shot",
+      "description": "Full environment visible, subject small in frame."
+    },
+    {
+      "token": "mws",
+      "label": "Medium Wide Shot",
+      "description": "Subject from knees up with environment context."
+    },
+    {
+      "token": "ms",
+      "label": "Medium Shot",
+      "description": "Subject from waist up."
+    },
+    {
+      "token": "mcu",
+      "label": "Medium Close-Up",
+      "description": "Subject from chest up."
+    },
+    {
+      "token": "cu",
+      "label": "Close-Up",
+      "description": "Subject's face fills the frame."
+    },
+    {
+      "token": "ecu",
+      "label": "Extreme Close-Up",
+      "description": "Tight on a single detail (eye, hand, object)."
+    },
+    {
+      "token": "pov",
+      "label": "Point of View",
+      "description": "Camera represents a character's literal viewpoint."
+    },
+    {
+      "token": "ots",
+      "label": "Over the Shoulder",
+      "description": "Framed past one character's shoulder toward another."
+    },
+    {
+      "token": "2s",
+      "label": "Two Shot",
+      "description": "Two subjects framed together."
+    }
+  ],
+  "angle": [
+    {
+      "token": "eye",
+      "label": "Eye Level",
+      "description": "Camera at subject's eye height. Neutral perspective."
+    },
+    {
+      "token": "low",
+      "label": "Low Angle",
+      "description": "Camera below subject, looking up. Conveys power or menace."
+    },
+    {
+      "token": "high",
+      "label": "High Angle",
+      "description": "Camera above subject, looking down. Conveys vulnerability."
+    },
+    {
+      "token": "dutch",
+      "label": "Dutch Angle",
+      "description": "Camera tilted on its roll axis. Conveys unease or disorientation."
+    },
+    {
+      "token": "bird",
+      "label": "Bird's Eye",
+      "description": "Camera directly overhead. God-like or surveillance perspective."
+    },
+    {
+      "token": "worm",
+      "label": "Worm's Eye",
+      "description": "Camera at ground level looking up. Extreme low angle."
+    }
+  ],
+  "lens": [
+    {
+      "token": "wide",
+      "label": "Wide Lens",
+      "description": "Short focal length (14–35mm). Exaggerates depth."
+    },
+    {
+      "token": "std",
+      "label": "Standard Lens",
+      "description": "Normal focal length (35–70mm). Natural perspective."
+    },
+    {
+      "token": "tele",
+      "label": "Telephoto Lens",
+      "description": "Long focal length (70–200mm+). Compresses depth."
+    },
+    {
+      "token": "macro",
+      "label": "Macro Lens",
+      "description": "Extreme close focus for tiny details."
+    },
+    {
+      "token": "anamorphic",
+      "label": "Anamorphic Lens",
+      "description": "Widescreen with characteristic lens flares and oval bokeh."
+    }
+  ],
+  "move": [
+    {
+      "token": "static",
+      "label": "Static",
+      "description": "Camera is locked off. No movement."
+    },
+    {
+      "token": "pan",
+      "label": "Pan",
+      "description": "Camera rotates horizontally on its axis."
+    },
+    {
+      "token": "tilt",
+      "label": "Tilt",
+      "description": "Camera rotates vertically on its axis."
+    },
+    {
+      "token": "dolly",
+      "label": "Dolly",
+      "description": "Camera moves toward or away from subject on a track."
+    },
+    {
+      "token": "crane",
+      "label": "Crane",
+      "description": "Camera moves vertically through space."
+    },
+    {
+      "token": "handheld",
+      "label": "Handheld",
+      "description": "Camera is handheld. Organic, unstable feel."
+    },
+    {
+      "token": "steadicam",
+      "label": "Steadicam",
+      "description": "Stabilized floating movement. Smooth tracking."
+    },
+    {
+      "token": "drone",
+      "label": "Drone",
+      "description": "Aerial camera movement. Sweeping or hovering."
+    }
+  ],
+  "light": [
+    {
+      "token": "natural",
+      "label": "Natural Light",
+      "description": "Ambient daylight or available light. Realistic."
+    },
+    {
+      "token": "noir",
+      "label": "Film Noir",
+      "description": "High contrast, deep shadows, hard light sources.",
+      "contrast": "high",
+      "shadow_density": "heavy"
+    },
+    {
+      "token": "high_key",
+      "label": "High Key",
+      "description": "Bright, even lighting. Minimal shadows. Clean feel."
+    },
+    {
+      "token": "low_key",
+      "label": "Low Key",
+      "description": "Predominantly dark with selective highlights."
+    },
+    {
+      "token": "golden",
+      "label": "Golden Hour",
+      "description": "Warm, soft directional light. Magic hour look."
+    },
+    {
+      "token": "blue",
+      "label": "Blue Hour",
+      "description": "Cool ambient twilight. Pre-dawn or post-sunset."
+    },
+    {
+      "token": "practical",
+      "label": "Practical Lighting",
+      "description": "Light sources visible in frame (lamps, candles, screens)."
+    },
+    {
+      "token": "neon",
+      "label": "Neon",
+      "description": "Saturated colored light. Urban, cyberpunk aesthetic."
+    }
+  ],
+  "tod": [
+    {
+      "token": "DAY",
+      "label": "Day",
+      "description": "Standard daylight hours."
+    },
+    {
+      "token": "NIGHT",
+      "label": "Night",
+      "description": "Nighttime. Artificial or moonlight."
+    },
+    {
+      "token": "DAWN",
+      "label": "Dawn",
+      "description": "Early morning, pre-sunrise."
+    },
+    {
+      "token": "DUSK",
+      "label": "Dusk",
+      "description": "Late evening, post-sunset."
+    },
+    {
+      "token": "CONT",
+      "label": "Continuous",
+      "description": "Same time as previous scene. No time jump."
+    }
+  ],
+  "dof": [
+    {
+      "token": "deep",
+      "label": "Deep Focus",
+      "description": "Everything in frame is sharp. Large depth of field."
+    },
+    {
+      "token": "shallow",
+      "label": "Shallow Focus",
+      "description": "Subject sharp, background blurred. Isolates subject."
+    },
+    {
+      "token": "rack",
+      "label": "Rack Focus",
+      "description": "Focus shifts between planes during the shot."
+    }
+  ],
+  "color": [
+    {
+      "token": "warm",
+      "label": "Warm",
+      "description": "Warm color temperature."
+    },
+    {
+      "token": "cool",
+      "label": "Cool",
+      "description": "Cool color temperature."
+    }
+  ],
+  "mood": [
+    {
+      "token": "tense",
+      "label": "Tense",
+      "description": "A tense or uneasy mood."
+    },
+    {
+      "token": "romantic",
+      "label": "Romantic",
+      "description": "A dreamy or romantic mood."
+    }
+  ],
+  "custom": []
+}
