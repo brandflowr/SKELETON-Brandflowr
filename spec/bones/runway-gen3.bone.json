@@ -1,5 +1,5 @@
 {
-  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json",
   "bone_id": "runway-gen3",
   "bone_version": "1.0",
   "label": "Runway Gen-3 Alpha (Video Generation)",

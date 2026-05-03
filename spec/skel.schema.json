@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://spore.dev/schemas/skel/v2.0/skel.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/skel.schema.json",
   "title": "SKEL — Skeleton",
   "description": "A flat, relational JSON format for representing visual narratives.",
   "type": "object",

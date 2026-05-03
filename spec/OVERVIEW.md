@@ -9,8 +9,8 @@
 SKEL is an open interchange format that represents screenplays, storyboards, and visual narratives as flat JSON. Instead of deeply nested trees, SKEL stores Acts, Scenes, and Shots as top-level arrays linked by ID references — like a relational database for stories.
 
 It was designed for:
-- AI-driven image/video generation pipelines (Runway, Kling, Sora, etc.)
-- Storyboard authoring tools (Spore)
+- AI-driven image/video generation pipelines (Flux, Kling, Runway, WAN, etc.)
+- Storyboard authoring tools
 - Cross-tool interchange between screenplay editors and production software
 
 ---
@@ -21,7 +21,7 @@ It was designed for:
 |---|---|
 | Screenplay formats (Fountain, FDX) have no visual metadata | SKEL encodes camera, lighting, lens, and movement per shot |
 | Nested story trees are fragile and hard to query | Flat relational structure — query any shot by ID |
-| No standard for AI prompt pipelines | `action` + `prompt` + `v_setup` fields map directly to generation APIs |
+| No standard for AI prompt pipelines | `action` + `v_setup` fields map directly to generation APIs |
 | Formats break when tools add custom data | `extensions` object with `x-` namespacing keeps the core spec clean |
 | No validation for story structure | JSON Schema + referential integrity checks catch errors before they hit production |
 
@@ -40,71 +40,53 @@ It was designed for:
 | [`skel-keyfile.json`](./skel-keyfile.json) | Default token dictionary. Maps shorthand tokens to full production definitions. |
 | [`example.skel.json`](./example.skel.json) | Complete working example. "The Last Signal" — 2 acts, 3 scenes, 9 shots with BONE data. |
 | [`bones/`](./bones/) | Starter BONE definitions: `flux-dev`, `runway-gen3`, `kling-v1`. |
+| [`TOKEN_REFERENCE.md`](./TOKEN_REFERENCE.md) | All valid tokens at a glance — quick lookup for prompt writing. |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture map. Data flow, module responsibilities, integration points. |
 | [`DECISIONS.md`](./DECISIONS.md) | Architecture Decision Records. Why we made the choices we made. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
-
-### Implementation (`/app/utils/SKEL`)
-
-| File | Purpose |
-|---|---|
-| [`types.ts`](../app/utils/SKEL/types.ts) | TypeScript interfaces matching the JSON Schema. `SKELDocument`, `SKELScene`, `SKELShot`, `SKELVSetup`, etc. |
-| [`validator.ts`](../app/utils/SKEL/validator.ts) | Schema validation (AJV) + referential integrity checks + duplicate ID detection. |
-| [`keyfile.ts`](../app/utils/SKEL/keyfile.ts) | `SKELKeyResolver` class. Expands shorthand tokens to full definitions with spec-compliant fallback defaults. |
-| [`converter.ts`](../app/utils/SKEL/converter.ts) | Bidirectional conversion: `masterStoryToSKEL()`, `storyToSKEL()`, `SKELToStory()`. |
-| [`bone.ts`](../app/utils/SKEL/bone.ts) | `BoneResolver` class. Loads definitions, resolves inheritance chain, validates BONE data. |
-
-### Dependencies
-
-| Package | Version | Purpose |
-|---|---|---|
-| `ajv` | `^8.18.0` | JSON Schema validation engine |
 
 ---
 
 ## Quick Start
 
-### Validate a SKEL document
-```ts
-import { validateSKEL } from '~/utils/SKEL/validator'
+### Validate a SKEL document (JavaScript/TypeScript)
 
-const result = validateSKEL(myDocument)
-if (!result.valid) {
-  console.error(result.errors)
+```ts
+import Ajv from 'ajv'
+import schema from './skel.schema.json'
+
+const ajv = new Ajv()
+const validate = ajv.compile(schema)
+const valid = validate(myDocument)
+if (!valid) console.error(validate.errors)
+```
+
+### Write a shot with BONE data
+
+```json
+{
+  "id": "sh_1",
+  "scene_id": "sc_1",
+  "action": "Harlan writes in the logbook.",
+  "v_setup": { "size": "cu", "angle": "high", "light": "noir" },
+  "bones": {
+    "flux-dev": {
+      "text": "Close-up of weathered hands writing in a leather logbook, candlelight, noir lighting.",
+      "guidance": 9,
+      "seed": 42
+    }
+  }
 }
 ```
 
-### Resolve BONE data for a shot (with inheritance)
-```ts
-import { BoneResolver } from '~/utils/SKEL/bone'
-
-const resolver = new BoneResolver(SKELDoc.bone_registry)
-const result = resolver.resolveForShot('flux-dev', SKELDoc, shot)
-// result.data → { text: "...", negative: "blurry...", guidance: 9, seed: 42 }
-// result.source → ['defaults', 'metadata', 'scene', 'shot']
-```
-
 ### Resolve tokens from a shot
+
 ```ts
-import { SKELKeyResolver } from '~/utils/SKEL/keyfile'
-
-const resolver = new SKELKeyResolver()
-const resolved = resolver.resolveSetup(shot.v_setup)
-// resolved.size → { token: "cu", label: "Close-Up", description: "Subject's face fills the frame." }
-```
-
-### Export a Spore project to SKEL
-```ts
-import { masterStoryToSKEL } from '~/utils/SKEL/converter'
-
-const SKELDoc = masterStoryToSKEL(masterStory)
-```
-
-### Import a SKEL file into Spore
-```ts
-import { SKELToStory } from '~/utils/SKEL/converter'
-
-const story = SKELToStory(SKELDoc, projectId)
+// Token "cu" expands to: { label: "Close-Up", description: "Subject's face fills the frame." }
+// Token "noir" expands to: { label: "Noir", contrast: "high", shadow_density: "heavy" }
+// Tokens live in skel-keyfile.json — load and expand at render time.
+const keyFile = await fetch('skel-keyfile.json').then(r => r.json())
+const sizeToken = keyFile.size.find(t => t.token === shot.v_setup.size)
 ```
 
 ---
@@ -132,7 +114,7 @@ Every scene is capped at 4 shots. This constraint keeps visual narratives concis
 ### Extensions
 Any entity can carry vendor-specific data via `extensions` with `x-` namespaced keys:
 ```json
-{ "extensions": { "x-Spore": { "production_status": "approved" } } }
+{ "extensions": { "x-myapp": { "production_status": "approved" } } }
 ```
 
 ---
@@ -144,20 +126,13 @@ Any entity can carry vendor-specific data via `extensions` with `x-` namespaced 
 | Specification | ✅ v2.0 complete |
 | JSON Schema | ✅ Draft 7, validated |
 | Key File | ✅ 7 categories, 47 tokens |
-| TypeScript types | ✅ Matches schema |
-| Validator | ✅ Schema + referential integrity |
-| Key resolver | ✅ With spec-compliant fallbacks |
-| Converter (export) | ✅ MasterStory → SKEL, Story → SKEL |
-| Converter (import) | ✅ SKEL → Story |
 | BONE spec | ✅ v1.0 complete |
-| BONE schema | ✅ Validates .bone.json files |
-| BONE resolver | ✅ Inheritance chain + validation |
+| BONE schema | ✅ Validates `.bone.json` files |
 | Starter BONEs | ✅ flux-dev, runway-gen3, kling-v1 |
 | Fountain import | 🔲 Planned |
 | Final Draft import | 🔲 Planned |
 | OpenTimelineIO export | 🔲 Planned |
 | Standalone CLI | 🔲 Planned |
-| Schema hosting | 🔲 Needs Spore.dev |
 
 ---
 

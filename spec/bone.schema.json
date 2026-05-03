@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json",
   "title": "BONE — Base Object Narrative Export",
-  "description": "A plugin definition format for attaching AI generation config to VRAD entities.",
+  "description": "A plugin definition format for attaching AI generation config to SKEL story entities.",
   "type": "object",
   "required": ["bone_id", "bone_version", "label", "target", "attaches_to", "fields"],
   "additionalProperties": false,
@@ -38,7 +38,7 @@
         "enum": ["metadata", "act", "scene", "shot"]
       },
       "minItems": 1,
-      "description": "Which VRAD entity types this BONE can attach to."
+      "description": "Which SKEL entity types this BONE can attach to."
     },
     "fields": {
       "type": "object",
