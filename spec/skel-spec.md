@@ -1,34 +1,38 @@
 # SKEL Specification v2.0
 
-**Visual Relational Action Data**
+**Story Keyframe Extensible Layout**
 
-> A flat, relational JSON format for representing visual narratives as machine-readable, validatable story data.
+> A flat, relational YAML format for representing visual narratives as machine-readable, human-authored story data.
 
 ---
 
 ## 1. Introduction
 
-SKEL (Visual Relational Action Data) is a JSON-based interchange format for encoding screenplays, storyboards, and visual narratives into a flat relational structure. It is designed for:
+SKEL (Story Keyframe Extensible Layout) is a YAML-based interchange format for encoding screenplays, storyboards, and visual narratives into a flat relational structure. It is designed for:
 
 - AI-driven image/video generation pipelines
-- Storyboard authoring tools
+- Storyboard authoring tools (primary host: Spore Studio)
 - Cross-tool interchange between screenplay editors, production software, and rendering engines
+
+`.skel` is the layout of the body — acts, scenes, shots, visual setup — before the BONEs (AI pipelines defined in `.bone` files) are attached to it.
 
 ### 1.1 Design Principles
 
 - **Flat over nested**: Acts, scenes, and shots are top-level arrays linked by ID references, not deep nesting.
 - **Relational**: Any entity can be queried directly by ID without tree traversal.
+- **Human-authored**: YAML block structure keeps files readable and writable by creators, not just tools.
 - **Compact**: Shorthand tokens keep file sizes small; a key file expands them to full definitions.
 - **Validatable**: A companion JSON Schema enables programmatic validation by any standard tool.
-- **Extensible**: Reserved `extensions` objects allow vendor-specific data without breaking the core spec.
+- **Extensible**: Reserved `extensions` objects with `x-` namespacing allow vendor-specific data without breaking the core spec.
 
 ### 1.2 File Convention
 
-| Property       | Value                    |
-| -------------- | ------------------------ |
-| File extension | `.skel` or `.skel.json`  |
-| MIME type      | `application/SKEL+json`  |
-| Encoding       | UTF-8                    |
+| Property       | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| File extension | `.skel`                                                 |
+| Format         | YAML (UTF-8)                                            |
+| MIME type      | `application/skel+yaml`                                 |
+| JSON export    | `.skel.json` — portability format, same structure       |
 | Schema URI     | `https://Spore.dev/schemas/SKEL/v2.0/skel.schema.json` |
 
 ---

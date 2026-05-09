@@ -59,14 +59,17 @@ A `.bone.json` file describes a single tool, generator, or pipeline attachment. 
 
 ### 2.2 Fields
 
-| Field          | Type     | Required | Description                                                    |
-| -------------- | -------- | -------- | -------------------------------------------------------------- |
-| `bone_id`      | string   | yes      | Unique identifier. Lowercase, hyphens allowed.                 |
-| `bone_version` | string   | yes      | Semver version of this BONE definition.                        |
-| `label`        | string   | yes      | Human-readable name for UI display.                            |
-| `description`  | string   | no       | What this BONE does.                                           |
-| `target`       | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
-| `attaches_to`  | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`. |
+| Field               | Type     | Required | Description                                                    |
+| ------------------- | -------- | -------- | -------------------------------------------------------------- |
+| `bone_id`           | string   | yes      | Unique identifier. Lowercase, hyphens allowed.                 |
+| `bone_version`      | string   | yes      | Semver version of this BONE definition.                        |
+| `label`             | string   | yes      | Human-readable name for UI display.                            |
+| `description`       | string   | no       | What this BONE does.                                           |
+| `target`            | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
+| `attaches_to`       | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`. |
+| `prompt_assembly`   | object   | no       | How field values + story context assemble into the final prompt string. See §2.4. |
+| `llm_instructions`  | object   | no       | How an LLM should write prompts for this specific generator. See §2.5. |
+| `output`            | object   | no       | Where and how to store the rendered file after generation. See §2.6. |
 | `fields`       | object   | yes      | Field definitions (see §2.3).                                  |
 | `defaults`     | object   | no       | Default values for fields.                                     |
 
@@ -85,6 +88,167 @@ Each key in `fields` is a field name. The value describes the field:
 | `max`      | number  | no       | Maximum value (for `number` type).                       |
 | `options`  | array   | no       | Valid options (for `select` UI type).                    |
 | `description` | string | no     | Help text for the field.                                 |
+
+---
+
+## 2.4 `prompt_assembly` Object
+
+Defines how the BONE's field data and story context (v_setup tokens, character refs, scene header) combine into the final string sent to an AI generation API. This is what drives the Assembled Prompt Preview in Spore.
+
+| Field               | Type   | Required | Description |
+| ------------------- | ------ | -------- | ----------- |
+| `strategy`          | string | yes      | `"template"`, `"sequential"`, or `"raw"`. |
+| `template`          | string | no       | Template string with `{{field_name}}` substitution. Required when strategy is `"template"`. |
+| `v_setup_injection` | object | no       | Controls injection of resolved v_setup tokens into the assembled prompt. |
+| `character_injection` | object | no     | Controls injection of character data from `character_refs`. |
+| `max_length`        | number | no       | Maximum character length of the assembled prompt. Used for validation and preview warnings. |
+| `separator`         | string | no       | Separator between sequential elements. Default: `" "`. |
+
+**Strategies:**
+- `"template"` — uses the `template` string. `{{field_name}}` substitutes field values. System tokens: `{{v_setup.size}}`, `{{v_setup.light}}`, `{{v_setup.move}}`, `{{v_setup.angle}}`, `{{v_setup.lens}}`, `{{character_refs}}`, `{{scene.header}}`, `{{scene.location}}`, `{{scene.tod}}`.
+- `"sequential"` — concatenates non-empty field values in field definition order, joined by `separator`. Default strategy for bones that don't define `prompt_assembly`.
+- `"raw"` — the `text` field value is sent verbatim. No additional assembly. For services that take plain prompts.
+
+**`v_setup_injection` sub-fields:**
+
+| Field         | Type     | Description |
+| ------------- | -------- | ----------- |
+| `enabled`     | boolean  | Whether to inject v_setup tokens. Default: `false`. |
+| `position`    | string   | `"append"`, `"prepend"`, or `"inline"` (used in template via `{{v_setup.*}}`). |
+| `token_format`| string   | `"natural"` (expanded labels), `"technical"` (shorthand tokens), `"none"`. |
+| `tokens`      | string[] | Which v_setup categories to inject. E.g. `["size", "angle", "light"]`. |
+
+**`character_injection` sub-fields:**
+
+| Field    | Type   | Description |
+| -------- | ------ | ----------- |
+| `enabled` | boolean | Whether to inject character data. Default: `false`. |
+| `position` | string | `"prepend"`, `"append"`, or `"subject_prefix"`. |
+| `format`  | string | `"name_only"`, `"name_and_description"`, or `"consistency_modifier"`. |
+
+**Example:**
+```json
+"prompt_assembly": {
+  "strategy": "template",
+  "template": "{{subject}} {{action}}. {{camera}}. {{environment}}. {{style}}.",
+  "v_setup_injection": {
+    "enabled": true,
+    "position": "inline",
+    "token_format": "natural",
+    "tokens": ["size", "move", "light"]
+  },
+  "character_injection": {
+    "enabled": true,
+    "position": "subject_prefix",
+    "format": "name_and_description"
+  },
+  "max_length": 500
+}
+```
+
+---
+
+## 2.5 `llm_instructions` Object
+
+Tells a language model how to write prompts for this specific generator. When Claude (or any LLM tool) generates prompts for shots in Spore, it reads this before writing. This makes the BONE a complete **prompt authoring contract** — not just a data container.
+
+| Field           | Type     | Required | Description |
+| --------------- | -------- | -------- | ----------- |
+| `writing_guide` | string   | no       | Main instruction set for writing prompts for this generator. Plain text or Markdown. |
+| `field_guides`  | object   | no       | Per-field writing instructions. Keys are field names. |
+| `examples`      | array    | no       | Input/output pairs showing correct prompt construction. |
+| `do`            | string[] | no       | Rules the LLM should follow. |
+| `dont`          | string[] | no       | Rules the LLM should NOT break. |
+
+**Example:**
+```json
+"llm_instructions": {
+  "writing_guide": "Write video prompts for Seedance 2 using a segmented structure. Use kinetic motion verbs. Camera field is a single short instruction. Keep total assembled prompt under 150 words.",
+  "field_guides": {
+    "action": "Lead with the strongest motion verb. This is the most important field.",
+    "camera": "Single instruction only. Do not use the word 'camera' in this field."
+  },
+  "examples": [
+    {
+      "scene": "INT. LIGHTHOUSE - NIGHT",
+      "action": "Harlan writes in the logbook",
+      "output": {
+        "subject": "A weathered fisherman in his 60s",
+        "action": "leans forward and scrawls coordinates across a damp logbook page",
+        "camera": "slow push in",
+        "environment": "Stone interior, single candle, heavy shadows on salt-worn walls",
+        "style": "Cinematic noir, shallow depth of field, 4K"
+      }
+    }
+  ],
+  "do": ["Use kinetic motion verbs", "Describe camera as a single short instruction"],
+  "dont": ["Stack more than 2 adjectives per noun", "Exceed 150 words total"]
+}
+```
+
+---
+
+## 2.6 `output` Object
+
+Tells any LLM or automated pipeline where to store a rendered file after the generator completes, and which fields in the SKEL document to update. This is what closes the loop from "prompt sent" to "file in project, story updated."
+
+Without this field, a BONE is a prompt contract only. With `output`, a BONE becomes a full generation pipeline spec — it knows what to ask for, how to ask for it, and where to put the result.
+
+| Field               | Type   | Required | Description |
+| ------------------- | ------ | -------- | ----------- |
+| `format`            | string | yes      | Output file extension: `"png"`, `"jpg"`, `"mp4"`, `"gif"`, `"wav"`, etc. |
+| `target`            | string | yes      | Which Spore field to write the result to. See target values below. |
+| `path_template`     | string | no       | Storage path relative to workspace root. Supports tokens: `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, `{n}` (auto-incrementing take number). Default templates are used if omitted (see below). |
+| `status_on_complete`| string | no       | Production status to set on the shot after a successful download. Default: `"review"`. Values: `"review"`, `"approved"`. |
+
+**Target values:**
+
+| Target            | Writes to |
+| ----------------- | --------- |
+| `"startFrameImage"` | `shot.extensions.x-Spore.startFrameImage` |
+| `"endFrameImage"`   | `shot.extensions.x-Spore.endFrameImage` |
+| `"image"`           | `shot.extensions.x-Spore.image` (generic reference image) |
+| `"video_take"`      | `video-map.json` → appends a new take for the shot, sets `active: true` |
+| `"audio_track"`     | `audio-map.json` → assigns file as dialogue/sfx/music per BONE target |
+
+**Default path templates (used when `path_template` is omitted):**
+
+```
+image BONEs:  projects/{slug}/assets/images/{shot_id}.{bone_id}.{format}
+video BONEs:  projects/{slug}/assets/video/{shot_id}.v{n}.{format}
+audio BONEs:  projects/{slug}/assets/audio/{shot_id}.{bone_id}.{format}
+```
+
+**Example — Flux Dev (image):**
+```json
+"output": {
+  "format": "png",
+  "target": "startFrameImage",
+  "status_on_complete": "review"
+}
+```
+
+**Example — Higgsfield / Runway / Kling (video):**
+```json
+"output": {
+  "format": "mp4",
+  "target": "video_take",
+  "status_on_complete": "review"
+}
+```
+
+**What an LLM does after receiving a completed render:**
+
+1. Resolve the storage path using the template + context (workspace, slug, shot_id, bone_id)
+2. Download the file to that path
+3. Write the path to the field specified by `target`:
+   - Image targets → update `shot.extensions.x-Spore[target]` in `story.json`
+   - `video_take` → append entry to `video-map.json` with `active: true`
+   - `audio_track` → append entry to `audio-map.json` with the appropriate track type
+4. Set `shot.extensions.x-Spore.production_status.image` (or `.video`) to `status_on_complete`
+5. Save the story file
+
+Spore will pick up the updated files on next load or file-watch event. No app restart required.
 
 ---
 

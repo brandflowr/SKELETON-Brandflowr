@@ -1,0 +1,92 @@
+{
+  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "bone_id": "seedance-2",
+  "bone_version": "1.0",
+  "label": "Seedance 2 (Video Generation)",
+  "description": "ByteDance Seedance 2. Text-to-video and image-to-video. Structured prompt format: subject, action, camera, environment, style. Responds best to segmented prompts with kinetic motion verbs.",
+  "target": "video",
+  "attaches_to": ["shot", "scene", "metadata"],
+  "fields": {
+    "subject":     { "type": "string",  "required": false, "ui": "text",     "label": "Subject", "description": "Who or what is in the shot. Include physical appearance and relevant traits. E.g. 'A weathered man in his 60s wearing a yellow slicker'." },
+    "action":      { "type": "string",  "required": true,  "ui": "textarea", "label": "Action / Motion", "description": "What is happening. Use strong motion verbs. E.g. 'leans forward and scrawls coordinates across a damp logbook page'." },
+    "camera":      { "type": "string",  "required": false, "ui": "text",     "label": "Camera Instruction", "description": "Single camera direction. E.g. 'slow push in', 'low tracking shot', 'static wide'. Do not use the word camera in this field." },
+    "environment": { "type": "string",  "required": false, "ui": "text",     "label": "Environment / Lighting", "description": "Location and lighting mood in one sentence. E.g. 'Stone lighthouse interior, single candle source, deep shadows on salt-worn walls'." },
+    "style":       { "type": "string",  "required": false, "ui": "text",     "label": "Style / Technical Notes", "description": "Cinematic style and any technical flags. E.g. 'Cinematic noir, shallow depth of field, 4K'." },
+    "duration":    { "type": "number",  "required": false, "ui": "select",   "label": "Duration (seconds)", "options": [5, 10], "default": 5 },
+    "aspect":      { "type": "string",  "required": false, "ui": "select",   "label": "Aspect Ratio", "options": ["16:9", "9:16", "1:1"], "default": "16:9" },
+    "resolution":  { "type": "string",  "required": false, "ui": "select",   "label": "Resolution", "options": ["720p", "1080p"], "default": "1080p" },
+    "reference_image": { "type": "string", "required": false, "ui": "file",  "label": "Start Frame", "description": "Reference image for image-to-video generation." },
+    "negative":    { "type": "string",  "required": false, "ui": "textarea", "label": "Negative Prompt", "description": "What to avoid. E.g. 'blurry, watermark, text overlay, low quality'." }
+  },
+  "defaults": {
+    "duration": 5,
+    "aspect": "16:9",
+    "resolution": "1080p"
+  },
+  "prompt_assembly": {
+    "strategy": "template",
+    "template": "{{subject}} {{action}}. {{camera}}. {{environment}}. {{style}}.",
+    "v_setup_injection": {
+      "enabled": true,
+      "position": "inline",
+      "token_format": "natural",
+      "tokens": ["size", "angle", "move", "light"],
+      "note": "v_setup tokens are used as fallback if camera/environment fields are empty. If the camera field is populated, v_setup.move is omitted to avoid duplication."
+    },
+    "character_injection": {
+      "enabled": true,
+      "position": "subject_prefix",
+      "format": "name_and_description"
+    },
+    "max_length": 500,
+    "separator": " "
+  },
+  "llm_instructions": {
+    "writing_guide": "Write video prompts for Seedance 2 using a segmented structure across five fields. Each field is ONE concept. Keep total assembled prompt under 150 words. Seedance 2 responds strongly to kinetic motion verbs — use 'surges', 'drifts', 'slams', 'crawls', 'tilts', not 'moves' or 'goes'. The camera field should be a single short instruction like 'slow push in' or 'low tracking shot' — Seedance 2 reads this as a discrete parameter. Do not stack more than two adjectives per noun. The environment field is lighting + location in one sentence maximum.",
+    "field_guides": {
+      "subject": "Physical description first, then clothing/props if relevant. Lead with the most visually distinctive trait. Skip if the shot has no clear subject (establishing shots, abstract).",
+      "action": "The motion event of the shot. Start with the strongest kinetic verb. This is the most important field — Seedance 2 is motion-first.",
+      "camera": "Single instruction only. Choose from: slow push in, pull back, low tracking shot, static wide, static close-up, overhead crane down, Dutch tilt hold, handheld follow. Do not say 'camera' or 'we see'.",
+      "environment": "Location name + dominant light source + one atmospheric detail. Keep to one sentence.",
+      "style": "Cinematic reference + technical quality notes. E.g. 'Cinematic noir, shallow DOF, 4K'. Two to four terms max."
+    },
+    "examples": [
+      {
+        "scene": "INT. LIGHTHOUSE - NIGHT",
+        "action": "Harlan writes in the logbook by candlelight",
+        "output": {
+          "subject": "A weathered fisherman in his 60s with calloused, ink-stained hands",
+          "action": "leans forward and scrawls coordinates across a damp logbook page, wrist dragging through wet ink",
+          "camera": "slow push in",
+          "environment": "Stone lighthouse interior, single candle, deep shadows climbing salt-worn walls",
+          "style": "Cinematic noir, shallow depth of field, 4K"
+        }
+      },
+      {
+        "scene": "EXT. HARBOUR - DAWN",
+        "action": "Fishing boats leave the dock in early morning light",
+        "output": {
+          "subject": "",
+          "action": "Three wooden fishing boats drift out from the dock, leaving slow white wakes across still grey water",
+          "camera": "static wide",
+          "environment": "Fishing harbour at dawn, flat pink light on the horizon, fog over the water",
+          "style": "Muted naturalistic palette, wide aspect, 4K"
+        }
+      }
+    ],
+    "do": [
+      "Use kinetic motion verbs (surges, drifts, slams, crawls, tilts)",
+      "Give the camera field a single short instruction",
+      "Lead the subject field with the strongest visual trait",
+      "Keep environment to one sentence",
+      "Leave subject empty for shots without a clear foreground subject"
+    ],
+    "dont": [
+      "Stack more than 2 adjectives per noun",
+      "Exceed 150 words total",
+      "Use passive voice for motion ('is seen walking' → 'walks')",
+      "Begin the camera field with the word 'camera'",
+      "Describe the same detail in multiple fields"
+    ]
+  }
+}

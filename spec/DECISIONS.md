@@ -152,3 +152,35 @@
 - Maximum adoption potential — no license friction
 - Anyone can use, modify, and redistribute
 - No copyleft obligations for commercial tools that implement SKEL
+
+---
+
+## ADR-010: SKEL Acronym Expansion + YAML Format Adoption
+
+**Date:** May 2026  
+**Status:** Accepted
+
+**Context:** The original acronym expansion for SKEL was informal ("Visual Relational Action Data" — which was actually the VRAD format name, not the SKEL acronym). As the format matures and moves toward public release, a precise, meaningful acronym and a format choice that reflects the design philosophy were needed.
+
+**Decision:** `.SKEL` is formally defined as **Story Keyframe Extensible Layout**. The format shifts from JSON to **YAML**.
+
+Rationale for the name:
+- **Story** — the file encodes a visual narrative, not generic data
+- **Keyframe** — each shot is a keyframe: a defined moment in the story with a precise visual setup
+- **Extensible** — YAML is natively extensible; the format is designed for plugin architecture (BONEs) and vendor extensions
+- **Layout** — describes the flat-but-hierarchical structure of the file: acts, scenes, shots as top-level arrays, linked by ID — a layout of the body before the BONEs (AI pipelines) are attached
+
+Rationale for YAML:
+- YAML's block structure makes `.skel` files human-readable and author-friendly
+- YAML natively supports comments, allowing inline documentation of shots and scenes
+- The flat relational structure (ADR-001) maps cleanly to YAML's block sequences
+- Extensibility (`x-` namespaced extensions) reads more naturally in YAML than JSON
+- The Skeleton Metaphor is preserved and strengthened: `.skel` is the layout of the body (story structure), `.bone` files are the AI pipelines that attach to it — YAML makes this separation visually legible
+
+**Consequences:**
+- `skel-spec.md` updated to reflect YAML as the canonical format
+- File extension remains `.skel`; MIME type updates to `application/skel+yaml`
+- JSON export (`.skel.json`) remains supported as a portability format
+- All spec examples rewritten in YAML
+- BONE format (`.bone`) remains JSON — BONEs are tool definitions, not authored documents; JSON is appropriate there
+- Existing JSON `.skel` files are valid for migration with a one-pass YAML conversion
