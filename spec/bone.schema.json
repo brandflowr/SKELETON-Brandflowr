@@ -6,6 +6,12 @@
   "type": "object",
   "required": ["bone_id", "bone_version", "label", "target", "attaches_to", "fields"],
   "additionalProperties": false,
+  "patternProperties": {
+    "^x-": {
+      "description": "Vendor-specific namespaced extension data.",
+      "type": "object"
+    }
+  },
   "properties": {
     "$schema": { "type": "string" },
     "bone_id": {
@@ -31,6 +37,11 @@
       "enum": ["image", "video", "audio", "style", "custom"],
       "description": "Primary category of this BONE."
     },
+    "provider": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-]*$",
+      "description": "Optional provider namespace, such as higgsfield, runway, kling, or flux."
+    },
     "attaches_to": {
       "type": "array",
       "items": {
@@ -50,9 +61,124 @@
     "defaults": {
       "type": "object",
       "description": "Default values for fields."
+    },
+    "prompt_assembly": { "$ref": "#/definitions/PromptAssembly" },
+    "llm_instructions": {
+      "type": "object",
+      "description": "Generator-specific writing guidance for LLM prompt authors.",
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "description": "Render output format, target, storage template, and write-back behavior.",
+      "additionalProperties": true
+    },
+    "routing": {
+      "type": "object",
+      "description": "Optional provider routing metadata or lookup hints. Projects may also keep routing in external config.",
+      "additionalProperties": true
+    },
+    "execution": {
+      "type": "object",
+      "description": "Legacy executable route metadata used by existing BONE definitions.",
+      "additionalProperties": true
+    },
+    "execution_routes": {
+      "type": "array",
+      "description": "Optional executable routes the agent can choose from, such as MCP, CLI, or skill package routes.",
+      "items": { "$ref": "#/definitions/ExecutionRoute" }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Vendor-specific extension data. Keys should be x- namespaced.",
+      "additionalProperties": true
     }
   },
   "definitions": {
+    "PromptAssembly": {
+      "type": "object",
+      "required": ["strategy"],
+      "additionalProperties": false,
+      "description": "Prompt assembly strategy and context injection rules.",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["template", "sequential", "raw"]
+        },
+        "template": {
+          "type": "string",
+          "description": "Template string using {{field_name}} and supported system tokens."
+        },
+        "v_setup_injection": { "$ref": "#/definitions/VSetupInjection" },
+        "character_injection": { "$ref": "#/definitions/CharacterInjection" },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum assembled prompt length in characters."
+        },
+        "separator": {
+          "type": "string",
+          "description": "Separator used by sequential assembly. Defaults to a single space."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "strategy": { "const": "template" } },
+            "required": ["strategy"]
+          },
+          "then": { "required": ["template"] }
+        }
+      ]
+    },
+    "VSetupInjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "position": { "type": "string", "enum": ["append", "prepend", "inline"] },
+        "token_format": { "type": "string", "enum": ["natural", "technical", "none"] },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["size", "angle", "lens", "move", "light", "tod", "dof", "aspect", "color", "mood", "custom"]
+          }
+        }
+      }
+    },
+    "CharacterInjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "position": { "type": "string", "enum": ["prepend", "append", "subject_prefix"] },
+        "format": { "type": "string", "enum": ["name_only", "name_and_description", "consistency_modifier"] }
+      }
+    },
+    "ExecutionRoute": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["mcp", "cli", "skill", "api", "manual"]
+        },
+        "label": { "type": "string" },
+        "tool": { "type": "string" },
+        "command": { "type": "string" },
+        "endpoint": { "type": "string" },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "args": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
     "FieldDef": {
       "type": "object",
       "required": ["type", "required"],

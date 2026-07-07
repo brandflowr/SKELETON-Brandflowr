@@ -4,7 +4,8 @@
 # Dry run (preview only):          .\sync-spec.ps1 -DryRun
 
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [string]$Destination = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,7 +13,19 @@ $ErrorActionPreference = "Stop"
 # ── Paths ─────────────────────────────────────────────────────────────────────
 $scriptDir = $PSScriptRoot
 $src       = Join-Path $scriptDir "spec"
-$dst       = Join-Path $scriptDir "..\SPORE-Desktop\spec"
+
+# Destination: pass -Destination <path-to-SPORE-Desktop-spec-folder>, or rely on
+# the default sibling-folder guesses below.
+if ($Destination) {
+    $dst = $Destination
+} else {
+    $candidates = @(
+        (Join-Path $scriptDir "..\SPORE-Desktop\spec"),
+        (Join-Path $scriptDir "..\theDesktopApp\spec")
+    )
+    $dst = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $dst) { $dst = $candidates[0] }
+}
 
 if (-not (Test-Path $src)) { Write-Error "Source not found: $src"; exit 1 }
 if (-not (Test-Path $dst)) { Write-Error "Destination not found: $dst"; exit 1 }
@@ -30,7 +43,11 @@ $formatFiles = @(
     "TOKEN_REFERENCE.md",
     "CHANGELOG.md",
     "DECISIONS.md",
-    "LLM_INTEGRATION.md"
+    "LLM_INTEGRATION.md",
+    "x-spore.schema.json",
+    "audio-map.schema.json",
+    "video-map.schema.json",
+    "canvas-layout.schema.json"
 )
 
 # bones/ subfolder — sync all .bone.json files

@@ -1,6 +1,6 @@
 # SKELETON-Spec — Master Session Instructions
 
-> Read this first, every session. Update `local-update.md` when done.
+> Read this first, every session.
 
 ---
 
@@ -43,7 +43,11 @@ spec/
 ├── TOKEN_REFERENCE.md    ← All v_setup token values
 ├── ARCHITECTURE.md       ← System architecture overview
 ├── DECISIONS.md          ← Architecture Decision Records (ADRs)
-├── PUNCHLIST.md          ← Open spec work
+├── LLM_INTEGRATION.md    ← LLM agent read/edit/validate guidance
+├── x-spore.schema.json   ← SPORE extension data schema
+├── audio-map.schema.json ← audio-map.json sidecar schema
+├── video-map.schema.json ← video-map.json sidecar schema
+├── canvas-layout.schema.json ← canvas-layout.json sidecar schema
 ├── CHANGELOG.md          ← Version history
 └── OVERVIEW.md           ← Quick orientation
 ```
@@ -56,7 +60,7 @@ All in `spec/DECISIONS.md`. The critical ones:
 
 - **ADR-001:** Flat relational structure (acts/scenes/shots as top-level arrays, linked by ID)
 - **ADR-002:** JSON Schema Draft 7 — AJV 8 native support
-- **ADR-003:** 4-shot max per scene (configurable via `metadata.constraints`)
+- **ADR-003:** Scene shot counts are unrestricted; structure is governed by referential integrity
 - **ADR-004:** Shorthand token system + key file
 - **ADR-005:** `x-` namespaced vendor extensions
 - **ADR-009:** MIT License
@@ -65,8 +69,6 @@ All in `spec/DECISIONS.md`. The critical ones:
 ---
 
 ## Open Spec Work
-
-Check `spec/PUNCHLIST.md` for current status. Key open items:
 
 **SKEL-S1: Update example.skel.json → example.skel (YAML)**
 - Create `example.skel` in YAML as the primary reference example
@@ -81,10 +83,6 @@ Check `spec/PUNCHLIST.md` for current status. Key open items:
 - Code blocks in `skel-spec.md` currently show JSON
 - Replace with YAML throughout; keep JSON examples labeled as "export format"
 
-**SKEL-S4: `skel_version` casing audit**
-- Grep all spec files for `SKEL_version` or `skelVersion`
-- Normalize to `skel_version` everywhere
-
 ---
 
 ## Conventions
@@ -97,4 +95,4 @@ Check `spec/PUNCHLIST.md` for current status. Key open items:
 
 ---
 
-*Start every session by reading this file and `spec/PUNCHLIST.md`. End by updating `local-update.md`.*
+*Start every session by reading this file.*

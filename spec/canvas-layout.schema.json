@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://spore.dev/schemas/skel/v1.0/canvas-layout.schema.json",
+  "title": "SPORE Canvas Layout",
+  "description": "Production Canvas node positions and viewport state. Stored at projects/{slug}/canvas/layout.json. This file is purely presentational — it stores node positions and zoom state so the canvas can restore its layout across sessions. It does not contain or modify story data.",
+  "type": "object",
+  "required": ["nodes"],
+  "additionalProperties": false,
+  "properties": {
+    "nodes": {
+      "type": "object",
+      "description": "Node layout data keyed by entity ID (shot ID, scene ID, or act ID). Keys must match IDs that exist in the project's story.skel. Nodes for IDs that no longer exist in story.skel are stale and may be ignored by the application.",
+      "patternProperties": {
+        "^[a-zA-Z0-9_][a-zA-Z0-9_-]*$": {
+          "$ref": "#/definitions/CanvasNode"
+        }
+      },
+      "additionalProperties": false
+    },
+    "viewport": {
+      "$ref": "#/definitions/CanvasViewport",
+      "description": "Last-saved viewport state (zoom + pan). Restored when the canvas is reopened."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Canvas layout schema version. Current: '1.0'.",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "saved_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when this layout was last saved.",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "CanvasNode": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": true,
+      "description": "Display position and optional metadata for a single canvas node.",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "Horizontal position of the node on the canvas, in canvas units."
+        },
+        "y": {
+          "type": "number",
+          "description": "Vertical position of the node on the canvas, in canvas units."
+        },
+        "width": {
+          "type": "number",
+          "description": "Explicit node width in canvas units, if overridden from the default.",
+          "minimum": 0
+        },
+        "height": {
+          "type": "number",
+          "description": "Explicit node height in canvas units, if overridden from the default.",
+          "minimum": 0
+        },
+        "collapsed": {
+          "type": "boolean",
+          "description": "Whether this node is in its collapsed (compact) display state."
+        },
+        "extensions": {
+          "type": "object",
+          "description": "Vendor-specific extension data for canvas node display. Keys SHOULD be x- namespaced (e.g. x-spore-color)."
+        }
+      }
+    },
+    "CanvasViewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Viewport zoom and pan state.",
+      "properties": {
+        "zoom": {
+          "type": "number",
+          "description": "Zoom level of the canvas viewport. 1.0 = 100%.",
+          "minimum": 0.01,
+          "maximum": 20
+        },
+        "pan_x": {
+          "type": "number",
+          "description": "Horizontal pan offset of the canvas viewport, in canvas units."
+        },
+        "pan_y": {
+          "type": "number",
+          "description": "Vertical pan offset of the canvas viewport, in canvas units."
+        }
+      }
+    }
+  }
+}

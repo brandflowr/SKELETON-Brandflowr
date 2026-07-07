@@ -1,12 +1,12 @@
-# SKEL — Visual Relational Action Data
+# SKEL - Story Keyframe Extensible Layout
 
-> A flat, relational JSON format for encoding visual narratives into machine-readable, validatable story data.
+> A flat, relational YAML format for encoding visual narratives into machine-readable, validatable story data.
 
 ---
 
 ## What Is SKEL?
 
-SKEL is an open interchange format that represents screenplays, storyboards, and visual narratives as flat JSON. Instead of deeply nested trees, SKEL stores Acts, Scenes, and Shots as top-level arrays linked by ID references — like a relational database for stories.
+SKEL is SPORE's native story format. A project stores its authoring document as `story.skel`, a UTF-8 YAML file. Instead of deeply nested trees, SKEL stores Acts, Scenes, and Shots as top-level arrays linked by ID references - like a relational database for stories. `.skel.json` is the explicit export/interchange form of the same data model.
 
 It was designed for:
 - AI-driven image/video generation pipelines (Runway, Kling, Sora, etc.)
@@ -41,10 +41,10 @@ SKEL uses the term **Acts** for the top-level story grouping. Spore Studio surfa
 |---|---|
 | [`skel-spec.md`](./skel-spec.md) | SKEL formal specification. Structure, constraints, key file, extensibility, interchange, versioning. |
 | [`bone-spec.md`](./bone-spec.md) | BONE formal specification. Plugin system for AI generation and attachable config. |
-| [`skel.schema.json`](./skel.schema.json) | SKEL JSON Schema (Draft 7). Includes `bone_registry` and `bones` on all entities. |
+| [`skel.schema.json`](./skel.schema.json) | SKEL JSON Schema (Draft 7). Validates the parsed `.skel` data model and `.skel.json` exports. Includes `bone_registry` and `bones` on all entities. |
 | [`bone.schema.json`](./bone.schema.json) | BONE JSON Schema. Validates `.bone.json` definition files. |
 | [`skel-keyfile.json`](./skel-keyfile.json) | Default token dictionary. Maps shorthand tokens to full production definitions. |
-| [`example.skel.json`](./example.skel.json) | Complete working example. "The Last Signal" — 2 acts, 3 scenes, 9 shots with BONE data. |
+| [`example.skel.json`](./example.skel.json) | Complete export/interchange example. "The Last Signal" - 2 acts, 3 scenes, 9 shots with BONE data. |
 | [`bones/`](./bones/) | Starter BONE definitions: `flux-dev`, `runway-gen3`, `kling-v1`. |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture map. Data flow, module responsibilities, integration points. |
 | [`LLM_INTEGRATION.md`](./LLM_INTEGRATION.md) | How LLMs read, write, and act on SKEL/BONE. The full generation loop: prompt → generator → storage → write-back. MCP tool map. |
@@ -61,14 +61,21 @@ SKEL uses the term **Acts** for the top-level story grouping. Spore Studio surfa
 | [`converter.ts`](../app/utils/SKEL/converter.ts) | Bidirectional conversion: `masterStoryToSKEL()`, `storyToSKEL()`, `SKELToStory()`. |
 | [`bone.ts`](../app/utils/SKEL/bone.ts) | `BoneResolver` class. Loads definitions, resolves inheritance chain, validates BONE data. |
 
-### Spore-Specific Extension Data (stored in `x-Spore` namespace)
+### Spore-Specific Extension Data (stored in `x-spore` namespace)
 
-These files live in each Spore project folder and carry data that extends SKEL but is not part of the core spec. They are stored alongside `story.json` (the SKEL document).
+These files live in each Spore project folder and carry data that extends SKEL but is not part of the core spec. They are stored alongside `story.skel` (the native SKEL document). `story.json` is legacy/migration input only.
 
 | File | Purpose |
 |---|---|
 | `audio-map.json` | Maps shot IDs → assigned audio tracks (dialogue, SFX, music). One entry per shot. |
 | `video-map.json` | Maps shot IDs → numbered video takes (V1–V4) with an active take flag. Supports multi-take per shot. |
+
+Additional SPORE extension contracts:
+
+| Extension | Purpose |
+|---|---|
+| `extensions.x-spore.proposals` | Optional proposal history on SKEL entities. Stores pending/accepted/rejected AI or user suggestions without changing core SKEL fields. |
+| `x-spore.schema.json` | Supplementary schema for SPORE-owned extension data, including proposal objects. The core SKEL schema remains vendor-neutral. |
 
 ### Dependencies
 
@@ -109,7 +116,7 @@ const resolved = resolver.resolveSetup(shot.v_setup)
 // resolved.size → { token: "cu", label: "Close-Up", description: "Subject's face fills the frame." }
 ```
 
-### Export a Spore project to SKEL
+### Export a Spore project to SKEL JSON
 ```ts
 import { masterStoryToSKEL } from '~/utils/SKEL/converter'
 
@@ -151,14 +158,13 @@ const SKELDoc = fountainToSkel(fountainSource)
 ### Token System
 Shots use shorthand tokens (`cu`, `noir`, `dolly`) that the Key File expands to full definitions. This keeps `.skel` files small while preserving rich metadata for rendering engines.
 
-### 4-Shot Limit
-Every scene is capped at 4 shots by default. This constraint keeps visual narratives concise and prevents AI pipelines from producing unbounded output. Configurable via `metadata.constraints.max_shots_per_scene`.
-
 ### Extensions
 Any entity can carry vendor-specific data via `extensions` with `x-` namespaced keys:
 ```json
-{ "extensions": { "x-Spore": { "production_status": "approved", "startFrameImage": "..." } } }
+{ "extensions": { "x-spore": { "production_status": "approved", "startFrameImage": "..." } } }
 ```
+
+SPORE proposal history lives under `extensions.x-spore.proposals`. Proposal objects have stable IDs, a `type`, a `status` (`pending`, `accepted`, `rejected`, or `superseded`), and a short `summary`. See `SKEL/spec/x-spore.schema.json` for the supplementary schema.
 
 ### Production Status (split image / video)
 Shots carry a `status` object with separate image and video production states:
@@ -191,8 +197,8 @@ Shots carry a `status` object with separate image and video production states:
 | Starter BONEs | ✅ flux-dev, runway-gen3, kling-v1 |
 | Fountain import (`fountainToSkel`) | ✅ Implemented in Spore |
 | Split image/video production status | ✅ Implemented in Spore |
-| Audio map (x-Spore extension) | ✅ Implemented in Spore |
-| Video takes / multi-take map (x-Spore) | ✅ Implemented in Spore |
+| Audio map (x-spore extension) | ✅ Implemented in Spore |
+| Video takes / multi-take map (x-spore) | ✅ Implemented in Spore |
 | Real-time SKEL validation in UI | ✅ Implemented in Spore |
 | Final Draft import | 🔲 Planned |
 | OpenTimelineIO export | 🔲 Planned |

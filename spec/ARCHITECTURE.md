@@ -90,13 +90,13 @@
 
 ## Spore-Specific Sidecar Data
 
-Spore stores two additional files alongside `story.json` (the SKEL document). These files carry production data that extends SKEL but is scoped to the Spore host application.
+Spore stores sidecar files alongside `story.skel`, the native SKEL document. These files carry production data that extends SKEL but is scoped to the Spore host application. `story.json` is legacy/migration input only.
 
 ```
 project/
-  story.json          ← SKEL document (acts, scenes, shots, bones)
-  audio-map.json      ← x-Spore: shot ID → dialogue/SFX/music track assignments
-  video-map.json      ← x-Spore: shot ID → V1/V2/V3/V4 takes + active take flag
+  story.skel          ← native SKEL YAML document (acts, scenes, shots, bones)
+  audio-map.json      ← x-spore: shot ID → dialogue/SFX/music track assignments
+  video-map.json      ← x-spore: shot ID → V1/V2/V3/V4 takes + active take flag
 ```
 
 ### audio-map.json
@@ -121,12 +121,37 @@ Maps shot IDs to numbered video takes. One take is flagged as active. The Timeli
 {
   "sh_abc123": {
     "takes": [
-      { "id": "V1", "file": "assets/video/take1.mp4", "active": false },
-      { "id": "V2", "file": "assets/video/take2.mp4", "active": true }
+      { "id": "V1", "file": "assets/video/take1.mp4", "isActive": false },
+      { "id": "V2", "file": "assets/video/take2.mp4", "isActive": true }
     ]
   }
 }
 ```
+
+The `isActive` flag marks exactly one take per shot as the active take. User-imported video takes use paths under `assets/video/`; AI-generated video renders use paths under `renders/video/` (see Render Output Protocol below). Both types coexist in `video-map.json` — the path prefix distinguishes their origin.
+
+---
+
+### Render Output Protocol
+
+When an external generator or LLM writes a rendered file back to a project, it uses the following deterministic path convention:
+
+```
+{workspace_root}/projects/{slug}/renders/images/{shot_id}.{bone_id}.{format}    ← image renders
+{workspace_root}/projects/{slug}/renders/video/{shot_id}.v{n}.{format}          ← video renders
+{workspace_root}/projects/{slug}/renders/audio/{shot_id}.{bone_id}.{format}     ← audio renders
+{workspace_root}/projects/{slug}/renders/failures/{shot_id}.{bone_id}.log       ← failure logs
+```
+
+The `renders/` folders are created by the Render Output Protocol card in the Showrunner page. They are distinct from the `assets/` folders used for user-imported media.
+
+After writing a render file, the generator or LLM updates:
+- **Image renders** → `shot.extensions.x-spore.startFrameImage` (or `endFrameImage` / `image`) in `story.skel`
+- **Video renders** → `video-map.json`: append a new take with `isActive: true`, set all prior takes for that shot to `isActive: false`
+- **Audio renders** → `audio-map.json`: assign the file as `dialogue`, `sfx`, or `music` per the BONE's target
+- **Production status** → `shot.extensions.x-spore.production_status.image` or `.video` set to `"review"`
+
+Spore's Refresh Outputs action scans `renders/` folders and re-attaches any outputs that match shot IDs found in filenames.
 
 ---
 
@@ -145,6 +170,40 @@ Maps shot IDs to numbered video takes. One take is flagged as active. The Timeli
 - Returns `{ valid: boolean, errors: SKELError[] }`
 - Called after every save in Spore (real-time validation badge in UI)
 
+### External validator contract
+- CLI entry point: `spore validate projects/example/story.skel`
+- MCP / agent tool: `validate_skel`
+- The external contract wraps the same validation behavior as `validator.ts`, but accepts a file path and returns stable machine-readable errors.
+- Required stages:
+  1. Parse `.skel` YAML, or `.skel.json` export input when explicitly requested.
+  2. Determine lifecycle from `metadata.lifecycle`, defaulting to `draft`, unless an explicit CLI/tool override is provided.
+  3. Run JSON Schema validation against the parsed data model.
+  4. Run referential integrity checks for IDs, act/scene/shot refs, and lifecycle-specific structure.
+  5. Resolve BONE registry references and validate required BONE fields after inheritance.
+  6. Optionally validate sidecar files (`audio-map.json`, `video-map.json`, canvas layout) against shot IDs.
+- Required result shape:
+
+```ts
+type SKELValidationResult = {
+  valid: boolean
+  lifecycle: 'draft' | 'production' | 'export'
+  errors: SKELError[]
+  warnings: SKELError[]
+}
+
+type SKELError = {
+  code: string
+  severity: 'error' | 'warning'
+  path: string
+  message: string
+}
+```
+
+- CLI exit codes:
+  - `0`: valid, no errors
+  - `1`: validation completed with errors
+  - `2`: file could not be read or parsed
+
 ### keyfile.ts
 - `SKELKeyResolver` class loads `skel-keyfile.json` (or custom key file)
 - `resolveToken(category, token)` → single token lookup
@@ -156,7 +215,7 @@ Maps shot IDs to numbered video takes. One take is flagged as active. The Timeli
 - `storyToSKEL(Story)` → SKELDocument (UI state export)
 - `SKELToStory(SKELDocument, projectId)` → Story (import into UI)
 - Token mapping tables normalize free-text values (e.g., "Close-Up" → `cu`)
-- Enforces 4-shot limit during conversion
+- Preserves all detected shots in the source scene during conversion
 
 ### fountainToSkel (app/utils/fountainToSkel.ts)
 - Parses `.fountain` screenplay files into structured tokens
@@ -179,7 +238,9 @@ Spore UI State (Pinia)
         │
         ├──→ validateSKEL()    ← validator.ts (pre-flight check, errors shown in UI)
         │
-        ├──→ JSON.stringify()  ← write to story.json / .skel.json
+        ├──→ YAML.stringify()  ← write to story.skel
+        │
+        ├──→ JSON.stringify()  ← explicit .skel.json export only
         │
         └──→ AI Pipeline       ← shots[].bones + resolved v_setup
 ```
@@ -187,10 +248,10 @@ Spore UI State (Pinia)
 ## Data Flow: Import
 
 ```
-  .skel.json file (or native save dialog)
+  .skel file (native) or .skel.json file (export/interchange)
         │
         ▼
-  JSON.parse()
+  YAML.parse() / JSON.parse()
         │
         ▼
   validateSKEL()         ← validator.ts (reject bad files, surface errors)
@@ -246,7 +307,7 @@ Spore UI State (Pinia)
 | Spec Section | Implementation |
 |---|---|
 | §2 Document Structure | `types.ts` — all interfaces |
-| §3.1 Shot Limit (max 4) | `skel.schema.json` — `maxItems: 4` on `shot_refs`; enforced in Story Editor UI |
+| §3.1 Front-Loading | `fountain-to-skel.ts` — shot actions derive from source beats |
 | §3.3 ID Uniqueness | `validator.ts` — duplicate ID detection |
 | §3.4 Referential Integrity | `validator.ts` — cross-reference validation |
 | §3.5 Character Limits | `skel.schema.json` — `maxLength` on `action`, `prompt`, `logline` |
@@ -263,16 +324,17 @@ Spore UI State (Pinia)
 
 | Spore Component | SKEL Integration |
 |---|---|
-| `story.json` (project disk format) | IS the SKEL document — written by `useTauri.saveStory()`, read by `useTauri.loadStory()` |
-| `useTauri.loadStory()` | Reads 3 formats: SKEL (skel_version present), old MasterStory, old nested chapters. Auto-migrates on first save. |
-| `useTauri.saveStory()` | Always writes SKEL v2.0. Migrates legacy fields (imagePrompt → bones.flux-dev.text, etc.) |
+| `story.skel` (project disk format) | Native SKEL YAML document - written by `useTauri.saveStory()`, read by `useTauri.loadStory()` |
+| `story.json` | Legacy/migration input only. Read when present in older projects, then migrated to `story.skel` on save. |
+| `useTauri.loadStory()` | Reads native `story.skel`, `.skel.json` imports, and legacy project formats. Auto-migrates legacy data on first save. |
+| `useTauri.saveStory()` | Always writes native SKEL v2.0 YAML to `story.skel`. Migrates legacy fields (imagePrompt → bones.flux-dev.text, etc.) |
 | `app/types/Spore.ts` → `Shot` | Token maps normalize `shotType`, `cameraAngle`, `cameraMovement`, `lighting` |
 | `useSKEL` composable | `validate()`, `resolveSetup()`, `resolveBonesForShot()`, `sizeLabel()`, etc. |
 | Showrunner page | Fountain import button → `fountainToSkel()` → `SKELToStory()` → hydrate store |
 | Showrunner page | Export `.skel.json` button → `storyToSKEL()` → `validateSKEL()` → native save dialog |
-| Showrunner page | Import `.skel.json` button → `validateSKEL()` → `SKELToStory()` → create project |
+| Showrunner page | Import `.skel` / `.skel.json` button → `validateSKEL()` → `SKELToStory()` → create project |
 | Story Editor | Real-time validation badge — error count in top bar after every save |
-| Story Editor | Shot limit: reads `metadata.constraints.max_shots_per_scene`, disables Add Shot at limit |
+| Story Editor | Add Shot and Import Sequence append to the selected scene without a count cap |
 | Shot Editor | Dynamic BONE fields: reads `bone_registry`, renders fields per BONE `ui` hints |
 | Shot Editor | Token dropdowns: size (9), angle (6), move (8), lens (5), light (8), DOF (3), aspect |
 | Shot Editor | Split production status: image (5 states) / video (6 states) |

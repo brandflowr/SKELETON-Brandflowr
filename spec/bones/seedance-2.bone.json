@@ -3,90 +3,195 @@
   "bone_id": "seedance-2",
   "bone_version": "1.0",
   "label": "Seedance 2 (Video Generation)",
-  "description": "ByteDance Seedance 2. Text-to-video and image-to-video. Structured prompt format: subject, action, camera, environment, style. Responds best to segmented prompts with kinetic motion verbs.",
+  "description": "ByteDance Seedance 2. AI filmmaking video prompts with text-only, storyboard-driven, and character-sheet-plus-storyboard reference modes.",
   "target": "video",
   "attaches_to": ["shot", "scene", "metadata"],
   "fields": {
-    "subject":     { "type": "string",  "required": false, "ui": "text",     "label": "Subject", "description": "Who or what is in the shot. Include physical appearance and relevant traits. E.g. 'A weathered man in his 60s wearing a yellow slicker'." },
-    "action":      { "type": "string",  "required": true,  "ui": "textarea", "label": "Action / Motion", "description": "What is happening. Use strong motion verbs. E.g. 'leans forward and scrawls coordinates across a damp logbook page'." },
-    "camera":      { "type": "string",  "required": false, "ui": "text",     "label": "Camera Instruction", "description": "Single camera direction. E.g. 'slow push in', 'low tracking shot', 'static wide'. Do not use the word camera in this field." },
-    "environment": { "type": "string",  "required": false, "ui": "text",     "label": "Environment / Lighting", "description": "Location and lighting mood in one sentence. E.g. 'Stone lighthouse interior, single candle source, deep shadows on salt-worn walls'." },
-    "style":       { "type": "string",  "required": false, "ui": "text",     "label": "Style / Technical Notes", "description": "Cinematic style and any technical flags. E.g. 'Cinematic noir, shallow depth of field, 4K'." },
-    "duration":    { "type": "number",  "required": false, "ui": "select",   "label": "Duration (seconds)", "options": [5, 10], "default": 5 },
-    "aspect":      { "type": "string",  "required": false, "ui": "select",   "label": "Aspect Ratio", "options": ["16:9", "9:16", "1:1"], "default": "16:9" },
-    "resolution":  { "type": "string",  "required": false, "ui": "select",   "label": "Resolution", "options": ["720p", "1080p"], "default": "1080p" },
-    "reference_image": { "type": "string", "required": false, "ui": "file",  "label": "Start Frame", "description": "Reference image for image-to-video generation." },
-    "negative":    { "type": "string",  "required": false, "ui": "textarea", "label": "Negative Prompt", "description": "What to avoid. E.g. 'blurry, watermark, text overlay, low quality'." }
+    "reference_mode": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Reference Mode",
+      "options": ["text", "storyboard", "characters_and_storyboard"],
+      "default": "text",
+      "description": "Choose text-only prompts, storyboard-grid reference, or character sheets plus storyboard."
+    },
+    "subject": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Subject",
+      "description": "Who or what is in the shot. Reuse character descriptions verbatim when no reference sheet or Soul ID is available."
+    },
+    "action": {
+      "type": "string",
+      "required": true,
+      "ui": "textarea",
+      "label": "Action / Motion",
+      "description": "What happens. Use strong kinetic verbs and cover the complete 0:00-0:15 timeline when authoring a full sequence."
+    },
+    "camera": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Camera Instruction",
+      "description": "Single camera direction: slow push in, low tracking shot, static wide, handheld follow. Do not use the word camera."
+    },
+    "environment": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Environment / Lighting",
+      "description": "Location, light source, and atmosphere in one sentence."
+    },
+    "style": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Style / Technical Notes",
+      "description": "Shared visual style, palette, grain, lens, and rendering notes. Keep consistent across shots."
+    },
+    "duration": {
+      "type": "number",
+      "required": false,
+      "ui": "select",
+      "label": "Duration (seconds)",
+      "options": [5, 10, 15],
+      "default": 15
+    },
+    "aspect": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Aspect Ratio",
+      "options": ["16:9", "9:16", "1:1"],
+      "default": "16:9"
+    },
+    "resolution": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Resolution",
+      "options": ["720p", "1080p"],
+      "default": "1080p"
+    },
+    "character_references": {
+      "type": "array",
+      "required": false,
+      "ui": "file",
+      "label": "Character Sheets",
+      "description": "Optional character reference sheets. Number them uniquely as @image1, @image2, etc."
+    },
+    "storyboard_reference": {
+      "type": "string",
+      "required": false,
+      "ui": "file",
+      "label": "Storyboard Grid",
+      "description": "Optional 9-panel storyboard grid. Use as the main visual and motion reference."
+    },
+    "reference_image": {
+      "type": "string",
+      "required": false,
+      "ui": "file",
+      "label": "Start Frame",
+      "description": "Optional single start-frame reference for image-to-video generation."
+    },
+    "audio": {
+      "type": "string",
+      "required": false,
+      "ui": "textarea",
+      "label": "Audio / Mood",
+      "description": "Audio instruction. Default is NO MUSIC unless the user explicitly requests music or dialog."
+    },
+    "negative": {
+      "type": "string",
+      "required": false,
+      "ui": "textarea",
+      "label": "Negative Prompt",
+      "description": "What to avoid, such as text on screen, watermark, music, low quality, or identity drift."
+    }
   },
   "defaults": {
-    "duration": 5,
+    "reference_mode": "text",
+    "duration": 15,
     "aspect": "16:9",
-    "resolution": "1080p"
+    "resolution": "1080p",
+    "audio": "NO MUSIC",
+    "negative": "text on screen, captions, watermark, low quality, character drift, inconsistent costume, unwanted music"
+  },
+  "output": {
+    "format": "mp4",
+    "target": "videoTake",
+    "completion_status": "review"
   },
   "prompt_assembly": {
     "strategy": "template",
-    "template": "{{subject}} {{action}}. {{camera}}. {{environment}}. {{style}}.",
+    "template": "FORMAT: {{duration}} seconds / {{aspect}} / {{style}} / {{audio}}. SUBJECT: {{subject}}. ENVIRONMENT: {{environment}}. ACTION AND TIMELINE: {{action}}. CAMERA: {{camera}}. REFERENCES: {{reference_mode}}; character sheets {{character_references}}; storyboard grid {{storyboard_reference}}; start frame {{reference_image}}. NEGATIVE: {{negative}}.",
     "v_setup_injection": {
       "enabled": true,
       "position": "inline",
       "token_format": "natural",
-      "tokens": ["size", "angle", "move", "light"],
-      "note": "v_setup tokens are used as fallback if camera/environment fields are empty. If the camera field is populated, v_setup.move is omitted to avoid duplication."
+      "tokens": ["size", "angle", "move", "light", "dof", "aspect"],
+      "note": "v_setup tokens are fallback context. Do not duplicate populated camera, style, or environment fields."
     },
     "character_injection": {
       "enabled": true,
       "position": "subject_prefix",
       "format": "name_and_description"
     },
-    "max_length": 500,
+    "max_length": 1800,
     "separator": " "
   },
   "llm_instructions": {
-    "writing_guide": "Write video prompts for Seedance 2 using a segmented structure across five fields. Each field is ONE concept. Keep total assembled prompt under 150 words. Seedance 2 responds strongly to kinetic motion verbs — use 'surges', 'drifts', 'slams', 'crawls', 'tilts', not 'moves' or 'goes'. The camera field should be a single short instruction like 'slow push in' or 'low tracking shot' — Seedance 2 reads this as a discrete parameter. Do not stack more than two adjectives per noun. The environment field is lighting + location in one sentence maximum.",
+    "writing_guide": "Write Seedance 2 prompts using the AI filmmaking pipeline. Default duration is 15 seconds unless the user explicitly asks for less. Choose the correct reference mode: text for no storyboard, storyboard when a grid is the main reference, characters_and_storyboard when character sheets and a storyboard grid exist. If using multiple references, number every image uniquely: Character A sheet is @image1, Character B sheet is @image2, storyboard grid is the next number. Never reuse @image1 for multiple references. When a storyboard grid exists, prefer one continuous 15-second sequence over separate text-only shots. Default audio is NO MUSIC unless the user requests music, a track, dialog, or sound design. Keep prompts lean, kinetic, and direct.",
     "field_guides": {
-      "subject": "Physical description first, then clothing/props if relevant. Lead with the most visually distinctive trait. Skip if the shot has no clear subject (establishing shots, abstract).",
-      "action": "The motion event of the shot. Start with the strongest kinetic verb. This is the most important field — Seedance 2 is motion-first.",
-      "camera": "Single instruction only. Choose from: slow push in, pull back, low tracking shot, static wide, static close-up, overhead crane down, Dutch tilt hold, handheld follow. Do not say 'camera' or 'we see'.",
-      "environment": "Location name + dominant light source + one atmospheric detail. Keep to one sentence.",
-      "style": "Cinematic reference + technical quality notes. E.g. 'Cinematic noir, shallow DOF, 4K'. Two to four terms max."
+      "reference_mode": "text = Variant A; storyboard = Variant B; characters_and_storyboard = Variant C.",
+      "subject": "Use the exact character-lock description verbatim if no visual reference is available. If a character sheet, Soul ID, or strong reference exists, keep this short and avoid face re-description.",
+      "action": "For text mode, cover the full 0:00-0:15 range with three short timeline beats. For storyboard modes, compress the board into a brief through-line and tell Seedance to read panels sequentially.",
+      "camera": "Single short instruction or brief camera logic. Do not start with the word camera.",
+      "environment": "One sentence: location, time of day, light source, atmosphere.",
+      "style": "Use the same palette, grain, lens, and lighting language across all shots in a sequence.",
+      "character_references": "Assign unique @image numbers to every sheet. Do not collapse multiple characters onto @image1.",
+      "storyboard_reference": "If present, the storyboard grid is the main visual and motion reference. Read panels as sequential shots, not as one image.",
+      "audio": "Default NO MUSIC. Include dialog only when requested. For replies, start with 'She replies:' or 'He replies:' to preserve speaking order."
     },
     "examples": [
       {
-        "scene": "INT. LIGHTHOUSE - NIGHT",
-        "action": "Harlan writes in the logbook by candlelight",
+        "variant": "text",
         "output": {
-          "subject": "A weathered fisherman in his 60s with calloused, ink-stained hands",
-          "action": "leans forward and scrawls coordinates across a damp logbook page, wrist dragging through wet ink",
-          "camera": "slow push in",
-          "environment": "Stone lighthouse interior, single candle, deep shadows climbing salt-worn walls",
-          "style": "Cinematic noir, shallow depth of field, 4K"
+          "reference_mode": "text",
+          "subject": "RAVEN: Mid-40s, lean Asian man, silver-grey spiky hair, sleeveless ochre kung-fu robe, gold arm cuffs, barefoot.",
+          "action": "0:00-0:05: Static wide - Raven waits in fighting stance as dust drifts across the floor. 0:05-0:10: Low tracking shot - Viper lunges, palm strike cutting through the dust. 0:10-0:15: Tight close-up - Raven pivots away, sleeve snapping past the lens.",
+          "camera": "wide to low tracking to tight close-up",
+          "environment": "Abandoned dojo at dusk, broken roof beams, warm side light through dust.",
+          "style": "35mm film grain, muted ochre palette, grounded martial-arts realism",
+          "audio": "NO MUSIC"
         }
       },
       {
-        "scene": "EXT. HARBOUR - DAWN",
-        "action": "Fishing boats leave the dock in early morning light",
+        "variant": "characters_and_storyboard",
         "output": {
-          "subject": "",
-          "action": "Three wooden fishing boats drift out from the dock, leaving slow white wakes across still grey water",
-          "camera": "static wide",
-          "environment": "Fishing harbour at dawn, flat pink light on the horizon, fog over the water",
-          "style": "Muted naturalistic palette, wide aspect, 4K"
+          "reference_mode": "characters_and_storyboard",
+          "action": "Use character sheets @image1 and @image2 and storyboard grid @image3. Create a 15-second cinematic sequence. Read the storyboard panels as sequential shots, not one image. Follow panel order, camera logic, motion arrows, and framing consistently. Handheld moments may add realism. NO TEXT ON SCREEN, NO MUSIC. Storyline: Viper breaks the standoff, Raven evades, both reset in tense stillness.",
+          "audio": "NO MUSIC"
         }
       }
     ],
     "do": [
-      "Use kinetic motion verbs (surges, drifts, slams, crawls, tilts)",
-      "Give the camera field a single short instruction",
-      "Lead the subject field with the strongest visual trait",
-      "Keep environment to one sentence",
-      "Leave subject empty for shots without a clear foreground subject"
+      "Use 15 seconds by default",
+      "Cover the full 0:00-0:15 timeline in text mode",
+      "Use storyboard mode when a grid exists",
+      "Number each reference image uniquely",
+      "Reuse character descriptions verbatim",
+      "Keep style language consistent across shots"
     ],
     "dont": [
-      "Stack more than 2 adjectives per noun",
-      "Exceed 150 words total",
-      "Use passive voice for motion ('is seen walking' → 'walks')",
-      "Begin the camera field with the word 'camera'",
-      "Describe the same detail in multiple fields"
+      "Default to a shorter duration unless requested",
+      "Add music unless the user asks for it",
+      "Use the same @image number for different references",
+      "Use Variant A when a storyboard grid is available",
+      "Write bloated character descriptions",
+      "Put captions or text on screen unless requested"
     ]
   }
 }

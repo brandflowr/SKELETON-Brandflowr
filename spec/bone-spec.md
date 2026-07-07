@@ -27,7 +27,7 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 | File extension | `.bone.json`               |
 | MIME type      | `application/bone+json`    |
 | Encoding       | UTF-8                      |
-| Schema URI     | `https://Spore.dev/schemas/bone/v1.0/bone.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json` |
 
 ---
 
@@ -59,19 +59,23 @@ A `.bone.json` file describes a single tool, generator, or pipeline attachment. 
 
 ### 2.2 Fields
 
-| Field               | Type     | Required | Description                                                    |
-| ------------------- | -------- | -------- | -------------------------------------------------------------- |
-| `bone_id`           | string   | yes      | Unique identifier. Lowercase, hyphens allowed.                 |
-| `bone_version`      | string   | yes      | Semver version of this BONE definition.                        |
-| `label`             | string   | yes      | Human-readable name for UI display.                            |
-| `description`       | string   | no       | What this BONE does.                                           |
-| `target`            | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
-| `attaches_to`       | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`. |
-| `prompt_assembly`   | object   | no       | How field values + story context assemble into the final prompt string. See §2.4. |
-| `llm_instructions`  | object   | no       | How an LLM should write prompts for this specific generator. See §2.5. |
-| `output`            | object   | no       | Where and how to store the rendered file after generation. See §2.6. |
+| Field          | Type     | Required | Description                                                    |
+| -------------- | -------- | -------- | -------------------------------------------------------------- |
+| `bone_id`      | string   | yes      | Unique identifier. Lowercase, hyphens allowed.                 |
+| `bone_version` | string   | yes      | Semver version of this BONE definition.                        |
+| `label`        | string   | yes      | Human-readable name for UI display.                            |
+| `description`  | string   | no       | What this BONE does.                                           |
+| `target`       | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
+| `provider`     | string   | no       | Provider namespace used for grouping/configuration, e.g. `higgsfield`, `runway`, `kling`, `flux`. |
+| `attaches_to`  | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`. |
 | `fields`       | object   | yes      | Field definitions (see §2.3).                                  |
 | `defaults`     | object   | no       | Default values for fields.                                     |
+| `prompt_assembly` | object | no       | How field values and story context assemble into the final prompt string. See Section 2.4. |
+| `llm_instructions` | object | no      | How an LLM should write prompts for this specific generator. See Section 2.5. |
+| `output`       | object   | no       | Where and how to store the rendered file after generation. See Section 2.6. |
+| `routing`      | object   | no       | Optional provider routing metadata or lookup hints. See Section 2.7. |
+| `execution_routes` | array | no       | Optional executable routes an agent can choose from. See Section 2.7. |
+| `extensions`   | object   | no       | Vendor-specific extension data. Keys SHOULD be `x-` namespaced. |
 
 ### 2.3 Field Definitions
 
@@ -93,64 +97,48 @@ Each key in `fields` is a field name. The value describes the field:
 
 ## 2.4 `prompt_assembly` Object
 
-Defines how the BONE's field data and story context (v_setup tokens, character refs, scene header) combine into the final string sent to an AI generation API. This is what drives the Assembled Prompt Preview in Spore.
+Defines how the BONE's field data and story context, such as `v_setup` tokens, character refs, and scene header, combine into the final string sent to an AI generation API. This drives the Assembled Prompt Preview in SPORE.
 
-| Field               | Type   | Required | Description |
-| ------------------- | ------ | -------- | ----------- |
-| `strategy`          | string | yes      | `"template"`, `"sequential"`, or `"raw"`. |
-| `template`          | string | no       | Template string with `{{field_name}}` substitution. Required when strategy is `"template"`. |
-| `v_setup_injection` | object | no       | Controls injection of resolved v_setup tokens into the assembled prompt. |
-| `character_injection` | object | no     | Controls injection of character data from `character_refs`. |
-| `max_length`        | number | no       | Maximum character length of the assembled prompt. Used for validation and preview warnings. |
-| `separator`         | string | no       | Separator between sequential elements. Default: `" "`. |
+| Field                 | Type   | Required | Description |
+| --------------------- | ------ | -------- | ----------- |
+| `strategy`            | string | yes      | `template`, `sequential`, or `raw`. |
+| `template`            | string | no       | Template string with `{{field_name}}` substitution. Required when strategy is `template`. |
+| `v_setup_injection`   | object | no       | Controls injection of resolved `v_setup` tokens into the assembled prompt. |
+| `character_injection` | object | no       | Controls injection of character data from `character_refs`. |
+| `max_length`          | integer | no      | Maximum character length of the assembled prompt. Must be greater than `0`. Used for validation and preview warnings. |
+| `separator`           | string | no       | Separator between sequential elements. Default: space. |
 
-**Strategies:**
-- `"template"` — uses the `template` string. `{{field_name}}` substitutes field values. System tokens: `{{v_setup.size}}`, `{{v_setup.light}}`, `{{v_setup.move}}`, `{{v_setup.angle}}`, `{{v_setup.lens}}`, `{{character_refs}}`, `{{scene.header}}`, `{{scene.location}}`, `{{scene.tod}}`.
-- `"sequential"` — concatenates non-empty field values in field definition order, joined by `separator`. Default strategy for bones that don't define `prompt_assembly`.
-- `"raw"` — the `text` field value is sent verbatim. No additional assembly. For services that take plain prompts.
+If a BONE omits `prompt_assembly`, SPORE SHOULD use `sequential` behavior with a single-space separator.
 
-**`v_setup_injection` sub-fields:**
+Template variables use double braces. `{{field_name}}` resolves from the effective BONE data after defaults and inheritance. System tokens include `{{v_setup.size}}`, `{{v_setup.angle}}`, `{{v_setup.lens}}`, `{{v_setup.move}}`, `{{v_setup.light}}`, `{{v_setup.tod}}`, `{{v_setup.dof}}`, `{{character_refs}}`, `{{scene.header}}`, `{{scene.location}}`, and `{{scene.tod}}`. Missing variables resolve to an empty string, and assemblers SHOULD trim repeated whitespace and dangling punctuation in preview/output.
 
-| Field         | Type     | Description |
-| ------------- | -------- | ----------- |
-| `enabled`     | boolean  | Whether to inject v_setup tokens. Default: `false`. |
-| `position`    | string   | `"append"`, `"prepend"`, or `"inline"` (used in template via `{{v_setup.*}}`). |
-| `token_format`| string   | `"natural"` (expanded labels), `"technical"` (shorthand tokens), `"none"`. |
-| `tokens`      | string[] | Which v_setup categories to inject. E.g. `["size", "angle", "light"]`. |
+Strategies:
+- `template`: uses the `template` string. `template` is required for this strategy.
+- `sequential`: concatenates non-empty field values in `fields` definition order, joined by `separator`.
+- `raw`: sends the `text` field value verbatim. No additional assembly.
 
-**`character_injection` sub-fields:**
+`v_setup_injection` sub-fields:
 
-| Field    | Type   | Description |
-| -------- | ------ | ----------- |
-| `enabled` | boolean | Whether to inject character data. Default: `false`. |
-| `position` | string | `"prepend"`, `"append"`, or `"subject_prefix"`. |
-| `format`  | string | `"name_only"`, `"name_and_description"`, or `"consistency_modifier"`. |
+| Field          | Type     | Description |
+| -------------- | -------- | ----------- |
+| `enabled`      | boolean  | Whether to inject `v_setup` tokens. Default: `false`. |
+| `position`     | string   | `append`, `prepend`, or `inline`. `inline` is used by `{{v_setup.*}}` template tokens. |
+| `token_format` | string   | `natural`, `technical`, or `none`. |
+| `tokens`       | string[] | Which `v_setup` categories to inject. Valid core tokens: `size`, `angle`, `lens`, `move`, `light`, `tod`, `dof`, `aspect`, `color`, `mood`, `custom`. |
 
-**Example:**
-```json
-"prompt_assembly": {
-  "strategy": "template",
-  "template": "{{subject}} {{action}}. {{camera}}. {{environment}}. {{style}}.",
-  "v_setup_injection": {
-    "enabled": true,
-    "position": "inline",
-    "token_format": "natural",
-    "tokens": ["size", "move", "light"]
-  },
-  "character_injection": {
-    "enabled": true,
-    "position": "subject_prefix",
-    "format": "name_and_description"
-  },
-  "max_length": 500
-}
-```
+`character_injection` sub-fields:
 
----
+| Field      | Type    | Description |
+| ---------- | ------- | ----------- |
+| `enabled`  | boolean | Whether to inject character data. Default: `false`. |
+| `position` | string  | `prepend`, `append`, or `subject_prefix`. |
+| `format`   | string  | `name_only`, `name_and_description`, or `consistency_modifier`. |
+
+Validators MUST report malformed `prompt_assembly` objects: unknown strategy names, missing `template` for `template` strategy, invalid injection enum values, and non-positive `max_length`. Validators SHOULD warn when `raw` strategy is used without a `text` field definition.
 
 ## 2.5 `llm_instructions` Object
 
-Tells a language model how to write prompts for this specific generator. When Claude (or any LLM tool) generates prompts for shots in Spore, it reads this before writing. This makes the BONE a complete **prompt authoring contract** — not just a data container.
+Tells a language model how to write prompts for this specific generator. When an LLM generates prompts for shots in SPORE, it reads this before writing. This makes the BONE a prompt authoring contract, not just a data container.
 
 | Field           | Type     | Required | Description |
 | --------------- | -------- | -------- | ----------- |
@@ -158,97 +146,93 @@ Tells a language model how to write prompts for this specific generator. When Cl
 | `field_guides`  | object   | no       | Per-field writing instructions. Keys are field names. |
 | `examples`      | array    | no       | Input/output pairs showing correct prompt construction. |
 | `do`            | string[] | no       | Rules the LLM should follow. |
-| `dont`          | string[] | no       | Rules the LLM should NOT break. |
-
-**Example:**
-```json
-"llm_instructions": {
-  "writing_guide": "Write video prompts for Seedance 2 using a segmented structure. Use kinetic motion verbs. Camera field is a single short instruction. Keep total assembled prompt under 150 words.",
-  "field_guides": {
-    "action": "Lead with the strongest motion verb. This is the most important field.",
-    "camera": "Single instruction only. Do not use the word 'camera' in this field."
-  },
-  "examples": [
-    {
-      "scene": "INT. LIGHTHOUSE - NIGHT",
-      "action": "Harlan writes in the logbook",
-      "output": {
-        "subject": "A weathered fisherman in his 60s",
-        "action": "leans forward and scrawls coordinates across a damp logbook page",
-        "camera": "slow push in",
-        "environment": "Stone interior, single candle, heavy shadows on salt-worn walls",
-        "style": "Cinematic noir, shallow depth of field, 4K"
-      }
-    }
-  ],
-  "do": ["Use kinetic motion verbs", "Describe camera as a single short instruction"],
-  "dont": ["Stack more than 2 adjectives per noun", "Exceed 150 words total"]
-}
-```
-
----
+| `dont`          | string[] | no       | Rules the LLM should not break. |
 
 ## 2.6 `output` Object
 
-Tells any LLM or automated pipeline where to store a rendered file after the generator completes, and which fields in the SKEL document to update. This is what closes the loop from "prompt sent" to "file in project, story updated."
+Tells any LLM or automated pipeline where to store a rendered file after the generator completes, and which files or fields to update. Without this field, a BONE is a prompt contract only. With `output`, a BONE becomes a generation pipeline spec.
 
-Without this field, a BONE is a prompt contract only. With `output`, a BONE becomes a full generation pipeline spec — it knows what to ask for, how to ask for it, and where to put the result.
+| Field                | Type   | Required | Description |
+| -------------------- | ------ | -------- | ----------- |
+| `format`             | string | yes      | Output file extension: `png`, `jpg`, `mp4`, `gif`, `wav`, etc. |
+| `target`             | string | yes      | Which SPORE field or sidecar to write the result to. |
+| `path_template`      | string | no       | Storage path relative to workspace root. Supports `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, and `{n}`. |
+| `completion_status` | string | no       | Production status to set on the shot after a successful download. Default: `review`. |
 
-| Field               | Type   | Required | Description |
-| ------------------- | ------ | -------- | ----------- |
-| `format`            | string | yes      | Output file extension: `"png"`, `"jpg"`, `"mp4"`, `"gif"`, `"wav"`, etc. |
-| `target`            | string | yes      | Which Spore field to write the result to. See target values below. |
-| `path_template`     | string | no       | Storage path relative to workspace root. Supports tokens: `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, `{n}` (auto-incrementing take number). Default templates are used if omitted (see below). |
-| `status_on_complete`| string | no       | Production status to set on the shot after a successful download. Default: `"review"`. Values: `"review"`, `"approved"`. |
-
-**Target values:**
-
-| Target            | Writes to |
-| ----------------- | --------- |
-| `"startFrameImage"` | `shot.extensions.x-Spore.startFrameImage` |
-| `"endFrameImage"`   | `shot.extensions.x-Spore.endFrameImage` |
-| `"image"`           | `shot.extensions.x-Spore.image` (generic reference image) |
-| `"video_take"`      | `video-map.json` → appends a new take for the shot, sets `active: true` |
-| `"audio_track"`     | `audio-map.json` → assigns file as dialogue/sfx/music per BONE target |
+Target values:
+- `startFrameImage`: write to `shot.extensions.x-spore.startFrameImage` in `story.skel`.
+- `endFrameImage`: write to `shot.extensions.x-spore.endFrameImage` in `story.skel`.
+- `image`: write to `shot.extensions.x-spore.image` in `story.skel`.
+- `video_take`: append a new take to `video-map.json`, sets `isActive: true` on the new take, sets `isActive: false` on all prior takes for that shot.
+- `audio_track`: assign a track in `audio-map.json`. Track type (`dialogue`, `sfx`, or `music`) is determined by the BONE's `target` field.
 
 **Default path templates (used when `path_template` is omitted):**
 
 ```
-image BONEs:  projects/{slug}/assets/images/{shot_id}.{bone_id}.{format}
-video BONEs:  projects/{slug}/assets/video/{shot_id}.v{n}.{format}
-audio BONEs:  projects/{slug}/assets/audio/{shot_id}.{bone_id}.{format}
+image BONEs:   projects/{slug}/renders/images/{shot_id}.{bone_id}.{format}
+video BONEs:   projects/{slug}/renders/video/{shot_id}.v{n}.{format}
+audio BONEs:   projects/{slug}/renders/audio/{shot_id}.{bone_id}.{format}
+failure logs:  projects/{slug}/renders/failures/{shot_id}.{bone_id}.log
 ```
 
-**Example — Flux Dev (image):**
-```json
-"output": {
-  "format": "png",
-  "target": "startFrameImage",
-  "status_on_complete": "review"
-}
-```
+**What an LLM or pipeline does after receiving a completed render:**
 
-**Example — Higgsfield / Runway / Kling (video):**
-```json
-"output": {
-  "format": "mp4",
-  "target": "video_take",
-  "status_on_complete": "review"
-}
-```
-
-**What an LLM does after receiving a completed render:**
-
-1. Resolve the storage path using the template + context (workspace, slug, shot_id, bone_id)
-2. Download the file to that path
+1. Resolve the storage path using the template and context (workspace root, slug, shot_id, bone_id, format).
+2. Download or move the file to that path.
 3. Write the path to the field specified by `target`:
-   - Image targets → update `shot.extensions.x-Spore[target]` in `story.json`
-   - `video_take` → append entry to `video-map.json` with `active: true`
+   - Image targets → update `shot.extensions.x-spore[target]` in `story.skel`
+   - `video_take` → append entry to `video-map.json` with `isActive: true`; set `isActive: false` on all prior takes for that shot
    - `audio_track` → append entry to `audio-map.json` with the appropriate track type
-4. Set `shot.extensions.x-Spore.production_status.image` (or `.video`) to `status_on_complete`
-5. Save the story file
+4. Set `shot.extensions.x-spore.production_status.image` (or `.video`) to `completion_status`.
+5. Save `story.skel`.
 
-Spore will pick up the updated files on next load or file-watch event. No app restart required.
+Spore picks up updated files on next reload or file-watch event. No app restart required. Failed renders SHOULD write a log entry to the `renders/failures/` path for diagnostics.
+
+---
+
+## 2.7 Provider Routing Metadata
+
+BONE definitions MAY declare provider and routing metadata so SPORE and agents can group generators, choose an execution path, and display provider readiness without hardcoding every generator in the app.
+
+`provider` is a short lowercase namespace. Examples: `higgsfield`, `runway`, `kling`, `flux`.
+
+`routing` is an optional open object for provider-specific lookup hints, default model IDs, or external routing-table keys. Projects MAY also keep routing in workspace config or generated agent skills instead of embedding it in the BONE.
+
+`execution_routes` is an optional ordered list of executable routes. Agents SHOULD choose the first route that is available and configured.
+
+| Field      | Type     | Required | Description |
+| ---------- | -------- | -------- | ----------- |
+| `type`     | string   | yes      | `mcp`, `cli`, `skill`, `api`, or `manual`. |
+| `label`    | string   | no       | Human-readable route label. |
+| `tool`     | string   | no       | MCP/tool identifier, e.g. `higgsfield.generate_image`. |
+| `command`  | string   | no       | CLI command template or executable name. |
+| `endpoint` | string   | no       | API endpoint or route key. |
+| `requires` | string[] | no       | Capability/config keys required before this route is usable. |
+| `args`     | object   | no       | Route-specific argument mapping hints. |
+
+Example:
+
+```json
+{
+  "provider": "higgsfield",
+  "execution_routes": [
+    {
+      "type": "mcp",
+      "label": "Higgsfield MCP",
+      "tool": "higgsfield.generate_image",
+      "requires": ["settings.higgsfield.executionRoute", "auth.higgsfield"]
+    },
+    {
+      "type": "cli",
+      "label": "Higgsfield CLI",
+      "command": "higgsfield generate create",
+      "requires": ["cli.higgsfield"]
+    }
+  ]
+}
+```
+
+Unknown top-level fields are rejected by the core BONE schema unless they are explicitly defined, placed under `extensions`, or use an `x-` namespaced top-level key.
 
 ---
 
@@ -259,14 +243,14 @@ When a SKEL document is exported, all active BONE definitions are embedded in a 
 ```json
 {
   "skel_version": "2.0",
-  "metadata": { ... },
+  "metadata": { "..." : "..." },
   "bone_registry": {
     "flux-dev": {
       "bone_version": "1.0",
       "label": "Flux Dev (Image Generation)",
       "target": "image",
       "attaches_to": ["shot", "scene", "metadata"],
-      "fields": { ... },
+      "fields": { "...": "..." },
       "defaults": { "guidance": 7.5 }
     },
     "runway-gen3": {
@@ -274,13 +258,13 @@ When a SKEL document is exported, all active BONE definitions are embedded in a 
       "label": "Runway Gen-3 Alpha (Video)",
       "target": "video",
       "attaches_to": ["shot"],
-      "fields": { ... },
+      "fields": { "...": "..." },
       "defaults": { "duration": 4 }
     }
   },
-  "acts": [ ... ],
-  "scenes": [ ... ],
-  "shots": [ ... ]
+  "acts": [],
+  "scenes": [],
+  "shots": []
 }
 ```
 
@@ -327,11 +311,6 @@ Scene-level BONEs set defaults for all shots in that scene. Shot-level data over
     "flux-dev": {
       "negative": "blurry, cartoon, low quality, bright colors",
       "guidance": 8
-    },
-    "suno-v3": {
-      "text": "Dark ambient drone, distant foghorn, creaking wood",
-      "duration": 30,
-      "genre": "ambient"
     }
   }
 }
@@ -397,14 +376,29 @@ Users can create custom BONE definitions for any purpose:
 
 Custom BONEs follow the same spec. The `target` field uses `custom` and the `bone_id` should be prefixed to avoid collisions (e.g., `my-studio-editorial`).
 
+### 6.1 First-Party AI Filmmaking BONEs
+
+SPORE ships a small AI filmmaking base pack for character-locked, storyboard-driven video generation:
+
+| BONE | Target | Purpose |
+| ---- | ------ | ------- |
+| `character-reference-sheet` | image | Creates neutral 8-view identity sheets for character continuity. |
+| `storyboard-grid-9` | image | Creates a 3x3 continuous-scene storyboard grid with readable production-note strips. |
+| `seedance-2` | video | Creates 15-second Seedance 2 video prompts from text, storyboard grids, or character sheets plus storyboard grids. |
+
+These BONEs are prompt authoring contracts. LLMs SHOULD read their `llm_instructions` before writing prompt data and SHOULD preserve character-lock text verbatim across the character sheet, storyboard, and video BONEs. When a storyboard grid exists, video BONEs SHOULD prefer storyboard-driven prompting over independent text-only shot prompts because it reduces character, geography, and camera drift.
+
 ---
 
 ## 7. Validation
 
 ### 7.1 Registry Validation
 
+- Empty `draft` SKEL documents MAY omit `bone_registry`, or MAY include it as `{}`.
+- If any SKEL entity contains a `bones` object, the SKEL document MUST include `bone_registry`.
 - Every key in an entity's `bones` object MUST have a corresponding entry in `bone_registry`.
-- Parsers SHOULD warn (not error) on unregistered BONEs to allow forward compatibility.
+- In `export` lifecycle, every referenced BONE definition MUST be embedded in `bone_registry` and MUST validate against the BONE definition schema.
+- Parsers MAY warn on unused BONE definitions in `bone_registry`, but unresolved BONE keys in entity data are validation errors.
 
 ### 7.2 Field Validation
 
@@ -424,7 +418,9 @@ Custom BONEs follow the same spec. The `target` field uses `custom` and the `bon
 When exporting a SKEL document:
 1. Collect all BONE IDs referenced across all entities.
 2. Embed their full definitions in `bone_registry`.
-3. The exported file is fully self-contained.
+3. Set `metadata.lifecycle` to `export`, or validate under export rules.
+4. Reject the export if any referenced BONE ID cannot be resolved to a full definition.
+5. The exported file is fully self-contained.
 
 ### 8.2 Import
 

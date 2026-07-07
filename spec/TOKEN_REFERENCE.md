@@ -125,12 +125,11 @@
 
 | Rule | Value |
 |------|-------|
-| Max shots per scene | **4** |
 | Max `action` length | **200 chars** |
 | Max `prompt` length | **300 chars** |
 | Max `logline` length | **280 chars** |
 | ID format (recommended) | `nanoid(12)` or UUID v4 |
-| Extension key prefix | `x-` (e.g., `x-Spore`) |
+| Extension key prefix | `x-` (e.g., `x-spore`) |
 
 ---
 
@@ -165,7 +164,7 @@
     "dof": "shallow"
   },
   "extensions": {
-    "x-Spore": { "production_status": "approved" }
+    "x-spore": { "production_status": "approved" }
   }
 }
 ```

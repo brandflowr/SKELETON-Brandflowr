@@ -1,6 +1,6 @@
 # Contributing to SKELETON-Spec
 
-SKEL (Skeleton) is an open specification. Contributions are welcome.
+SKEL (Story Keyframe Extensible Layout) is an open specification. Contributions are welcome.
 
 ## Ways to Contribute
 

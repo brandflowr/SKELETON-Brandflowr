@@ -1,0 +1,90 @@
+{
+  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "bone_id": "character-reference-sheet",
+  "bone_version": "1.0",
+  "label": "Character Reference Sheet",
+  "description": "AI filmmaking identity-lock sheet. Produces an 8-view reference image for character continuity across storyboards and video shots.",
+  "provider": "spore",
+  "target": "image",
+  "attaches_to": ["metadata", "scene", "shot"],
+  "fields": {
+    "character_description": {
+      "type": "string",
+      "required": false,
+      "ui": "textarea",
+      "label": "Character Description",
+      "description": "Tight identity traits only: age range, build, skin, hair, eyes, brief wardrobe, key prop. Omit scene effects."
+    },
+    "reference_images": {
+      "type": "array",
+      "required": false,
+      "ui": "file",
+      "label": "Reference Images",
+      "description": "Optional character image anchors. If present, the prompt should not re-describe the image in prose."
+    },
+    "style": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Rendering Style",
+      "description": "Genre style only, such as photorealistic live action, Pixar-style 3D, anime cel-shading, noir, or iPhone vlog."
+    },
+    "aspect": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Aspect Ratio",
+      "options": ["16:9", "9:16", "1:1", "4:3"],
+      "default": "16:9"
+    },
+    "negative": {
+      "type": "string",
+      "required": false,
+      "ui": "textarea",
+      "label": "Negative Prompt",
+      "description": "Elements to exclude, such as busy backgrounds, cropped feet, text overlays, watermark, low quality."
+    }
+  },
+  "defaults": {
+    "style": "photorealistic, life-like live action shot on a DSLR camera with 35mm film and muted color tones, do not make it look like a 3D render",
+    "aspect": "16:9",
+    "negative": "busy background, distracting background, cropped feet, cropped ankles, cropped knees, cropped head, text overlay, watermark, low quality"
+  },
+  "output": {
+    "format": "png",
+    "target": "startFrameImage",
+    "completion_status": "review"
+  },
+  "prompt_assembly": {
+    "strategy": "template",
+    "template": "Create a professional character reference sheet for {{character_description}}. Divide the sheet into four vertical columns, each representing a different angle, for a total of eight shots. The entire top row must show full-body views from head to toe facing four different directions: front, side, three-quarter view, and back. All subjects in the top row must be fully visible including feet, with no cropping at the ankles, knees, or head. The bottom row must contain four close-up shots of the face corresponding to each full-body shot above. The style must be {{style}}. Background should be simple and not distracting from character design. Aspect ratio = {{aspect}}.",
+    "character_injection": {
+      "enabled": true,
+      "position": "subject_prefix",
+      "format": "name_and_description"
+    },
+    "max_length": 1400,
+    "separator": " "
+  },
+  "llm_instructions": {
+    "writing_guide": "Use this BONE to make the identity anchor for AI filmmaking. If reference_images are attached, treat them as the visual source of truth and do not re-describe the character in prose; write only the rendering style and sheet layout. If no reference image exists, fill character_description with 30-60 words of identity-locking traits only. Keep lighting neutral and studio-like. Do not include scene-specific lighting, dirt, blood, sparks, rain, damage, or story atmosphere. Always request a simple, non-distracting background.",
+    "field_guides": {
+      "character_description": "Description-only mode: age range, build, skin, hair, eyes, brief wardrobe, key prop. Target 30-60 words. No atmosphere or transient scene effects.",
+      "reference_images": "When present, reference images carry identity. Do not re-narrate visible details in character_description.",
+      "style": "Genre rendering style only. Avoid scene lighting terms like moonlit, firelit, neon-soaked, stormy, or blood-red.",
+      "aspect": "Use 16:9 for reusable sheets unless the downstream workflow requires another ratio."
+    },
+    "do": [
+      "Reuse the same character description verbatim downstream",
+      "Keep character sheet lighting neutral",
+      "Keep the background simple",
+      "Use reference images as the primary visual anchor when available"
+    ],
+    "dont": [
+      "Add scene-specific grime, blood, rain, sparks, or rim light",
+      "Exceed 60 words in description-only mode unless the user explicitly needs it",
+      "Re-describe an attached reference image in prose",
+      "Crop feet, ankles, knees, or head in the full-body row"
+    ]
+  }
+}

@@ -8,13 +8,13 @@
 
 ## 1. Introduction
 
-SKEL (Story Keyframe Extensible Layout) is a YAML-based interchange format for encoding screenplays, storyboards, and visual narratives into a flat relational structure. It is designed for:
+SKEL (Story Keyframe Extensible Layout) is a YAML-based native authoring format for encoding screenplays, storyboards, and visual narratives into a flat relational structure. It is designed for:
 
 - AI-driven image/video generation pipelines
 - Storyboard authoring tools (primary host: Spore Studio)
 - Cross-tool interchange between screenplay editors, production software, and rendering engines
 
-`.skel` is the layout of the body — acts, scenes, shots, visual setup — before the BONEs (AI pipelines defined in `.bone` files) are attached to it.
+`.skel` is SPORE's native story file. It is the layout of the body - acts, scenes, shots, visual setup - before the BONEs (AI pipelines defined in `.bone.json` files) are attached to it. `.skel.json` is the export and interchange form of the same data model.
 
 ### 1.1 Design Principles
 
@@ -32,14 +32,14 @@ SKEL (Story Keyframe Extensible Layout) is a YAML-based interchange format for e
 | File extension | `.skel`                                                 |
 | Format         | YAML (UTF-8)                                            |
 | MIME type      | `application/skel+yaml`                                 |
-| JSON export    | `.skel.json` — portability format, same structure       |
+| JSON export    | `.skel.json` - portability format, same structure       |
 | Schema URI     | `https://Spore.dev/schemas/SKEL/v2.0/skel.schema.json` |
 
 ---
 
 ## 2. Document Structure
 
-A SKEL document is a single JSON object with the following top-level keys:
+A SKEL document is a YAML mapping with the following top-level keys. The `.skel.json` export uses the same keys as a JSON object:
 
 ```
 {
@@ -64,12 +64,13 @@ A semver string identifying the spec version. Parsers MUST reject documents with
 | ------------ | ------ | -------- | ------------------------------------------------ |
 | `story_id`   | string | yes      | UUID v4 identifier for the story.                |
 | `title`      | string | yes      | Human-readable title.                            |
+| `lifecycle`  | string | no       | Validation mode: `draft`, `production`, or `export`. Defaults to `draft`. |
 | `logline`    | string | no       | One-sentence summary (max 280 chars).            |
 | `author`     | string | no       | Author or team name.                             |
 | `created_at` | string | no       | ISO 8601 datetime.                               |
 | `modified_at`| string | no       | ISO 8601 datetime.                               |
 | `skin_key`   | string | no       | Reference to a visual style/skin preset.         |
-| `constraints`| object | no       | Extensible config, e.g., `max_shots_per_scene`.  |
+| `constraints`| object | no       | Extensible project config.                       |
 | `bones`      | object | no       | Project-wide BONE defaults (see BONE Spec).      |
 | `extensions` | object | no       | Vendor-specific metadata (see §6).               |
 
@@ -101,6 +102,8 @@ An ordered array of Scene objects.
 | `shot_refs`       | string[] | yes      | Ordered array of shot IDs in this scene.             |
 | `narrative`       | string   | no       | Scene-level narrative summary.                       |
 | `notes`           | string   | no       | Essential production or directorial notes.           |
+| `intent`          | object   | no       | Creative purpose and structural role of the scene. See §2.6.1. |
+| `creative_status` | string   | no       | Story-development status. See §2.6.2.                |
 | `extensions`      | object   | no       | Vendor-specific data.                                |
 
 #### 2.4.1 `loc` Object
@@ -125,10 +128,12 @@ An ordered array of Shot objects. This is the primary unit of SKEL.
 | `dialogue`       | string   | no       | Spoken dialogue for this shot.                     |
 | `character_refs` | string[] | no       | IDs of characters present.                         |
 | `duration`       | number   | no       | Estimated duration in seconds.                     |
-| `notes`          | string   | no       | Context, setup details, or production notes.       |
-| `status`         | object   | no       | Production status object (`image`, `video`).       |
-| `v_setup`        | object   | yes      | Visual setup object (see §2.5.1).                  |
-| `extensions`     | object   | no       | Vendor-specific data.                              |
+| `notes`           | string   | no       | Context, setup details, or production notes.         |
+| `status`          | object   | no       | Production status object (`image`, `video`).         |
+| `v_setup`         | object   | yes      | Visual setup object (see §2.5.1).                    |
+| `intent`          | object   | no       | Creative purpose and beat for this shot. See §2.6.1. |
+| `creative_status` | string   | no       | Story-development status. See §2.6.2.                |
+| `extensions`      | object   | no       | Vendor-specific data.                                |
 
 #### 2.5.1 `v_setup` Object
 
@@ -144,25 +149,109 @@ An ordered array of Shot objects. This is the primary unit of SKEL.
 | `color`  | string | no       | Color temperature or grading token (see §4).    |
 | `mood`   | string | no       | Emotional lighting/mood token (see §4).         |
 
-### 2.6 `key_file` (optional)
+### 2.6 Creative Collaboration Fields
+
+These optional fields capture the *why* behind story choices. They are separate from production status (`status.image`, `status.video`) and do not affect generation pipelines — they exist so LLMs and directors can reason about story intent and development state.
+
+#### 2.6.1 `intent` Object
+
+Available on both scenes and shots. All fields are optional.
+
+**Scene intent:**
+
+| Field            | Type   | Description                                                                          |
+| ---------------- | ------ | ------------------------------------------------------------------------------------ |
+| `purpose`        | string | What this scene reveals, establishes, or accomplishes for the story.                 |
+| `conflict`       | string | The dramatic tension or opposition driving this scene.                               |
+| `emotional_turn` | string | How the emotional state or audience feeling changes across the scene.                 |
+| `story_function` | string | Structural role in the narrative: `setup`, `escalation`, `reveal`, `reaction`, `decision`, `transition`, `payoff`, or `button`. |
+
+```yaml
+intent:
+  purpose: "Reveal that the machine predicts speech."
+  conflict: "Mara wants certainty; Eli wants explanation."
+  emotional_turn: "Curiosity becomes dread."
+  story_function: reveal
+```
+
+**Shot intent:**
+
+| Field      | Type   | Description                                                                                    |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------- |
+| `beat`     | string | The specific story beat or moment this shot captures.                                          |
+| `function` | string | Structural role within the scene: same values as scene `story_function`.                       |
+| `emphasis` | string | What the shot should make the audience feel or notice. LLMs must preserve this when rewriting. |
+
+```yaml
+intent:
+  beat: "The VU needle moves before Eli speaks."
+  function: reveal
+  emphasis: "End on the machine, not the people."
+```
+
+**Rules for LLMs:**
+- When rewriting `action` or prompt text, read `intent` first and ensure the rewrite serves the same beat, function, and emphasis.
+- Do not rewrite `intent` itself unless explicitly asked.
+
+#### 2.6.2 `creative_status`
+
+Available on both scenes and shots. A single string from a fixed vocabulary.
+
+| Value          | Meaning                                                                         |
+| -------------- | ------------------------------------------------------------------------------- |
+| `idea`         | Rough concept. Structure and content may change freely.                         |
+| `drafted`      | Written out but not yet reviewed.                                               |
+| `needs_review` | Ready for feedback. Content should not change until reviewed.                   |
+| `approved`     | Reviewed and accepted. Changes require explicit intent.                         |
+| `locked`       | Frozen. LLMs and automated tools MUST NOT modify this entity's content.         |
+
+```yaml
+creative_status: needs_review
+```
+
+`creative_status` is distinct from `status.image` and `status.video`. Those track media generation progress; `creative_status` tracks story-development progress. A shot can be `creative_status: approved` with `status.image: pending` (the words are locked, but the image has not been generated yet).
+
+### 2.8 `key_file` (optional)
 
 Either an inline key file object or a URI string pointing to an external key file. If omitted, parsers MUST use the SKEL Default Key File (see §4).
+
+### 2.9 `bone_registry` (conditional)
+
+`bone_registry` embeds BONE definitions keyed by `bone_id`. It is conditional because empty drafts do not need active generation tools, while BONE-bearing and exported documents must be self-describing enough for UI rendering, validation, and prompt assembly.
+
+Rules:
+
+- A new or empty `draft` document MAY omit `bone_registry`, or MAY include it as `{}`.
+- If `metadata.bones`, `act.bones`, `scene.bones`, or `shot.bones` appears anywhere in the document, `bone_registry` MUST be present.
+- Every key referenced inside an entity `bones` object MUST resolve to a matching key in `bone_registry`.
+- If `metadata.lifecycle` is `export`, `bone_registry` MUST be present. It MAY be `{}` only when the exported document contains no BONE data.
+- In `export` lifecycle, every referenced BONE definition embedded in `bone_registry` MUST satisfy the BONE definition schema.
+
+The JSON Schema can require `bone_registry` when BONE data is present, but exact key matching between entity `bones` objects and `bone_registry` is a referential integrity check performed by validators.
 
 ---
 
 ## 3. Constraints
 
-### 3.1 Shot Limit
+### 3.0 Document Lifecycle
 
-A scene SHOULD adhere to the shot limit defined in `metadata.constraints.max_shots_per_scene`. If omitted, the default constraint is **4 shots**. 
+SKEL documents MAY declare a lifecycle mode in `metadata.lifecycle`. If omitted, parsers MUST treat the document as `draft`.
 
-> **Rationale**: Enforcing a shot limit keeps visual narratives concise and prevents AI generation pipelines from producing unbounded output, but it must be configurable for longer narrative scenes.
+Allowed values:
 
-### 3.2 Front-Loading
+| Value        | Meaning |
+| ------------ | ------- |
+| `draft`      | Work-in-progress authoring document. Empty arrays and incomplete story structure are allowed so a new SPORE project can be created before acts, scenes, or shots exist. |
+| `production` | Active production document. Requires at least one act, scene, and shot, and requires non-empty `scene_refs` and `shot_refs` where those entities exist. Referential integrity MUST pass. |
+| `export`     | Portable handoff document. Includes all `production` requirements and SHOULD include all data needed by external tools, including embedded BONE definitions when BONE data exists. |
+
+Lifecycle controls validation strictness only. It does not change the SKEL data model.
+
+### 3.1 Front-Loading
 
 The `action` field MUST be derived from the **beginning** of the source paragraph. This ensures human readability remains tight, while the decoupled `prompts` object can contain expansive text directly fed to generative AI pipelines.
 
-### 3.3 ID Uniqueness
+### 3.2 ID Uniqueness
 
 All `id` fields across acts, scenes, and shots MUST be unique within a single SKEL document. Recommended format: `nanoid(12)` or UUID v4.
 
@@ -216,7 +305,7 @@ If a token is not found in the active key file, parsers MUST apply these default
 
 ### 4.3 Custom Tokens
 
-Vendors MAY register custom tokens by prefixing them with `x-` (e.g., `x-Spore-dreamy`). Custom tokens MUST be defined in the key file's `custom` section.
+Vendors MAY register custom tokens by prefixing them with `x-` (e.g., `x-spore-dreamy`). Custom tokens MUST be defined in the key file's `custom` section.
 
 ---
 
@@ -260,7 +349,7 @@ Every SKEL entity (metadata, act, scene, shot) includes an optional `extensions`
 ```json
 {
   "extensions": {
-    "x-Spore": {
+    "x-spore": {
       "production_status": "approved",
       "cost_estimate": 12.50
     },
@@ -277,6 +366,67 @@ Every SKEL entity (metadata, act, scene, shot) includes an optional `extensions`
 - Extensions MUST NOT override core SKEL fields.
 - Parsers MUST ignore unrecognized extension namespaces without error.
 - Extensions are NOT validated by the core JSON Schema; vendors MAY provide supplementary schemas.
+
+### 6.3 SPORE Proposals (`extensions.x-spore.proposals`)
+
+SPORE MAY store AI-assisted proposed changes under the `x-spore` extension namespace. Proposals are intentionally extension data, not core SKEL fields, so the base schema stays vendor-neutral.
+
+Proposals MAY be stored on the entity they affect (`metadata`, `act`, `scene`, or `shot`). If stored at a broader scope, include `target` to identify the affected entity.
+
+```yaml
+extensions:
+  x-spore:
+    proposals:
+      - id: prop_123
+        by: codex
+        type: rewrite_scene
+        status: pending
+        summary: "Tighten the reveal around the tape deck."
+        target:
+          entity: scene
+          id: sc_1
+        rationale: "The current reveal happens before the audience understands the risk."
+```
+
+Required proposal fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | Stable proposal ID. SHOULD use `prop_` prefix, e.g. `prop_123`. |
+| `by` | string | Author or agent identifier, e.g. `codex`, `claude`, `user`. |
+| `type` | string | Proposal type. See allowed values below. |
+| `status` | string | Proposal status. See allowed values below. |
+| `summary` | string | Short human-readable description of the proposed change. |
+
+Optional proposal fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `target` | object | Explicit target when the proposal is stored above or outside the affected entity. |
+| `rationale` | string | Why the change is suggested. |
+| `patch` | object | Optional machine-readable change payload. Shape depends on proposal type. |
+| `created_at` | string | ISO 8601 creation timestamp. |
+| `updated_at` | string | ISO 8601 update timestamp. |
+| `resolved_at` | string | ISO 8601 timestamp for accepted/rejected/superseded proposals. |
+
+Allowed statuses:
+- `pending`
+- `accepted`
+- `rejected`
+- `superseded`
+
+Allowed types:
+- `add_scene`
+- `rewrite_scene`
+- `add_shots`
+- `rewrite_shot`
+- `add_bone_prompts`
+- `structure_note`
+- `continuity_fix`
+
+Agents MUST NOT silently apply a proposal by changing the proposal object alone. Accepted proposals should either be applied to the affected SKEL entity and marked `accepted`, or left as `pending` until the user confirms. Rejected and superseded proposals SHOULD remain in place as history unless the user explicitly asks to remove them.
+
+The supplementary schema for SPORE extension data is `SKEL/spec/x-spore.schema.json`.
 
 ---
 
@@ -313,11 +463,12 @@ SKEL uses semantic versioning (`MAJOR.MINOR`).
 
 A conforming SKEL implementation MUST:
 
-1. Parse a `.skel.json` file and validate it against the JSON Schema (Draft 7).
-2. Enforce the 4-shot limit per scene.
-3. Validate referential integrity across acts, scenes, and shots.
-4. Resolve shorthand tokens via the key file (inline or external).
-5. Apply default fallbacks for missing tokens.
+1. Parse a `.skel` YAML file as the native authoring format.
+2. Validate the parsed SKEL data model against the JSON Schema (Draft 7).
+3. Export `.skel.json` only as an explicit portability/interchange action.
+4. Validate referential integrity across acts, scenes, and shots.
+5. Resolve shorthand tokens via the key file (inline or external).
+6. Apply default fallbacks for missing tokens.
 
 ---
 

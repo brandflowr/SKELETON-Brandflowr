@@ -46,7 +46,19 @@ Most production formats are built for human editors or specific tools. SKEL was 
 - Download and store the rendered file per the BONE's `output` spec
 - Write back to the SKEL doc / video-map / audio-map
 
-### 5. Validate
+Prompt assembly uses the same contract as `BONE/spec/bone-spec.md`: `template`, `sequential`, or `raw`. `template` expands `{{field_name}}` and supported system tokens such as `{{v_setup.size}}`, `{{character_refs}}`, and `{{scene.header}}`; `sequential` joins non-empty field values in definition order; `raw` sends the `text` field verbatim. The `assemble_prompt` tool should also apply `v_setup_injection`, `character_injection`, `separator`, and `max_length` consistently with the BONE schema.
+
+### 5. Reason about creative intent
+- Read `scene.intent` and `shot.intent` to understand why material exists, not just what it says
+- Honor `intent.emphasis` and `intent.beat` when rewriting action or prompt text
+- Check `creative_status` before modifying any scene or shot — `locked` entities must not be changed
+
+### 6. Store proposals without applying them
+- Write pending suggestions to `extensions.x-spore.proposals` when the user wants options rather than immediate edits
+- Use stable `prop_` IDs, one of the approved proposal types, and one of the approved statuses
+- Do not treat `status: accepted` as a substitute for applying the change to the affected SKEL entity
+
+### 7. Validate
 - Run the SKEL validator on modified data before saving
 - Report schema errors or referential integrity issues
 
@@ -55,7 +67,7 @@ Most production formats are built for human editors or specific tools. SKEL was 
 ## The Full Generation Loop (LLM Perspective)
 
 ```
-READ  story.json                          → load SKEL document
+READ  story.skel                          → load native SKEL YAML document
 READ  bone_registry                       → know which generators are active
 READ  metadata.bones                      → know project-level BONE defaults
 READ  scene.bones for target scene        → know scene-level defaults
@@ -66,8 +78,8 @@ FOR each shot in target scene:
   WRITE shot.bones[bone_id].text          → the prompt (respects inheritance, no redundancy)
   WRITE shot.v_setup tokens               → size, angle, move, light, etc.
 
-VALIDATE story.json against SKEL schema   → catch errors before save
-SAVE story.json
+VALIDATE story.skel against SKEL schema   → catch errors before save
+SAVE story.skel
 
 FOR each shot (render phase):
   ASSEMBLE prompt via prompt_assembly     → expand tokens to natural language, inject chars
@@ -76,13 +88,43 @@ FOR each shot (render phase):
   DOWNLOAD rendered file
   RESOLVE output path from bone.output    → workspace + slug + shot_id + bone_id + format
   SAVE file to resolved path
-  UPDATE story.json shot extensions        → startFrameImage / image / etc.
+  UPDATE story.skel shot extensions        → startFrameImage / image / etc.
   UPDATE video-map.json or audio-map.json  → for video/audio targets
   SET production_status → "review"
-  SAVE story.json
+  SAVE story.skel
 
 DONE → Spore picks up new files on reload
 ```
+
+---
+
+## Proposal Storage
+
+When an LLM suggests changes that should remain reviewable, it MAY write proposal objects under `extensions.x-spore.proposals` on the affected entity. This keeps pending ideas out of core SKEL fields until the user accepts them.
+
+```json
+"extensions": {
+  "x-spore": {
+    "proposals": [
+      {
+        "id": "prop_123",
+        "by": "codex",
+        "type": "rewrite_scene",
+        "status": "pending",
+        "summary": "Tighten the reveal around the tape deck.",
+        "target": { "entity": "scene", "id": "sc_1" },
+        "rationale": "The current reveal lands before the audience understands the risk."
+      }
+    ]
+  }
+}
+```
+
+Allowed statuses are `pending`, `accepted`, `rejected`, and `superseded`. Allowed types are `add_scene`, `rewrite_scene`, `add_shots`, `rewrite_shot`, `add_bone_prompts`, `structure_note`, and `continuity_fix`.
+
+Agents SHOULD preserve proposal history unless the user asks to remove it. To accept a proposal, apply the actual change to the target SKEL data, update the proposal status to `accepted`, and set `resolved_at`. To reject or supersede a proposal, update only its status and resolution metadata.
+
+The supplementary schema for this namespace is `SKEL/spec/x-spore.schema.json`; the core SKEL schema remains vendor-neutral.
 
 ---
 
@@ -127,11 +169,128 @@ Do not write free text into v_setup fields. Use the correct token from the keyfi
 
 The keyfile expands these at assembly time. The Assembled Prompt Preview will show the LLM-readable expansion.
 
-### Check shot limits
-SKEL enforces a shot limit per scene (default: 4). Read `metadata.constraints.max_shots_per_scene` before adding shots. Do not add shots that would exceed the limit.
+### Respect `creative_status: locked`
+Before modifying any scene or shot, check `creative_status`. If the value is `locked`, do NOT modify that entity's `action`, `dialogue`, `notes`, `bones`, or any other content field. You may read it, reference it, or use it to inform other work — but treat it as frozen.
+
+```yaml
+# ❌ WRONG — modifying a locked shot
+shot:
+  id: sh_3
+  creative_status: locked
+  action: "Harlan freezes. His eyes widen."   # ← do not rewrite this
+
+# ✅ CORRECT — skip locked entities, work on unlocked ones
+```
+
+If a user explicitly asks you to modify a locked entity, confirm the intent before proceeding. Do not silently override the lock.
+
+### Preserve `intent` when rewriting
+When a scene or shot has an `intent` object, read it before rewriting `action`, `dialogue`, or prompt text. The rewrite must serve the same `beat`, `function`, and `emphasis`.
+
+```yaml
+# Scene intent tells you WHY the scene exists
+intent:
+  purpose: "Reveal that the machine predicts speech."
+  emotional_turn: "Curiosity becomes dread."
+  story_function: reveal
+
+# Shot intent tells you what the shot MUST communicate
+intent:
+  beat: "The VU needle moves before Eli speaks."
+  emphasis: "End on the machine, not the people."
+```
+
+Rules:
+- Do not rewrite `intent` itself unless explicitly asked.
+- If your rewrite cannot honor `emphasis` or `beat`, flag the conflict rather than silently ignoring it.
+- `story_function` and `function` values are: `setup`, `escalation`, `reveal`, `reaction`, `decision`, `transition`, `payoff`, `button`.
 
 ### Validate before saving
 After writing BONE data, run the SKEL validator. Fix errors before writing the file to disk. A saved invalid SKEL is worse than an unsaved valid one.
+
+---
+
+## External Validator Contract
+
+SPORE-compatible tools MUST expose validation in a way that an LLM or external automation can run before saving or rendering.
+
+### CLI
+
+```powershell
+spore validate projects/example/story.skel
+```
+
+Optional flags:
+- `--lifecycle draft|production|export` overrides `metadata.lifecycle` for this validation run.
+- `--json` returns machine-readable output.
+- `--with-sidecars` validates `audio-map.json`, `video-map.json`, and canvas layout files when present.
+
+Exit codes:
+- `0`: valid, no errors.
+- `1`: validation completed with errors.
+- `2`: file could not be read or parsed.
+
+### MCP / Agent Tool
+
+Tool name:
+
+```text
+validate_skel
+```
+
+Input:
+
+```json
+{
+  "path": "projects/example/story.skel",
+  "lifecycle": "production",
+  "include_sidecars": true
+}
+```
+
+Output:
+
+```json
+{
+  "valid": false,
+  "lifecycle": "production",
+  "errors": [
+    {
+      "code": "BONE_UNRESOLVED",
+      "severity": "error",
+      "path": "shots[3].bones.flux-dev",
+      "message": "Referenced BONE key does not exist in bone_registry."
+    }
+  ],
+  "warnings": []
+}
+```
+
+Minimum checks:
+- `.skel` YAML parses correctly.
+- The parsed SKEL data model passes schema validation for the selected lifecycle.
+- IDs are unique across acts, scenes, and shots.
+- `act.scene_refs` match real scenes.
+- `scene.shot_refs` match real shots.
+- `scene.act_id` matches a real act.
+- `shot.scene_id` matches a real scene.
+- Any entity with `bones` requires `bone_registry`.
+- Every entity `bones` key resolves to `bone_registry`.
+- BONE data passes required-field checks after inheritance resolution.
+- Sidecar shot IDs resolve to real shots when sidecar validation is enabled.
+
+Recommended error codes:
+- `YAML_PARSE_ERROR`
+- `SCHEMA_ERROR`
+- `DUPLICATE_ID`
+- `ACT_SCENE_REF_MISSING`
+- `SCENE_SHOT_REF_MISSING`
+- `SCENE_ACT_MISSING`
+- `SHOT_SCENE_MISSING`
+- `BONE_REGISTRY_MISSING`
+- `BONE_UNRESOLVED`
+- `BONE_REQUIRED_FIELD_MISSING`
+- `SIDECAR_SHOT_MISSING`
 
 ---
 
@@ -141,24 +300,25 @@ After a generator returns a result, the storage path is always deterministic. An
 
 ```
 workspace_root  = from CLAUDE.md or project config
-project_slug    = metadata.extensions.x-Spore.slug  (or derived from title)
+project_slug    = metadata.extensions.x-spore.slug  (or derived from title)
 shot_id         = shot.id
 bone_id         = the BONE that generated this render
 format          = bone.output.format
 n               = next available take number (for video_take targets)
 
-Image path:  {workspace_root}/projects/{slug}/assets/images/{shot_id}.{bone_id}.{format}
-Video path:  {workspace_root}/projects/{slug}/assets/video/{shot_id}.v{n}.{format}
-Audio path:  {workspace_root}/projects/{slug}/assets/audio/{shot_id}.{bone_id}.{format}
+Image path:    {workspace_root}/projects/{slug}/renders/images/{shot_id}.{bone_id}.{format}
+Video path:    {workspace_root}/projects/{slug}/renders/video/{shot_id}.v{n}.{format}
+Audio path:    {workspace_root}/projects/{slug}/renders/audio/{shot_id}.{bone_id}.{format}
+Failure path:  {workspace_root}/projects/{slug}/renders/failures/{shot_id}.{bone_id}.log
 ```
 
 After saving the file, write back:
 
-**For image targets** — edit `story.json`, find the shot by ID, update:
+**For image targets** — edit `story.skel`, find the shot by ID, update:
 ```json
 "extensions": {
-  "x-Spore": {
-    "startFrameImage": "projects/{slug}/assets/images/{shot_id}.{bone_id}.png",
+  "x-spore": {
+    "startFrameImage": "projects/{slug}/renders/images/{shot_id}.{bone_id}.png",
     "production_status": { "image": "review" }
   }
 }
@@ -169,18 +329,18 @@ After saving the file, write back:
 {
   "{shot_id}": {
     "takes": [
-      { "id": "v1", "file": "projects/{slug}/assets/video/{shot_id}.v1.mp4", "active": true }
+      { "id": "v1", "file": "projects/{slug}/renders/video/{shot_id}.v1.mp4", "isActive": true }
     ]
   }
 }
 ```
-If a take already exists, append as `v2`, `v3`, etc. Set the new take as `active: true`, set all others to `active: false`.
+If a take already exists, append as `v2`, `v3`, etc. Set the new take as `isActive: true`, set all others to `isActive: false`.
 
 **For audio_track targets** — edit `audio-map.json`:
 ```json
 {
   "{shot_id}": {
-    "dialogue": "projects/{slug}/assets/audio/{shot_id}.{bone_id}.wav"
+    "dialogue": "projects/{slug}/renders/audio/{shot_id}.{bone_id}.wav"
   }
 }
 ```
@@ -196,7 +356,7 @@ The `CLAUDE.md` file auto-installed in every Spore workspace teaches Claude the 
 2. **Active project slug** — or instructions to read it from `project.json`
 3. **SKEL structure summary** — acts → scenes → shots, v_setup tokens, bone data
 4. **Render output protocol** — the storage convention above (verbatim or paraphrased)
-5. **Write-back protocol** — which files to update after a render (story.json, video-map, audio-map)
+5. **Write-back protocol** — which files to update after a render (`story.skel`, video-map, audio-map)
 6. **Validation requirement** — always run validator before saving
 7. **Available BONEs** — list of active bone_ids and their targets for this project
 
@@ -210,8 +370,8 @@ To enable the full autonomous loop (read → write → generate → store), the 
 
 | Tool | Purpose |
 |---|---|
-| `read_story` | Read and parse the current project's `story.json` |
-| `write_story` | Write updated SKEL data back to `story.json` |
+| `read_story` | Read and parse the current project's `story.skel` |
+| `write_story` | Write updated SKEL data back to `story.skel` |
 | `resolve_bones` | Resolve inheritance chain for a shot — returns effective BONE data |
 | `assemble_prompt` | Run `prompt_assembly` for a shot + bone — returns the final string |
 | `validate_skel` | Validate the SKEL document — returns errors/warnings |
@@ -226,7 +386,7 @@ These can be implemented as:
 - Spore MCP server (dedicated server exposing these as tools to Claude)
 - Direct file operations via the existing workspace file access Claude already has
 
-The minimal viable implementation uses direct file reads/writes — Claude reads `story.json`, edits it in memory, writes it back. The MCP server approach is the production-grade path.
+The minimal viable implementation uses direct file reads/writes — Claude reads `story.skel`, edits it in memory, writes it back. The MCP server approach is the production-grade path.
 
 ---
 

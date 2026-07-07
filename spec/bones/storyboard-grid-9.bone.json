@@ -1,0 +1,120 @@
+{
+  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "bone_id": "storyboard-grid-9",
+  "bone_version": "1.0",
+  "label": "9-Panel Cinematic Storyboard",
+  "description": "AI filmmaking storyboard sheet. Produces a 3x3 grid of nine sequential panels for one continuous scene with readable production-note strips.",
+  "provider": "spore",
+  "target": "image",
+  "attaches_to": ["scene", "shot", "metadata"],
+  "fields": {
+    "scene_type": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Scene Type",
+      "description": "The kind of scene: standoff, chase, exchange, reveal, dance, product demo, vlog beat, etc."
+    },
+    "style": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Visual Style",
+      "description": "Genre and rendering style shared by all panels."
+    },
+    "characters": {
+      "type": "array",
+      "required": false,
+      "ui": "textarea",
+      "label": "Character Locks",
+      "description": "One tight sentence per character. Reuse existing character descriptions verbatim where possible."
+    },
+    "location": {
+      "type": "string",
+      "required": false,
+      "ui": "text",
+      "label": "Location and Atmosphere",
+      "description": "One location and one atmosphere for the continuous scene."
+    },
+    "beats": {
+      "type": "array",
+      "required": true,
+      "ui": "textarea",
+      "label": "Nine Panel Beats",
+      "description": "Nine short directorial beats, read left-to-right and top-to-bottom."
+    },
+    "annotation_mode": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Third Annotation Line",
+      "options": ["MOOD", "VOICE", "STYLE"],
+      "default": "MOOD"
+    },
+    "aspect": {
+      "type": "string",
+      "required": false,
+      "ui": "select",
+      "label": "Aspect Ratio",
+      "options": ["16:9", "9:16", "1:1"],
+      "default": "16:9"
+    },
+    "exclusions": {
+      "type": "string",
+      "required": false,
+      "ui": "textarea",
+      "label": "Exclusions",
+      "description": "Things that must not appear in the panels."
+    }
+  },
+  "defaults": {
+    "scene_type": "cinematic scene",
+    "style": "cinematic, photorealistic, live-action, lifelike, 35mm film grain",
+    "annotation_mode": "MOOD",
+    "aspect": "16:9",
+    "exclusions": "no text, no captions, no panel numbers inside panels, no watermark"
+  },
+  "output": {
+    "format": "png",
+    "target": "startFrameImage",
+    "completion_status": "review"
+  },
+  "prompt_assembly": {
+    "strategy": "template",
+    "template": "Create a cinematic storyboard sheet in a 3x3 grid format, nine panels arranged in three rows and three columns, depicting one continuous {{scene_type}}. Style: {{style}}. Aspect ratio = {{aspect}} page layout. No text, no captions, no panel numbers inside panels, only thin clean separators between panels. Under each panel, add a thin off-white annotation strip with three short lines of production notes in a clean high-contrast sans-serif font that must be legible at rendered size: CAM, MOVE, and {{annotation_mode}}. Notes must read as short declarative slug lines, not full sentences. Character lock: {{characters}}. This is one location and one unbroken flow of time: {{location}}. Exclusions: {{exclusions}}. Camera moves naturally around the action as if shot in a single continuous take broken into nine sequential beats. Narrative beats, read left-to-right and top-to-bottom: {{beats}}.",
+    "v_setup_injection": {
+      "enabled": true,
+      "position": "append",
+      "token_format": "natural",
+      "tokens": ["size", "angle", "move", "light", "dof", "aspect"]
+    },
+    "character_injection": {
+      "enabled": true,
+      "position": "prepend",
+      "format": "name_and_description"
+    },
+    "max_length": 3000,
+    "separator": " "
+  },
+  "llm_instructions": {
+    "writing_guide": "Use this BONE when the user needs a 9-panel storyboard grid for a continuous scene. Write nine beats like a director, not a novelist: 3-12 words each, short and declarative. Vary framing and camera logic across the grid. The panels should advance time meaningfully and build toward panels 7-9. Character descriptions must be one tight sentence per character and should reuse existing identity text verbatim. Use MOOD by default, VOICE for vlog or dialogue scenes, and STYLE for action or martial-arts scenes.",
+    "field_guides": {
+      "characters": "One tight sentence per character: distinguishing features, hair, key clothing color, key prop. Avoid wardrobe inventory.",
+      "beats": "Exactly nine beats. Keep each beat short: 'Viper lunges, palm strike to sternum' rather than a paragraph.",
+      "annotation_mode": "MOOD for drama/dance/narrative, VOICE for vlog/dialogue, STYLE for fight choreography/action.",
+      "location": "Single location and atmosphere. Do not let panels drift into new geography."
+    },
+    "do": [
+      "Treat all nine panels as one continuous scene",
+      "Vary wide, medium, close-up, over-the-shoulder, and movement beats",
+      "Keep annotation lines uppercase, short, and legible",
+      "Use identical character faces, builds, clothing, and props across panels"
+    ],
+    "dont": [
+      "Write nine unrelated images",
+      "Use full sentences in panel beats or annotation strips",
+      "Put panel numbers or captions inside the image panels",
+      "Repeat the same camera angle nine times"
+    ]
+  }
+}

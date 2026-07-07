@@ -38,19 +38,19 @@
 
 ---
 
-## ADR-003: 4-Shot Limit Per Scene
+## ADR-003: Unrestricted Shot Counts Per Scene
 
 **Date:** 2025-07-15
-**Status:** Accepted
+**Status:** Superseded
 
-**Context:** AI generation pipelines can produce unbounded output if not constrained. Storyboard tools need predictable scene sizes for layout and cost estimation.
+**Context:** Early drafts tried to constrain scenes to a small fixed number of shots for layout and cost estimation. That conflicted with normal story structure: some scenes need one shot, some need many, and importers must preserve the author's scene boundaries.
 
-**Decision:** `shot_refs` in scenes has `maxItems: 4` in the schema. The converter enforces this with `.slice(0, 4)` during export.
+**Decision:** SKEL does not impose a per-scene shot-count cap. `shot_refs` may contain as many shots as the story requires. Validators enforce referential integrity, not an arbitrary maximum scene length.
 
 **Consequences:**
-- Keeps visual narratives concise and production-focused
-- Forces authors to prioritize the most important shots
-- May need to be configurable in future versions (via extensions or spec revision)
+- Fountain and script imports preserve long scenes without synthesizing continuation scenes.
+- Story Editor controls must not disable adding or importing shots based on scene shot count.
+- Cost, layout, and production planning tools can warn about unusually long scenes, but they must not reject valid structure solely because a scene has many shots.
 
 ---
 
@@ -78,7 +78,7 @@
 
 **Context:** Different tools (Spore, Runway, Kling) need to attach tool-specific data to shots and scenes without breaking the core format.
 
-**Decision:** Every SKEL entity has an optional `extensions` object. Keys must be namespaced with `x-` prefix (e.g., `x-Spore`, `x-runway`). The core schema does not validate extension contents.
+**Decision:** Every SKEL entity has an optional `extensions` object. Keys must be namespaced with `x-` prefix (e.g., `x-spore`, `x-runway`). The core schema does not validate extension contents.
 
 **Consequences:**
 - Core spec stays clean and stable
@@ -184,3 +184,69 @@ Rationale for YAML:
 - All spec examples rewritten in YAML
 - BONE format (`.bone`) remains JSON — BONEs are tool definitions, not authored documents; JSON is appropriate there
 - Existing JSON `.skel` files are valid for migration with a one-pass YAML conversion
+
+---
+
+## ADR-011: Document Lifecycle Modes
+
+**Date:** 2026-05-22
+**Status:** Accepted
+
+**Context:** SPORE needs to create a new project before the author has written acts, scenes, or shots. The original schema required non-empty `acts`, `scenes`, `shots`, `scene_refs`, and `shot_refs`, which made an empty but valid new project impossible. At the same time, production and export workflows still need stricter validation so broken structure does not reach rendering or handoff.
+
+**Decision:** SKEL adds optional `metadata.lifecycle` with three values: `draft`, `production`, and `export`. If omitted, parsers treat the document as `draft`.
+
+Validation behavior:
+- `draft` allows empty arrays and incomplete story structure.
+- `production` requires at least one act, scene, and shot, plus non-empty scene and shot reference arrays.
+- `export` inherits production-level structural requirements and is the mode where portable handoff requirements, such as embedded BONE definitions, should be enforced.
+
+**Consequences:**
+- New SPORE projects can be created and saved immediately as valid `draft` documents.
+- Production/export validation can remain strict without blocking early ideation.
+- Validators must select behavior based on `metadata.lifecycle`, not only the base schema.
+- Future lifecycle-specific requirements can be added without changing the core data model.
+
+---
+
+## ADR-012: Scene and Shot Creative Intent Fields
+
+**Date:** 2026-05-22
+**Status:** Accepted
+
+**Context:** SKEL captures what happens in a scene or shot, but not why it exists narratively. LLMs rewriting action descriptions or prompt text have no structured signal about a scene's dramatic purpose, its conflict, or the specific beat a shot is meant to capture. This leads to technically correct rewrites that miss the intent of the material.
+
+**Decision:** Add an optional `intent` object to both scenes and shots.
+
+Scene intent captures: `purpose` (what the scene accomplishes), `conflict` (the dramatic tension), `emotional_turn` (how feeling shifts across the scene), and `story_function` (structural role from a fixed vocabulary: `setup`, `escalation`, `reveal`, `reaction`, `decision`, `transition`, `payoff`, `button`).
+
+Shot intent captures: `beat` (the specific story moment), `function` (structural role, same vocabulary as scene), and `emphasis` (what the audience should feel or notice).
+
+LLM integration docs specify that agents must read `intent` before rewriting `action` or prompt text, and must not rewrite `intent` itself unless explicitly asked.
+
+**Consequences:**
+- Authors and directors can embed story-structure reasoning directly in the SKEL document.
+- LLMs have a structured signal to preserve intent across rewrites and expansions.
+- `intent` is fully optional — existing scenes and shots without it remain valid under all lifecycle modes.
+- The `story_function` vocabulary is the same for both scenes and shots, keeping the concept model consistent.
+- `intent` does not affect generation pipelines or validation strictness; it is purely informational.
+
+---
+
+## ADR-013: `creative_status` Field
+
+**Date:** 2026-05-22
+**Status:** Accepted
+
+**Context:** Story content moves through a development lifecycle that is entirely separate from the media production lifecycle already captured by `status.image` and `status.video`. A scene can be narratively locked (the words should not change) while the image is still pending generation. Without a dedicated field, LLMs and authors have no standard way to signal that a scene or shot's written content is frozen.
+
+**Decision:** Add an optional `creative_status` field to both scenes and shots with a fixed five-value vocabulary: `idea`, `drafted`, `needs_review`, `approved`, `locked`.
+
+`locked` is the machine-enforceable value: LLM integration docs specify that agents MUST NOT modify the content of any entity where `creative_status` is `locked`.
+
+**Consequences:**
+- Provides a clear contract between authors and LLMs about what is open to change and what is not.
+- `creative_status` and `status.image`/`status.video` are clearly distinct: creative status tracks story development; production status tracks media generation.
+- The five-value vocabulary covers the most common review/approval workflows without over-specifying a particular process.
+- Validators do not enforce `locked` semantics — that is an LLM/tooling contract, not a schema constraint.
+- All values are optional; scenes and shots without `creative_status` are treated as implicitly open by tools.

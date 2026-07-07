@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://spore.dev/schemas/skel/v1.0/video-map.schema.json",
+  "title": "SPORE Video Map",
+  "description": "Per-project mapping of shot IDs to video takes. Stored at projects/{slug}/video-map.json. Both AI-rendered takes (renders/video/) and user-imported takes (assets/video/) are valid entries; the path prefix distinguishes their origin.",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z0-9_][a-zA-Z0-9_-]*$": {
+      "$ref": "#/definitions/ShotVideoEntry"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "ShotVideoEntry": {
+      "type": "object",
+      "required": ["takes"],
+      "additionalProperties": false,
+      "description": "All video takes associated with a single shot.",
+      "properties": {
+        "takes": {
+          "type": "array",
+          "description": "Ordered list of video takes for this shot. At most one take may have isActive: true at any time. The active take is the primary take shown in the Timeline and Production Player.",
+          "items": {
+            "$ref": "#/definitions/VideoTake"
+          }
+        }
+      }
+    },
+    "VideoTake": {
+      "type": "object",
+      "required": ["id", "file", "isActive"],
+      "additionalProperties": false,
+      "description": "A single numbered video take.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Take identifier. Convention: V1, V2, V3, V4 (uppercase V followed by a positive integer).",
+          "pattern": "^V[1-9][0-9]*$"
+        },
+        "file": {
+          "type": "string",
+          "description": "Path to the video file, relative to the workspace root. AI pipeline renders use renders/video/{shot_id}.v{n}.{ext}. User-imported files use assets/video/{filename}.",
+          "minLength": 1
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether this is the active (primary) take for the shot. Exactly one take per shot should have isActive: true. When appending a new AI-generated take, set isActive: true on the new take and isActive: false on all prior takes for this shot."
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional human-readable label for the take (e.g. 'Alt angle', 'Higgsfield v2')."
+        },
+        "bone_id": {
+          "type": "string",
+          "description": "The bone_id of the BONE definition that generated this take, if it was produced by the AI pipeline."
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration of the take in seconds, if known.",
+          "minimum": 0
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 timestamp when this take was created or imported.",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/x-spore.schema.json",
+  "title": "SPORE Extension Data",
+  "description": "Supplementary schema for data stored under extensions.x-spore. The core SKEL schema remains vendor-neutral and does not require this schema.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "project_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-]*$"
+    },
+    "startFrameImage": { "type": "string" },
+    "endFrameImage": { "type": "string" },
+    "image": { "type": "string" },
+    "hero_shot": { "type": "boolean" },
+    "production_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": { "type": "string", "enum": ["pending", "generating", "review", "approved", "rejected"] },
+        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected"] }
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "description": "AI-authored or user-authored proposed changes for the entity that owns this extension object.",
+      "items": { "$ref": "#/definitions/Proposal" }
+    }
+  },
+  "definitions": {
+    "ProposalStatus": {
+      "type": "string",
+      "enum": ["pending", "accepted", "rejected", "superseded"]
+    },
+    "ProposalType": {
+      "type": "string",
+      "enum": [
+        "add_scene",
+        "rewrite_scene",
+        "add_shots",
+        "rewrite_shot",
+        "add_bone_prompts",
+        "structure_note",
+        "continuity_fix"
+      ]
+    },
+    "ProposalPatch": {
+      "type": "object",
+      "description": "Optional machine-readable change payload. Shape is intentionally open because proposal payloads vary by type.",
+      "additionalProperties": true
+    },
+    "Proposal": {
+      "type": "object",
+      "required": ["id", "by", "type", "status", "summary"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^prop_[a-zA-Z0-9_\\-]+$",
+          "description": "Stable proposal ID. Must remain unchanged when status changes."
+        },
+        "by": {
+          "type": "string",
+          "description": "Author or agent identifier, e.g. codex, claude, user, or a user handle."
+        },
+        "type": { "$ref": "#/definitions/ProposalType" },
+        "status": { "$ref": "#/definitions/ProposalStatus" },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short human-readable description of the proposed change."
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional explicit target when the proposal is stored above or outside the entity it affects.",
+          "properties": {
+            "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "project"] },
+            "id": { "type": "string" }
+          }
+        },
+        "rationale": { "type": "string" },
+        "patch": { "$ref": "#/definitions/ProposalPatch" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "resolved_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

@@ -4,12 +4,12 @@
   "metadata": {
     "story_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "title": "The Last Signal",
+    "lifecycle": "production",
     "logline": "A lighthouse keeper discovers a terrifying secret hidden in the patterns of his own transmissions.",
     "author": "spore",
     "created_at": "2025-01-15T10:00:00Z",
     "modified_at": "2025-01-15T14:30:00Z",
     "skin_key": "noir_v1",
-    "constraints": { "max_shots_per_scene": 4 },
     "bones": {
       "flux-dev": { "negative": "blurry, low quality, cartoon, anime", "guidance": 7.5, "aspect": "2.39:1" },
       "runway-gen3": { "model": "gen3-alpha-turbo", "aspect": "16:9" }
@@ -61,6 +61,13 @@
       "header": "INT. LIGHTHOUSE - NIGHT",
       "loc": { "type": "INT", "name": "LIGHTHOUSE", "tod": "NIGHT" },
       "shot_refs": ["sh_1", "sh_2", "sh_3"],
+      "intent": {
+        "purpose": "Establish Harlan's obsessive routine and plant the seed of the anomaly.",
+        "conflict": "Harlan's need for order versus the chaos encoded in his own transmissions.",
+        "emotional_turn": "Quiet dread replaces numb routine.",
+        "story_function": "setup"
+      },
+      "creative_status": "approved",
       "bones": {
         "flux-dev": { "guidance": 8, "negative": "blurry, low quality, cartoon, anime, bright colors" }
       }
@@ -107,6 +114,12 @@
       "action": "Harlan freezes. His eyes widen as he recognizes the pattern.",
       "v_setup": { "size": "ecu", "angle": "eye", "light": "noir", "dof": "shallow", "aspect": "2.39:1", "mood": "tense" },
       "character_refs": ["char_harlan"], "duration": 2,
+      "intent": {
+        "beat": "The moment Harlan understands the pattern is his own voice.",
+        "function": "reveal",
+        "emphasis": "Hold on the eyes — do not cut away until recognition is complete."
+      },
+      "creative_status": "locked",
       "status": { "image": "pending", "video": "not_started" },
       "bones": {
         "flux-dev": { "text": "Extreme close-up of Harlan's eyes reflecting candlelight, pupils dilating, shallow depth of field, noir lighting with hard shadows across brow." },
