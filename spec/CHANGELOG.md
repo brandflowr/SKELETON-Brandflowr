@@ -4,6 +4,31 @@ All notable changes to the SKEL specification and implementation.
 
 ---
 
+## [Unreleased]
+
+### MUSCLE v1.0 — behavior plugin system (new spec, additive)
+- New `muscle-spec.md`: MUSCLE (Modular User-Scripted Companion Logic Extension) — behavior plugins as `.muscle.json` manifests. Named lifecycle hooks (`import.*`, `document.validate`, `token.resolve`, `prompt.assemble.*`, `generate.route`, `render.complete`, `entity.changed`, `export.*`), three hook modes (`observe`/`transform`/`veto`), scoped capabilities, and `execution_routes` reusing the BONE §2.7 vocabulary. Plugins return RFC 6902 patches; hosts validate, enforce capabilities and `creative_status: locked`, and apply atomically. (ADR-014, ADR-015)
+- New `muscle.schema.json` (validates manifests) and `hook-payload.schema.json` (hook envelope/result contract, per-hook subject shapes).
+- `skel.schema.json`: added optional `metadata.plugins` (host-owned record of plugins whose patches were applied — reproducibility only; documents with unknown records must still load). Existing documents remain valid; documents using the new field require the updated schema in consuming apps first (sync before use).
+
+### Round-trip interchange rules (ADR-016, additive)
+- `skel.schema.json`: added optional `metadata.source` provenance (`format`, `file`, `tool`, `imported_at`).
+- Interchange rules: importers MUST preserve unmappable source data under `x-<format>` extension namespaces (strengthens ADR-005 from "ignore" to "preserve"); per-entity source refs live under the same namespaces; entity IDs are stable across import/export cycles.
+- Format adapters (Fountain export, FDX, OTIO, CSV) are specified as MUSCLEs on `import.*`/`export.*` hooks.
+- `sync-spec.ps1`: added the three new spec files to the sync list.
+
+### Spec editorial fixes (no data-model changes)
+- Corrected the SKEL acronym expansion to "Story Keyframe Extensible Layout" in README and OVERVIEW (per ADR-010; "Visual Relational Action Data" was the retired VRAD name).
+- Removed the stale 4-shot-per-scene validation rule from §5.3 (superseded by ADR-003: shot counts are unrestricted).
+- §3.2 Front-Loading: replaced the reference to a nonexistent `prompts` object with BONE prompt fields (BONE Spec §2.4).
+- Fixed section numbering gaps (§2.7, §3.1–3.5 now sequential; §3.3/§3.4/§3.5 again match the ARCHITECTURE.md conformance map).
+- Replaced the fictional `Spore.dev` schema URI with the GitHub raw URL.
+- §2 prose caught up with the 2.6.0 schema: documented the expanded `metadata` fields, scene `duration_seconds`/`mood`/`key_story_elements`/`bones`, shot `title`/`visual_focus`/`cinematography`/`sound_effects`, structured `dialogue`, and the optional top-level `characters`/`environments`/`audio_assets`/`story_analysis`/`production` collections (new §2.7).
+- §4 and TOKEN_REFERENCE.md now document the `color` and `mood` token categories shipped in `skel-keyfile.json`, and note the deliberate uppercase exception for `tod` tokens.
+- §8 Versioning now uses full semver (`MAJOR.MINOR.PATCH`), matching CONTRIBUTING.md.
+
+---
+
 ## [2.6.0] - 2026-06-14
 
 ### Schema consistency fixes (`spec/skel.schema.json` — the schema SPORE compiles)

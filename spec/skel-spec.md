@@ -33,7 +33,7 @@ SKEL (Story Keyframe Extensible Layout) is a YAML-based native authoring format 
 | Format         | YAML (UTF-8)                                            |
 | MIME type      | `application/skel+yaml`                                 |
 | JSON export    | `.skel.json` - portability format, same structure       |
-| Schema URI     | `https://Spore.dev/schemas/SKEL/v2.0/skel.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/skel.schema.json` |
 
 ---
 
@@ -50,9 +50,16 @@ A SKEL document is a YAML mapping with the following top-level keys. The `.skel.
   "acts": [ ... ],
   "scenes": [ ... ],
   "shots": [ ... ],
+  "characters": [ ... ],
+  "environments": [ ... ],
+  "audio_assets": [ ... ],
+  "story_analysis": { ... },
+  "production": { ... },
   "key_file": "..." | { ... }
 }
 ```
+
+`characters`, `environments`, `audio_assets`, `story_analysis`, and `production` are optional (see §2.7).
 
 ### 2.1 `skel_version` (required)
 
@@ -66,7 +73,20 @@ A semver string identifying the spec version. Parsers MUST reject documents with
 | `title`      | string | yes      | Human-readable title.                            |
 | `lifecycle`  | string | no       | Validation mode: `draft`, `production`, or `export`. Defaults to `draft`. |
 | `logline`    | string | no       | One-sentence summary (max 280 chars).            |
+| `subtitle`   | string | no       | Secondary title.                                 |
 | `author`     | string | no       | Author or team name.                             |
+| `director`   | string | no       | Director name.                                   |
+| `writer`     | string | no       | Writer name.                                     |
+| `genre`      | string | no       | Genre label.                                     |
+| `classification` | string | no   | Content rating or classification label.          |
+| `target_audience` | string | no  | Intended audience description.                   |
+| `target_duration_seconds` | number | no | Target runtime in seconds.                |
+| `target_duration_minutes` | number | no | Target runtime in minutes.                |
+| `budget_range` | string | no     | Budget descriptor.                               |
+| `status`     | string | no       | Free-form production status label. Distinct from per-shot `status.image`/`status.video`. |
+| `content_warnings` | string[] | no | Content warning labels.                        |
+| `tags`       | string[] | no     | Free-form tags.                                  |
+| `production_notes` | string | no | Project-level production notes.                  |
 | `created_at` | string | no       | ISO 8601 datetime.                               |
 | `modified_at`| string | no       | ISO 8601 datetime.                               |
 | `skin_key`   | string | no       | Reference to a visual style/skin preset.         |
@@ -102,6 +122,10 @@ An ordered array of Scene objects.
 | `shot_refs`       | string[] | yes      | Ordered array of shot IDs in this scene.             |
 | `narrative`       | string   | no       | Scene-level narrative summary.                       |
 | `notes`           | string   | no       | Essential production or directorial notes.           |
+| `duration_seconds`| number   | no       | Estimated scene duration in seconds.                 |
+| `mood`            | string   | no       | Scene-level emotional mood description.              |
+| `key_story_elements` | string[] | no    | Story elements this scene must convey.               |
+| `bones`           | object   | no       | BONE data keyed by bone_id (see BONE Spec).          |
 | `intent`          | object   | no       | Creative purpose and structural role of the scene. See §2.6.1. |
 | `creative_status` | string   | no       | Story-development status. See §2.6.2.                |
 | `extensions`      | object   | no       | Vendor-specific data.                                |
@@ -123,14 +147,18 @@ An ordered array of Shot objects. This is the primary unit of SKEL.
 | `id`             | string   | yes      | Unique shot identifier (e.g., `sh_1`).             |
 | `scene_id`       | string   | yes      | Back-reference to parent scene.                    |
 | `order`          | number   | no       | Sequential ordering index.                         |
+| `title`          | string   | no       | Short shot title for display.                      |
 | `action`         | string   | yes      | Action description (max 200 chars).                |
+| `visual_focus`   | string   | no       | What the eye should land on in the frame.          |
 | `bones`          | object   | no       | BONE data keyed by bone_id (see BONE Spec).        |
-| `dialogue`       | string   | no       | Spoken dialogue for this shot.                     |
+| `dialogue`       | string \| object | no | Spoken dialogue: a plain string, or a structured `Dialogue` object (`text`, `character_ref`, timing, `emotion`, `delivery_notes`, `voice_settings`). |
 | `character_refs` | string[] | no       | IDs of characters present.                         |
 | `duration`       | number   | no       | Estimated duration in seconds.                     |
 | `notes`           | string   | no       | Context, setup details, or production notes.         |
 | `status`          | object   | no       | Production status object (`image`, `video`).         |
 | `v_setup`         | object   | yes      | Visual setup object (see §2.5.1).                    |
+| `cinematography`  | object   | no       | Verbose camera/lighting detail (`focal_length`, `lens_type`, `focus_subject`, `framing_notes`, `depth_of_field`, `lighting`). `v_setup` remains the canonical shorthand. |
+| `sound_effects`   | array    | no       | Sound cues for this shot.                            |
 | `intent`          | object   | no       | Creative purpose and beat for this shot. See §2.6.1. |
 | `creative_status` | string   | no       | Story-development status. See §2.6.2.                |
 | `extensions`      | object   | no       | Vendor-specific data.                                |
@@ -211,6 +239,18 @@ creative_status: needs_review
 
 `creative_status` is distinct from `status.image` and `status.video`. Those track media generation progress; `creative_status` tracks story-development progress. A shot can be `creative_status: approved` with `status.image: pending` (the words are locked, but the image has not been generated yet).
 
+### 2.7 Optional Top-Level Collections
+
+A SKEL document MAY embed snapshots of studio-level assets so exported documents are self-contained. The primary reference for these assets remains by ID (host applications typically keep the canonical records in project-level files such as `studio.json`); embedding is RECOMMENDED when `metadata.lifecycle` is `export`.
+
+| Key | Type | Description |
+| --- | ---- | ----------- |
+| `characters` | array | Embedded character snapshots referenced by shots' `character_refs`. |
+| `environments` | array | Embedded environment snapshots referenced by scenes' `environment_ref`. |
+| `audio_assets` | array | Embedded audio asset snapshots referenced by shots' `sound_effects`. |
+| `story_analysis` | object | Informational story-level analysis (themes, arcs). Not used by generation pipelines. |
+| `production` | object | Informational production planning data. Not used by generation pipelines. |
+
 ### 2.8 `key_file` (optional)
 
 Either an inline key file object or a URI string pointing to an external key file. If omitted, parsers MUST use the SKEL Default Key File (see §4).
@@ -233,7 +273,7 @@ The JSON Schema can require `bone_registry` when BONE data is present, but exact
 
 ## 3. Constraints
 
-### 3.0 Document Lifecycle
+### 3.1 Document Lifecycle
 
 SKEL documents MAY declare a lifecycle mode in `metadata.lifecycle`. If omitted, parsers MUST treat the document as `draft`.
 
@@ -247,11 +287,11 @@ Allowed values:
 
 Lifecycle controls validation strictness only. It does not change the SKEL data model.
 
-### 3.1 Front-Loading
+### 3.2 Front-Loading
 
-The `action` field MUST be derived from the **beginning** of the source paragraph. This ensures human readability remains tight, while the decoupled `prompts` object can contain expansive text directly fed to generative AI pipelines.
+The `action` field MUST be derived from the **beginning** of the source paragraph. This keeps `action` tight and human-readable; expansive generation text belongs in BONE prompt fields (see BONE Spec §2.4 Prompt Assembly), which are fed directly to generative AI pipelines.
 
-### 3.2 ID Uniqueness
+### 3.3 ID Uniqueness
 
 All `id` fields across acts, scenes, and shots MUST be unique within a single SKEL document. Recommended format: `nanoid(12)` or UUID v4.
 
@@ -288,6 +328,10 @@ The key file maps shorthand tokens to full production definitions. It enables co
 | `light`  | `natural`, `noir`, `high_key`, `low_key`, `golden`, `blue`, `practical`, `neon` |
 | `tod`    | `DAY`, `NIGHT`, `DAWN`, `DUSK`, `CONT`                       |
 | `dof`    | `deep`, `shallow`, `rack`                                     |
+| `color`  | `warm`, `cool`                                                |
+| `mood`   | `tense`, `romantic`                                           |
+
+`tod` tokens are uppercase as a deliberate exception to the lowercase-token convention: they mirror screenplay slug-line time-of-day notation (`INT. LIGHTHOUSE - NIGHT`) and appear in `loc.tod`, not `v_setup`.
 
 ### 4.2 Default Fallbacks
 
@@ -302,6 +346,8 @@ If a token is not found in the active key file, parsers MUST apply these default
 | `light`  | `natural` |
 | `tod`    | `DAY`     |
 | `dof`    | `deep`    |
+
+`color` and `mood` have no defaults: if omitted, no grading or mood token is applied.
 
 ### 4.3 Custom Tokens
 
@@ -336,7 +382,8 @@ Tags MAY include `v_setup` attributes directly. The parser extracts these before
 Parsers SHOULD validate the raw Markdown input for:
 - Properly closed tags
 - Valid token values in tag attributes
-- No more than 4 `<shot>` tags per scene heading
+
+Scene shot counts are unrestricted (see ADR-003 in `DECISIONS.md`); importers MUST NOT drop or split shots to satisfy an arbitrary per-scene maximum.
 
 ---
 
@@ -452,10 +499,13 @@ The supplementary schema for SPORE extension data is `SKEL/spec/x-spore.schema.j
 
 ## 8. Versioning
 
-SKEL uses semantic versioning (`MAJOR.MINOR`).
+SKEL uses semantic versioning (`MAJOR.MINOR.PATCH`).
 
 - **MAJOR** increments indicate breaking changes. Parsers MUST reject documents with unsupported major versions.
 - **MINOR** increments indicate additive, backward-compatible changes. Parsers SHOULD accept documents with higher minor versions gracefully.
+- **PATCH** increments indicate clarifications, example fixes, and documentation updates with no data-model change.
+
+The `skel_version` field in documents MAY omit the patch component (e.g., `"2.0"`).
 
 ---
 

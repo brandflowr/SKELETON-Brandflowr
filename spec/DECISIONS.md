@@ -250,3 +250,61 @@ LLM integration docs specify that agents must read `intent` before rewriting `ac
 - The five-value vocabulary covers the most common review/approval workflows without over-specifying a particular process.
 - Validators do not enforce `locked` semantics — that is an LLM/tooling contract, not a schema constraint.
 - All values are optional; scenes and shots without `creative_status` are treated as implicitly open by tools.
+
+---
+
+## ADR-014: MUSCLE — Behavior Plugins Separate From BONE
+
+**Date:** 2026-07-07
+**Status:** Accepted
+
+**Context:** BONE answers "what data/config attaches to this entity" but not "who gets to run logic when something happens in the workflow." Users need to inject behavior — custom validators, prompt post-processors, render post-processing, external-app sync, format adapters — without forking Spore or the spec. Overloading BONE with behavior would blur its role as a portable, embeddable data contract (code cannot be safely embedded on export the way field definitions can).
+
+**Decision:** Add a second plugin kind: MUSCLE (Modular User-Scripted Companion Logic Extension), specified in `muscle-spec.md`. A MUSCLE is a `.muscle.json` manifest — not code — declaring: named lifecycle hooks it subscribes to (`import.*`, `document.validate`, `token.resolve`, `prompt.assemble.*`, `generate.route`, `render.complete`, `entity.changed`, `export.*`), a hook mode (`observe`/`transform`/`veto`), scoped capabilities, and `execution_routes` reusing the BONE §2.7 vocabulary (`mcp`, `cli`, `skill`, `api`, `manual`). Hosts invoke MUSCLEs as external processes/tools with a versioned JSON envelope and result (`hook-payload.schema.json`).
+
+**Consequences:**
+- BONE stays a pure data contract; MUSCLE owns behavior. A generator integration may ship both.
+- Language-agnostic and LLM-native: an MCP tool is a valid plugin; agents can act as plugin executors.
+- No embedded scripting runtime or sandbox required in Spore.
+- Behavior is recorded, not embedded: `metadata.plugins` lists what acted on a document; documents with unknown plugin records must still load everywhere.
+- Deterministic ordering (priority, then registration order) keeps multiple plugins on one hook predictable.
+
+---
+
+## ADR-015: Patch-Based Mutation for Plugins
+
+**Date:** 2026-07-07
+**Status:** Accepted
+
+**Context:** If plugins could return mutated SKELDocuments, a single misbehaving plugin could silently corrupt a project, bypass `creative_status: locked`, or clobber another plugin's changes. Robustness requires that the host stay the sole writer of `story.skel`.
+
+**Decision:** MUSCLEs in `transform` mode return RFC 6902 JSON Patch operations (or a hook-specific `subject_replacement` for derived values like assembled prompts). The host: rejects patches outside the plugin's declared capabilities, rejects patches touching `locked` entities, applies each plugin's patch set atomically, re-validates the document afterward and rolls back on failure, and logs every applied/rejected set. `veto` mode returns `SKELError`-shaped errors that merge into the standard validation result; `observe` mode returns nothing but logs.
+
+**Consequences:**
+- A plugin failure or hostile patch can never corrupt a document — worst case is a rejected, logged patch set.
+- Capabilities become a user-facing consent surface: hosts show what a plugin may touch before enabling it.
+- Ordering semantics are well-defined: each plugin sees the document state produced by the previous one.
+- Slightly more work for plugin authors than "return the whole doc," but the payload schema makes patches mechanical to produce.
+- `metadata.plugins` is host-owned and cannot be patched by plugins.
+
+---
+
+## ADR-016: Round-Trip Interchange — Unknown-Data Preservation + Provenance
+
+**Date:** 2026-07-07
+**Status:** Accepted
+
+**Context:** SKEL aims to round-trip with screenplay editors (Fountain, FDX), editorial tools (OpenTimelineIO), and production trackers. ADR-005 said parsers *ignore* unknown extension namespaces; that is not enough for round-trips — an import that drops what it cannot map, or an export that regenerates IDs, silently loses data on the second pass through another tool.
+
+**Decision:** Three interchange rules:
+1. **Preservation is mandatory:** importers MUST park source data they cannot map into a namespaced extension (`x-fdx`, `x-otio`, ...) rather than dropping it; exporters back to that format MUST restore it.
+2. **Provenance:** documents record `metadata.source` (`format`, `file`, `tool`, `imported_at`). Per-entity source references (FDX paragraph IDs, Fountain line ranges, OTIO clip names) live under the matching `x-<format>` extension namespace — no core schema change per format.
+3. **Stable IDs:** entity IDs never regenerate across import/export cycles; importers preserve incoming IDs where the source format has them.
+
+Format adapters are implemented as MUSCLEs on `import.*`/`export.*` hooks, making interchange the first proof of the plugin system.
+
+**Consequences:**
+- Lossless round-trips become a spec guarantee, not an adapter courtesy.
+- ADR-005's "ignore unknown namespaces" is strengthened to "preserve unknown namespaces" for all conforming tools.
+- `metadata.source` and `metadata.plugins` are the only core schema additions; everything format-specific stays in extensions.
+- Second and later round-trips do not duplicate entities, because IDs are stable.

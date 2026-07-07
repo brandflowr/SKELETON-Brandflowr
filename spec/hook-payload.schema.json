@@ -1,0 +1,211 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/hook-payload.schema.json",
+  "title": "MUSCLE Hook Payload Contract",
+  "description": "Envelope (host to MUSCLE) and result (MUSCLE to host) for hook invocations. MUSCLE Spec v1.0, payload_version 1.0. Validate an envelope against #/definitions/HookEnvelope and a result against #/definitions/HookResult.",
+  "definitions": {
+    "HookEnvelope": {
+      "type": "object",
+      "required": ["payload_version", "hook", "muscle_id", "lifecycle", "context"],
+      "additionalProperties": false,
+      "properties": {
+        "payload_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "hook": {
+          "type": "string",
+          "enum": [
+            "import.before",
+            "import.after",
+            "document.validate",
+            "token.resolve",
+            "prompt.assemble.before",
+            "prompt.assemble.after",
+            "generate.route",
+            "render.complete",
+            "entity.changed",
+            "export.before",
+            "export.after"
+          ]
+        },
+        "muscle_id": { "type": "string" },
+        "lifecycle": { "type": "string", "enum": ["draft", "production", "export"] },
+        "context": {
+          "type": "object",
+          "required": ["workspace_root", "project_slug"],
+          "additionalProperties": true,
+          "properties": {
+            "workspace_root": { "type": "string" },
+            "project_slug": { "type": "string" },
+            "config": {
+              "type": "object",
+              "description": "Per-project MUSCLE settings, validated against the manifest's config_schema.",
+              "additionalProperties": true
+            }
+          }
+        },
+        "document": {
+          "type": "object",
+          "description": "The SKELDocument (or a reduced view when the MUSCLE lacks read:document). Validated against skel.schema.json, not here.",
+          "additionalProperties": true
+        },
+        "sidecars": {
+          "type": "object",
+          "description": "Present only with read:sidecars capability.",
+          "additionalProperties": false,
+          "properties": {
+            "audio_map": { "type": "object", "additionalProperties": true },
+            "video_map": { "type": "object", "additionalProperties": true }
+          }
+        },
+        "subject": {
+          "description": "Hook-specific subject. Shape per hook is defined in #/definitions/subjects.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "HookResult": {
+      "type": "object",
+      "required": ["payload_version", "ok"],
+      "additionalProperties": false,
+      "properties": {
+        "payload_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "ok": {
+          "type": "boolean",
+          "description": "False signals the MUSCLE could not complete; the host treats it as a failure per MUSCLE Spec 3.3."
+        },
+        "patches": {
+          "type": "array",
+          "description": "RFC 6902 JSON Patch operations targeting the SKELDocument. transform mode only; must fall within declared capabilities.",
+          "items": { "$ref": "#/definitions/JsonPatchOp" }
+        },
+        "subject_replacement": {
+          "description": "For hooks whose subject is a derived value (e.g. prompt.assemble.after: the rewritten prompt string; generate.route: the chosen route). Type is hook-specific."
+        },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SKELError" },
+          "description": "veto mode only. Merged into the host's SKELValidationResult."
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SKELError" }
+        },
+        "logs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "JsonPatchOp": {
+      "type": "object",
+      "required": ["op", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "op": { "type": "string", "enum": ["add", "remove", "replace", "move", "copy", "test"] },
+        "path": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+        "from": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+        "value": {}
+      }
+    },
+    "SKELError": {
+      "type": "object",
+      "required": ["code", "severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Prefixed with the muscle_id, e.g. studio-style-guard.tone."
+        },
+        "severity": { "type": "string", "enum": ["error", "warning"] },
+        "path": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "subjects": {
+      "description": "Informative: the subject shape sent per hook. Hosts validate subjects against these definitions.",
+      "ImportSubject": {
+        "type": "object",
+        "required": ["format"],
+        "additionalProperties": false,
+        "properties": {
+          "format": { "type": "string", "description": "Source format id: fountain, fdx, skel.json, otio, csv, ..." },
+          "source_path": { "type": "string" },
+          "source_text": { "type": "string", "description": "import.before only: raw source content." }
+        }
+      },
+      "TokenResolveSubject": {
+        "type": "object",
+        "required": ["category", "token"],
+        "additionalProperties": false,
+        "properties": {
+          "category": { "type": "string" },
+          "token": { "type": "string" },
+          "resolved": { "type": "object", "additionalProperties": true }
+        }
+      },
+      "PromptSubject": {
+        "type": "object",
+        "required": ["entity", "id", "bone_id"],
+        "additionalProperties": false,
+        "properties": {
+          "entity": { "type": "string", "enum": ["shot"] },
+          "id": { "type": "string" },
+          "bone_id": { "type": "string" },
+          "effective_bone_data": {
+            "type": "object",
+            "description": "prompt.assemble.before: BONE data after defaults and inheritance.",
+            "additionalProperties": true
+          },
+          "assembled_prompt": {
+            "type": "string",
+            "description": "prompt.assemble.after: the assembled prompt string."
+          }
+        }
+      },
+      "GenerateRouteSubject": {
+        "type": "object",
+        "required": ["id", "bone_id", "routes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Shot id." },
+          "bone_id": { "type": "string" },
+          "routes": {
+            "type": "array",
+            "description": "Candidate execution routes from the BONE definition, in declared order.",
+            "items": { "type": "object", "additionalProperties": true }
+          }
+        }
+      },
+      "RenderCompleteSubject": {
+        "type": "object",
+        "required": ["id", "bone_id", "file_path", "target"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Shot id." },
+          "bone_id": { "type": "string" },
+          "file_path": { "type": "string", "description": "Resolved render output path." },
+          "target": { "type": "string", "description": "The BONE output target that was written." }
+        }
+      },
+      "EntityChangedSubject": {
+        "type": "object",
+        "required": ["entity", "id"],
+        "additionalProperties": false,
+        "properties": {
+          "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] },
+          "id": { "type": "string" },
+          "changed_paths": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "ExportSubject": {
+        "type": "object",
+        "required": ["format"],
+        "additionalProperties": false,
+        "properties": {
+          "format": { "type": "string" },
+          "target_path": { "type": "string" }
+        }
+      }
+    }
+  }
+}

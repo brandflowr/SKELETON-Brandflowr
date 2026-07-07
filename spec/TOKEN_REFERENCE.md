@@ -97,6 +97,28 @@
 
 ---
 
+## Color (`v_setup.color`) — optional
+
+| Token | Label | Effect |
+|-------|-------|--------|
+| `warm` | Warm | Warm color temperature |
+| `cool` | Cool | Cool color temperature |
+
+**Default:** none (omitted = no grading token applied)
+
+---
+
+## Mood (`v_setup.mood`) — optional
+
+| Token | Label | Effect |
+|-------|-------|--------|
+| `tense`    | Tense | A tense or uneasy mood |
+| `romantic` | Romantic | A dreamy or romantic mood |
+
+**Default:** none (omitted = no mood token applied)
+
+---
+
 ## Time of Day (`loc.tod`) — required
 
 | Token | Label |

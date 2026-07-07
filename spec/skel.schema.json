@@ -400,9 +400,37 @@
         "created_at": { "type": "string", "format": "date-time" },
         "modified_at": { "type": "string", "format": "date-time" },
         "skin_key": { "type": "string" },
+        "source": { "$ref": "#/definitions/SourceProvenance" },
+        "plugins": {
+          "type": "array",
+          "description": "Host-owned record of MUSCLE behavior plugins whose patches were applied to this document. Reproducibility metadata only — a document with unknown plugin records must still load everywhere.",
+          "items": { "$ref": "#/definitions/PluginRecord" }
+        },
         "constraints": { "$ref": "#/definitions/Constraints" },
         "bones": { "$ref": "#/definitions/Bones" },
         "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "SourceProvenance": {
+      "type": "object",
+      "description": "Where this document was imported from. Enables lossless round-trips: exporters back to the source format restore data parked under the matching x-<format> extension namespace.",
+      "required": ["format"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "type": "string", "description": "Source format id: fountain, fdx, otio, skel.json, csv, ..." },
+        "file": { "type": "string", "description": "Original source file name or path." },
+        "tool": { "type": "string", "description": "Tool that performed the import." },
+        "imported_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PluginRecord": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "muscle_id of the plugin." },
+        "version": { "type": "string", "description": "muscle_version that ran." },
+        "last_ran": { "type": "string", "format": "date-time" }
       }
     },
     "Act": {
