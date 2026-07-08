@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "muscle_id": "shot-lint",
+  "muscle_version": "1.0.0",
+  "label": "Shot Lint",
+  "description": "Demo veto MUSCLE: flags shots whose action text is missing or exceeds the front-loading budget.",
+  "hooks": [
+    { "on": "document.validate", "mode": "veto", "priority": 50, "timeout_ms": 10000 }
+  ],
+  "capabilities": ["read:document"],
+  "execution_routes": [
+    { "type": "cli", "label": "Shot Lint (node)", "command": "node ../plugins/shot-lint.mjs" }
+  ]
+}

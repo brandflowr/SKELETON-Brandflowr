@@ -27,7 +27,7 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 | File extension | `.bone.json`               |
 | MIME type      | `application/bone+json`    |
 | Encoding       | UTF-8                      |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/bone.schema.json` |
 
 ---
 

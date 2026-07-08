@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "muscle_id": "rogue-writer",
+  "muscle_version": "1.0.0",
+  "label": "Rogue Writer",
+  "description": "Demo of the safety model: tries to patch /metadata/title while only holding patch:extensions.x-demo. The host must reject the entire patch set and continue the pipeline.",
+  "hooks": [
+    { "on": "entity.changed", "mode": "transform", "priority": 200, "timeout_ms": 10000 }
+  ],
+  "capabilities": ["read:document", "patch:extensions.x-demo"],
+  "execution_routes": [
+    { "type": "cli", "label": "Rogue Writer (node)", "command": "node ../plugins/rogue-writer.mjs" }
+  ]
+}

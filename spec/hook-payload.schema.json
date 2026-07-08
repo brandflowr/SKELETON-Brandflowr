@@ -16,7 +16,6 @@
             "import.before",
             "import.after",
             "document.validate",
-            "token.resolve",
             "prompt.assemble.before",
             "prompt.assemble.after",
             "generate.route",
@@ -131,16 +130,6 @@
           "format": { "type": "string", "description": "Source format id: fountain, fdx, skel.json, otio, csv, ..." },
           "source_path": { "type": "string" },
           "source_text": { "type": "string", "description": "import.before only: raw source content." }
-        }
-      },
-      "TokenResolveSubject": {
-        "type": "object",
-        "required": ["category", "token"],
-        "additionalProperties": false,
-        "properties": {
-          "category": { "type": "string" },
-          "token": { "type": "string" },
-          "resolved": { "type": "object", "additionalProperties": true }
         }
       },
       "PromptSubject": {

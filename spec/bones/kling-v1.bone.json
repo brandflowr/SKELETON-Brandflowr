@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/bone.schema.json",
   "bone_id": "kling-v1",
   "bone_version": "1.0",
   "label": "Kling v1.6 (Video Generation)",

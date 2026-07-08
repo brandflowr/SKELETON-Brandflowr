@@ -24,9 +24,15 @@ Designed for:
 | File | Contents |
 |---|---|
 | [`spec/skel-spec.md`](./spec/skel-spec.md) | Formal specification |
-| [`spec/bone-spec.md`](./spec/bone-spec.md) | BONE plugin system specification |
+| [`spec/bone-spec.md`](./spec/bone-spec.md) | BONE data plugin system specification |
+| [`spec/muscle-spec.md`](./spec/muscle-spec.md) | MUSCLE behavior plugin system specification |
 | [`spec/skel.schema.json`](./spec/skel.schema.json) | JSON Schema (Draft 7) for validating `.skel.json` files |
 | [`spec/bone.schema.json`](./spec/bone.schema.json) | JSON Schema for validating `.bone.json` files |
+| [`spec/muscle.schema.json`](./spec/muscle.schema.json) | JSON Schema for validating `.muscle.json` manifests |
+| [`spec/hook-payload.schema.json`](./spec/hook-payload.schema.json) | Hook invocation contract (envelope/result shapes for MUSCLE hooks) |
+| [`spec/MUSCLE_AUTHORING.md`](./spec/MUSCLE_AUTHORING.md) | How to write a MUSCLE plugin, step by step |
+| [`spec/muscles/`](./spec/muscles/) | Example MUSCLE manifests: studio-style-guard, fountain-adapter |
+| [`reference/muscle-host/`](./reference/muscle-host/) | Runnable reference host — discovery, hook invocation, capability-checked patch application |
 | [`spec/skel-keyfile.json`](./spec/skel-keyfile.json) | Default token dictionary (9 categories, 48 tokens) |
 | [`spec/example.skel.json`](./spec/example.skel.json) | Complete working example (JSON export form) — "The Last Signal" |
 | [`spec/bones/`](./spec/bones/) | Starter BONE definitions: flux-dev, runway-gen3, kling-v1, seedance-2, character-reference-sheet, storyboard-grid-9 |
@@ -43,12 +49,27 @@ Designed for:
 
 ---
 
-## BONE Plugin System
+## Plugin System
 
-BONE (Base Object Narrative Export) is the plugin layer that attaches AI generation config and pipeline data to SKEL entities. For the full BONE spec, starter definitions, and schema — see [BONE-Brandflowr](https://github.com/brandflowr/BONE-Brandflowr).
+SKEL has a two-layer plugin system, following the skeleton metaphor:
+
+- **BONE** (Base Object Narrative Export) — *data* plugins. A `.bone.json` file attaches AI generation config, prompt contracts, and pipeline data to SKEL entities. See [`spec/bone-spec.md`](./spec/bone-spec.md) and the starter definitions in [`spec/bones/`](./spec/bones/).
+- **MUSCLE** (Modular User-Scripted Companion Logic Extension) — *behavior* plugins. A `.muscle.json` manifest subscribes to named lifecycle hooks (import, validation, prompt assembly, generation, render write-back, export) and returns JSON patches that the host validates and applies atomically. MUSCLEs never touch documents directly. See [`spec/muscle-spec.md`](./spec/muscle-spec.md).
+
+`.skel` is the body layout, `.bone` files are what attaches to it, `.muscle` files are what makes it move.
+
+Want to build a plugin? Start with [`spec/MUSCLE_AUTHORING.md`](./spec/MUSCLE_AUTHORING.md), copy an example from [`spec/muscles/`](./spec/muscles/), and test against the [reference host](./reference/muscle-host/):
+
+```bash
+cd reference/muscle-host/demo && node run-demo.mjs
+```
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](./LICENSE).
+
+Copyright © 2025–2026 Brandflowr AI LLC.
+
+SKEL™, BONE™, MUSCLE™, and SPORE™ are trademarks of Brandflowr AI LLC — see [TRADEMARKS.md](./TRADEMARKS.md).

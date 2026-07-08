@@ -10,6 +10,7 @@
     "^x-": {}
   },
   "properties": {
+    "$schema": { "type": "string" },
     "muscle_id": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
@@ -60,7 +61,6 @@
             "import.before",
             "import.after",
             "document.validate",
-            "token.resolve",
             "prompt.assemble.before",
             "prompt.assemble.after",
             "generate.route",

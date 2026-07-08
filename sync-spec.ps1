@@ -41,6 +41,7 @@ $formatFiles = @(
     "muscle-spec.md",
     "muscle.schema.json",
     "hook-payload.schema.json",
+    "MUSCLE_AUTHORING.md",
     "OVERVIEW.md",
     "ARCHITECTURE.md",
     "TOKEN_REFERENCE.md",
@@ -56,6 +57,13 @@ $formatFiles = @(
 # bones/ subfolder — sync all .bone.json files
 $bonesFiles = Get-ChildItem -Path (Join-Path $src "bones") -Filter "*.bone.json" |
               Select-Object -ExpandProperty Name
+
+# muscles/ subfolder — sync all example .muscle.json manifests
+$musclesFiles = @()
+if (Test-Path (Join-Path $src "muscles")) {
+    $musclesFiles = Get-ChildItem -Path (Join-Path $src "muscles") -Filter "*.muscle.json" |
+                    Select-Object -ExpandProperty Name
+}
 
 # ── Spore-specific files (never touched by this script) ───────────────────────
 $preserved = @(
@@ -113,6 +121,14 @@ foreach ($f in $bonesFiles) {
     $s = Join-Path $src "bones\$f"
     $d = Join-Path $dst "bones\$f"
     if (Sync-File $s $d "bones/$f") { $changed++ }
+}
+
+Write-Host ""
+Write-Host "muscles/:" -ForegroundColor White
+foreach ($f in $musclesFiles) {
+    $s = Join-Path $src "muscles\$f"
+    $d = Join-Path $dst "muscles\$f"
+    if (Sync-File $s $d "muscles/$f") { $changed++ }
 }
 
 Write-Host ""

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "muscle_id": "studio-style-guard",
+  "muscle_version": "1.0.0",
+  "label": "Studio Style Guard",
+  "description": "Enforces house style rules on assembled prompts. Rewrites prompts that drift from the style guide and warns on tone violations. Reference example for a transform-mode MUSCLE on a derived-value hook.",
+  "hooks": [
+    {
+      "on": "prompt.assemble.after",
+      "mode": "transform",
+      "priority": 50,
+      "timeout_ms": 10000,
+      "filter": { "bone_ids": ["flux-dev", "runway-gen3"] }
+    }
+  ],
+  "capabilities": [
+    "read:document",
+    "patch:extensions.x-studio"
+  ],
+  "execution_routes": [
+    {
+      "type": "mcp",
+      "label": "Style Guard MCP",
+      "tool": "style_guard.run_hook",
+      "requires": ["mcp.style_guard"]
+    },
+    {
+      "type": "cli",
+      "label": "Style Guard CLI",
+      "command": "style-guard run-hook --payload -",
+      "requires": ["cli.style-guard"]
+    }
+  ],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "style_guide": {
+        "type": "string",
+        "description": "Path to the studio style guide markdown file, relative to workspace root."
+      },
+      "strictness": {
+        "type": "string",
+        "enum": ["warn", "rewrite"],
+        "default": "warn"
+      }
+    }
+  }
+}

@@ -6,6 +6,27 @@ All notable changes to the SKEL specification and implementation.
 
 ## [Unreleased]
 
+### MUSCLE v1.0 hardening — from spec to working plugin system
+- **Removed the `token.resolve` hook** from `muscle-spec.md`, `muscle.schema.json`, and `hook-payload.schema.json` (with its `TokenResolveSubject`). Its result contract was undefined; deferred to a future minor version, noted in the spec.
+- `muscle-spec.md` §3.3: **mode enforcement is now an explicit host obligation** — results exceeding the declared `observe`/`transform`/`veto` mode are rejected as MUSCLE failures.
+- `muscle-spec.md` §4.2: `subject_replacement` is explicitly restricted to **derived, non-persisted values** (it is not capability-checked because it can never reach `story.skel`); on `generate.route` it MUST be one of the candidate routes, otherwise hosts fall back to default selection.
+- `muscle-spec.md` §4.3 rule 7: hosts MUST **auto-create the `extensions` container** when applying a patch under a declared `patch:extensions.x-<ns>` capability (found by running the reference host: namespace-scoped plugins were otherwise unable to write to untouched entities).
+- `muscle-spec.md` §1.1: fixed per-patch/atomic wording — a patch outside capabilities rejects the entire (atomic) patch set.
+- `muscle.schema.json`: allow a top-level `$schema` field in manifests.
+- New `spec/MUSCLE_AUTHORING.md`: step-by-step plugin authoring guide (hook/mode selection, manifest, tool, patches, testing, shipping).
+- New `spec/muscles/` example manifests: `studio-style-guard.muscle.json`, `fountain-adapter.muscle.json` — both validate against `muscle.schema.json`.
+- New `reference/muscle-host/`: zero-dependency Node reference host implementing discovery (§6.1), CLI-route invocation (§4), mode enforcement (§3.3), capability-scoped atomic patch application with locked-entity protection and rollback (§4.3), and `metadata.plugins` recording (§6.3). Ships a runnable demo (`demo/run-demo.mjs`) with three plugins: a veto linter, a conforming patcher, and a deliberately misbehaving plugin whose undeclared write is rejected.
+- `sync-spec.ps1`: added `MUSCLE_AUTHORING.md` and the `spec/muscles/` folder to the sync list.
+
+### Public release preparation
+- README: documented the MUSCLE spec and schemas in the spec table; replaced the external BONE repo pointer with a two-layer plugin system section (BONE = data, MUSCLE = behavior) — this repo is the single canonical home for SKEL, BONE, and MUSCLE.
+- `bone-spec.md` / `bone.schema.json`: Schema URI and `$id` now point to this repo (`brandflowr/SKELETON-Spec`) instead of the retired separate BONE repo.
+- LICENSE copyright year updated to 2025–2026; copyright and trademark notices added to README.
+- Added `TRADEMARKS.md` (SKEL™, BONE™, MUSCLE™, SPORE™ — marks of Brandflowr AI LLC; conforming-use policy).
+- Moved internal session notes (`master-instructions.md`) out of the repo root into `docs/internal/`.
+
+## [2.7.0] — 2026-07-07
+
 ### MUSCLE v1.0 — behavior plugin system (new spec, additive)
 - New `muscle-spec.md`: MUSCLE (Modular User-Scripted Companion Logic Extension) — behavior plugins as `.muscle.json` manifests. Named lifecycle hooks (`import.*`, `document.validate`, `token.resolve`, `prompt.assemble.*`, `generate.route`, `render.complete`, `entity.changed`, `export.*`), three hook modes (`observe`/`transform`/`veto`), scoped capabilities, and `execution_routes` reusing the BONE §2.7 vocabulary. Plugins return RFC 6902 patches; hosts validate, enforce capabilities and `creative_status: locked`, and apply atomically. (ADR-014, ADR-015)
 - New `muscle.schema.json` (validates manifests) and `hook-payload.schema.json` (hook envelope/result contract, per-hook subject shapes).

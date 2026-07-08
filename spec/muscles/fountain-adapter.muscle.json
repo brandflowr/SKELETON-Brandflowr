@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "muscle_id": "fountain-adapter",
+  "muscle_version": "1.0.0",
+  "label": "Fountain Round-Trip Adapter",
+  "description": "Format adapter for .fountain screenplay files, per ADR-016: preserves unmappable Fountain source data (title page keys, boneyards, notes, section depth) under the x-fountain extension namespace on import, and restores it on export. Reference example for an import/export MUSCLE.",
+  "hooks": [
+    {
+      "on": "import.after",
+      "mode": "transform",
+      "priority": 100,
+      "filter": { "formats": ["fountain"] }
+    },
+    {
+      "on": "export.before",
+      "mode": "transform",
+      "priority": 100,
+      "filter": { "formats": ["fountain"] }
+    }
+  ],
+  "capabilities": [
+    "read:document",
+    "patch:metadata",
+    "patch:extensions.x-fountain"
+  ],
+  "execution_routes": [
+    {
+      "type": "cli",
+      "label": "Fountain Adapter CLI",
+      "command": "skel-fountain run-hook --payload -",
+      "requires": ["cli.skel-fountain"]
+    },
+    {
+      "type": "skill",
+      "label": "Fountain Adapter Skill",
+      "tool": "fountain_roundtrip"
+    }
+  ]
+}

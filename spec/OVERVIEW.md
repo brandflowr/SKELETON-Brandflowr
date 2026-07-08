@@ -44,6 +44,8 @@ SKEL uses the term **Acts** for the top-level story grouping. Spore Studio surfa
 | [`muscle-spec.md`](./muscle-spec.md) | MUSCLE formal specification. Behavior plugin system: lifecycle hooks, patch-based mutation, capabilities, execution routes. |
 | [`muscle.schema.json`](./muscle.schema.json) | MUSCLE JSON Schema. Validates `.muscle.json` manifest files. |
 | [`hook-payload.schema.json`](./hook-payload.schema.json) | Hook invocation contract. Envelope (host → MUSCLE) and result (MUSCLE → host) shapes, per-hook subjects. |
+| [`MUSCLE_AUTHORING.md`](./MUSCLE_AUTHORING.md) | Practical guide: how to write, test, and ship a MUSCLE plugin. |
+| [`muscles/`](./muscles/) | Example MUSCLE manifests: `studio-style-guard` (prompt transform), `fountain-adapter` (round-trip format adapter per ADR-016). |
 | [`skel.schema.json`](./skel.schema.json) | SKEL JSON Schema (Draft 7). Validates the parsed `.skel` data model and `.skel.json` exports. Includes `bone_registry` and `bones` on all entities. |
 | [`bone.schema.json`](./bone.schema.json) | BONE JSON Schema. Validates `.bone.json` definition files. |
 | [`skel-keyfile.json`](./skel-keyfile.json) | Default token dictionary. Maps shorthand tokens to full production definitions. |
@@ -210,6 +212,8 @@ Shots carry a `status` object with separate image and video production states:
 | Schema hosting | ✅ GitHub raw URL (this repo) |
 | MUSCLE spec (behavior plugins) | ✅ v1.0 spec complete |
 | MUSCLE schema + hook payload schema | ✅ Validates manifests and hook envelopes/results |
+| MUSCLE authoring guide + example manifests | ✅ `MUSCLE_AUTHORING.md`, `muscles/` |
+| MUSCLE reference host | ✅ `reference/muscle-host/` — runnable demo of the full contract |
 | MUSCLE host implementation (Spore / CLI) | 🔲 Planned |
 | Round-trip provenance (`metadata.source`, stable IDs, x-format preservation) | ✅ Spec complete (ADR-016) |
 | BONE field validation (P6-2) | 🔲 Planned |

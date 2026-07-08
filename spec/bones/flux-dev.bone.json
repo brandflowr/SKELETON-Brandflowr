@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/BONE-Brandflowr/main/spec/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/bone.schema.json",
   "bone_id": "flux-dev",
   "bone_version": "1.0",
   "label": "Flux Dev (Image Generation)",

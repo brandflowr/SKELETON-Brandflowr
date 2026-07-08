@@ -18,7 +18,7 @@ Staying with the skeleton metaphor: `.skel` is the body layout, `.bone` files ar
 
 - **Manifest, not code**: A MUSCLE declares intent; the host executes routes. No embedded runtime, no sandboxing requirement in the host.
 - **Patch, never mutate**: MUSCLEs return JSON Patch operations or proposals. The host validates, enforces capabilities and `creative_status: locked`, then applies atomically — or rejects and logs.
-- **Capability-scoped**: A MUSCLE can only touch what its manifest declares. Undeclared writes are rejected per-patch.
+- **Capability-scoped**: A MUSCLE can only touch what its manifest declares. A patch outside declared capabilities causes the MUSCLE's entire patch set to be rejected (patch sets are atomic, §4.3).
 - **Fail-safe**: A crashed, timed-out, or misbehaving MUSCLE never corrupts a project. Failures log and the pipeline continues (except `veto` hooks in strict lifecycles).
 - **Deterministic**: Multiple MUSCLEs on one hook run in priority order, then registration order. Same inputs, same order, same result.
 - **Recorded, not embedded**: Behavior is code and cannot be portably embedded on export. Documents record which MUSCLEs acted on them (`metadata.plugins`) for reproducibility.
@@ -101,7 +101,6 @@ Hook names are dot-namespaced and versioned by payload (`payload_version` in the
 | `import.before` | Before a source file is parsed | Pre-process Fountain/FDX source text |
 | `import.after` | After parse, before the SKELDocument is handed to the host | Enrich, normalize, park foreign data under `x-<format>` |
 | `document.validate` | After schema + referential integrity checks | Custom lint rules; add errors/warnings |
-| `token.resolve` | During key file resolution | Supply custom token categories or overrides |
 | `prompt.assemble.before` | Before `prompt_assembly` runs for a shot/BONE pair | Adjust effective BONE data |
 | `prompt.assemble.after` | After the prompt string is assembled | Rewrite, style-enforce, inject |
 | `generate.route` | When choosing an execution route for a BONE | Custom routing, queueing, cost gating |
@@ -112,6 +111,10 @@ Hook names are dot-namespaced and versioned by payload (`payload_version` in the
 
 Hosts MAY implement a subset. A host MUST ignore subscriptions to hooks it does not implement and SHOULD report them as inactive rather than erroring.
 
+`document.validate`, `import.after`, and `export.before` carry no `subject` — the whole document is the subject (sent per read capabilities).
+
+> A `token.resolve` hook (custom token categories/overrides during key file resolution) was considered for v1.0 and deferred: its result contract needs real-world shaping first. It may return in a later minor version.
+
 ### 3.3 Hook Modes
 
 | Mode | May return patches | May return errors | Failure/timeout effect |
@@ -121,6 +124,8 @@ Hosts MAY implement a subset. A host MUST ignore subscriptions to hooks it does 
 | `veto` | no | yes | In `draft` lifecycle: logged, continues. In `production`/`export`: the operation fails closed. |
 
 `veto` MUSCLEs participate in validation: their errors merge into the standard `SKELValidationResult` (`errors[]` / `warnings[]`, `SKELError` shape) with `code` prefixed by the `muscle_id`.
+
+**Mode enforcement is a host obligation.** The declared `mode` is the contract: a host MUST reject a result that exceeds it — patches or `subject_replacement` from an `observe` or `veto` subscription, or `errors` from an `observe` or `transform` subscription. A violating result is treated as a MUSCLE failure per this section (the offending fields are discarded and logged; the pipeline continues per the mode's failure rule).
 
 ---
 
@@ -173,6 +178,8 @@ Hosts invoke a MUSCLE by executing one of its `execution_routes`, passing a **ho
 ```
 
 - `patches` is an RFC 6902 JSON Patch array targeting the SKELDocument. Hooks whose subject is a derived value (e.g. `prompt.assemble.after`) MAY instead return `subject_replacement` (e.g. the rewritten prompt string) — see the per-hook shapes in `hook-payload.schema.json`.
+- `subject_replacement` MUST only affect **derived, non-persisted values** — the in-flight assembled prompt, the chosen execution route. It is not capability-checked precisely because it can never reach `story.skel`. All document mutation goes through `patches`, which are always capability-checked.
+- On `generate.route`, a `subject_replacement` MUST be one of the candidate `routes` from the subject. A host MUST reject any other value and fall back to its default route selection.
 - `errors`/`warnings` use the `SKELError` shape from ARCHITECTURE.md.
 - A malformed result is treated as a MUSCLE failure per §3.3.
 
@@ -184,6 +191,7 @@ Hosts invoke a MUSCLE by executing one of its `execution_routes`, passing a **ho
 4. Re-run schema validation after applying; if the document becomes invalid, roll back and treat as MUSCLE failure.
 5. Apply MUSCLEs in hook order (§3.1); each MUSCLE sees the document state produced by the previous one.
 6. Log every applied and rejected patch set (see §7).
+7. When applying a patch under a declared `patch:extensions.x-<ns>` capability, create the target entity's `extensions` container if it does not exist. A namespace-scoped MUSCLE must not need (and must not be granted) broader capabilities just to create the container.
 
 ---
 
