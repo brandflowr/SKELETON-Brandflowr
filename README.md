@@ -5,7 +5,7 @@
 > A flat, relational YAML format for encoding visual narratives into machine-readable, validatable story data.
 
 ---
-
+3.	
 ## What Is SKEL?
 
 SKEL (Story Keyframe Extensible Layout) is an open format that represents screenplays, storyboards, and visual narratives as flat, relational data. The native authoring format is YAML (`.skel`); `.skel.json` is the JSON export/interchange form of the same data model. Instead of deeply nested trees, SKEL stores acts, scenes, and shots as top-level arrays linked by ID references — like a relational database for stories.
