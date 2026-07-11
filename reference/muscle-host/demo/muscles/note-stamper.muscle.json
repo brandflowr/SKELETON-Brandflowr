@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json",
   "muscle_id": "note-stamper",
   "muscle_version": "1.0.0",
   "label": "Note Stamper",

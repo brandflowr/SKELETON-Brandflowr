@@ -6,11 +6,11 @@
 
 ## What Is SKEL?
 
-SKEL is SPORE's native story format. A project stores its authoring document as `story.skel`, a UTF-8 YAML file. Instead of deeply nested trees, SKEL stores Acts, Scenes, and Shots as top-level arrays linked by ID references - like a relational database for stories. `.skel.json` is the explicit export/interchange form of the same data model.
+SKEL is Genlock's native story format. A project stores its authoring document as `story.skel`, a UTF-8 YAML file. Instead of deeply nested trees, SKEL stores Acts, Scenes, and Shots as top-level arrays linked by ID references - like a relational database for stories. `.skel.json` is the explicit export/interchange form of the same data model.
 
 It was designed for:
 - AI-driven image/video generation pipelines (Runway, Kling, Sora, etc.)
-- Storyboard authoring tools (Spore)
+- Storyboard authoring tools (Genlock)
 - Cross-tool interchange between screenplay editors and production software
 
 ---
@@ -27,9 +27,9 @@ It was designed for:
 
 ---
 
-## Terminology: SKEL vs Spore
+## Terminology: SKEL vs Genlock
 
-SKEL uses the term **Acts** for the top-level story grouping. Spore Studio surfaces this as **Chapters** in its UI. These are the same entity — `act_id` in SKEL maps to the chapter container in Spore. When the spec says "act", Spore shows "chapter".
+SKEL uses the term **Acts** for the top-level story grouping. Genlock Studio surfaces this as **Chapters** in its UI. These are the same entity — `act_id` in SKEL maps to the chapter container in Genlock. When the spec says "act", Genlock shows "chapter".
 
 ---
 
@@ -66,21 +66,21 @@ SKEL uses the term **Acts** for the top-level story grouping. Spore Studio surfa
 | [`converter.ts`](../app/utils/SKEL/converter.ts) | Bidirectional conversion: `masterStoryToSKEL()`, `storyToSKEL()`, `SKELToStory()`. |
 | [`bone.ts`](../app/utils/SKEL/bone.ts) | `BoneResolver` class. Loads definitions, resolves inheritance chain, validates BONE data. |
 
-### Spore-Specific Extension Data (stored in `x-spore` namespace)
+### Genlock-Specific Extension Data (stored in `x-genlock` namespace)
 
-These files live in each Spore project folder and carry data that extends SKEL but is not part of the core spec. They are stored alongside `story.skel` (the native SKEL document). `story.json` is legacy/migration input only.
+These files live in each Genlock project folder and carry data that extends SKEL but is not part of the core spec. They are stored alongside `story.skel` (the native SKEL document). `story.json` is legacy/migration input only.
 
 | File | Purpose |
 |---|---|
 | `audio-map.json` | Maps shot IDs → assigned audio tracks (dialogue, SFX, music). One entry per shot. |
 | `video-map.json` | Maps shot IDs → numbered video takes (V1–V4) with an active take flag. Supports multi-take per shot. |
 
-Additional SPORE extension contracts:
+Additional Genlock extension contracts:
 
 | Extension | Purpose |
 |---|---|
-| `extensions.x-spore.proposals` | Optional proposal history on SKEL entities. Stores pending/accepted/rejected AI or user suggestions without changing core SKEL fields. |
-| `x-spore.schema.json` | Supplementary schema for SPORE-owned extension data, including proposal objects. The core SKEL schema remains vendor-neutral. |
+| `extensions.x-genlock.proposals` | Optional proposal history on SKEL entities. Stores pending/accepted/rejected AI or user suggestions without changing core SKEL fields. |
+| `x-genlock.schema.json` | Supplementary schema for Genlock-owned extension data, including proposal objects. The core SKEL schema remains vendor-neutral. |
 
 ### Dependencies
 
@@ -121,14 +121,14 @@ const resolved = resolver.resolveSetup(shot.v_setup)
 // resolved.size → { token: "cu", label: "Close-Up", description: "Subject's face fills the frame." }
 ```
 
-### Export a Spore project to SKEL JSON
+### Export a Genlock project to SKEL JSON
 ```ts
 import { masterStoryToSKEL } from '~/utils/SKEL/converter'
 
 const SKELDoc = masterStoryToSKEL(masterStory)
 ```
 
-### Import a SKEL file into Spore
+### Import a SKEL file into Genlock
 ```ts
 import { SKELToStory } from '~/utils/SKEL/converter'
 
@@ -157,7 +157,7 @@ const SKELDoc = fountainToSkel(fountainSource)
 │          │     │ refs[]   │     │ action   │
 └──────────┘     └──────────┘     └──────────┘
      IDs link everything. No nesting.
-     Spore shows Acts as "Chapters" in the UI.
+     Genlock shows Acts as "Chapters" in the UI.
 ```
 
 ### Token System
@@ -166,20 +166,20 @@ Shots use shorthand tokens (`cu`, `noir`, `dolly`) that the Key File expands to 
 ### Extensions
 Any entity can carry vendor-specific data via `extensions` with `x-` namespaced keys:
 ```json
-{ "extensions": { "x-spore": { "production_status": "approved", "startFrameImage": "..." } } }
+{ "extensions": { "x-genlock": { "production_status": "approved", "startFrameImage": "..." } } }
 ```
 
-SPORE proposal history lives under `extensions.x-spore.proposals`. Proposal objects have stable IDs, a `type`, a `status` (`pending`, `accepted`, `rejected`, or `superseded`), and a short `summary`. See `SKEL/spec/x-spore.schema.json` for the supplementary schema.
+Genlock proposal history lives under `extensions.x-genlock.proposals`. Proposal objects have stable IDs, a `type`, a `status` (`pending`, `accepted`, `rejected`, or `superseded`), and a short `summary`. See `SKEL/spec/x-genlock.schema.json` for the supplementary schema.
 
 ### Production Status (split image / video)
 Shots carry a `status` object with separate image and video production states:
 - **Image**: `pending` | `generating` | `review` | `approved` | `rejected`
 - **Video**: `not_started` | `pending` | `generating` | `review` | `approved` | `rejected`
 
-### Audio Map (Spore extension)
+### Audio Map (Genlock extension)
 `audio-map.json` maps each shot ID to up to three track types — `dialogue`, `sfx`, `music`. Persisted outside the SKEL document to keep media references decoupled from story structure.
 
-### Video Takes (Spore extension)
+### Video Takes (Genlock extension)
 `video-map.json` maps each shot ID to numbered video takes (V1–V4). One take is flagged as active; the timeline dynamically creates track lanes for each take level used in the project.
 
 ---
@@ -200,11 +200,11 @@ Shots carry a `status` object with separate image and video production states:
 | BONE schema | ✅ Validates .bone.json files |
 | BONE resolver | ✅ Inheritance chain + validation |
 | Starter BONEs | ✅ flux-dev, runway-gen3, kling-v1 |
-| Fountain import (`fountainToSkel`) | ✅ Implemented in Spore |
-| Split image/video production status | ✅ Implemented in Spore |
-| Audio map (x-spore extension) | ✅ Implemented in Spore |
-| Video takes / multi-take map (x-spore) | ✅ Implemented in Spore |
-| Real-time SKEL validation in UI | ✅ Implemented in Spore |
+| Fountain import (`fountainToSkel`) | ✅ Implemented in Genlock |
+| Split image/video production status | ✅ Implemented in Genlock |
+| Audio map (x-genlock extension) | ✅ Implemented in Genlock |
+| Video takes / multi-take map (x-genlock) | ✅ Implemented in Genlock |
+| Real-time SKEL validation in UI | ✅ Implemented in Genlock |
 | Final Draft import | 🔲 Planned |
 | OpenTimelineIO export | 🔲 Planned |
 | CSV export | 🔲 Planned |
@@ -214,7 +214,7 @@ Shots carry a `status` object with separate image and video production states:
 | MUSCLE schema + hook payload schema | ✅ Validates manifests and hook envelopes/results |
 | MUSCLE authoring guide + example manifests | ✅ `MUSCLE_AUTHORING.md`, `muscles/` |
 | MUSCLE reference host | ✅ `reference/muscle-host/` — runnable demo of the full contract |
-| MUSCLE host implementation (Spore / CLI) | 🔲 Planned |
+| MUSCLE host implementation (Genlock / CLI) | 🔲 Planned |
 | Round-trip provenance (`metadata.source`, stable IDs, x-format preservation) | ✅ Spec complete (ADR-016) |
 | BONE field validation (P6-2) | 🔲 Planned |
 | Referential integrity auto-repair (P6-3) | 🔲 Planned |

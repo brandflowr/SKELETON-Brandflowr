@@ -10,7 +10,7 @@
 
 SKEL defines story structure. BONE defines the *data* that attaches to that structure (generator config, prompt contracts). MUSCLE defines the *behavior* that acts on it.
 
-A MUSCLE is a manifest, not code. It declares which lifecycle hooks it subscribes to, what it is allowed to read and change, and how a host invokes it (MCP tool, CLI command, API endpoint). The host — Spore, the `skel` CLI, or an LLM agent — calls the MUSCLE at each hook point with a JSON payload and receives a JSON result. MUSCLEs never mutate documents; they return **patches** that the host validates and applies atomically.
+A MUSCLE is a manifest, not code. It declares which lifecycle hooks it subscribes to, what it is allowed to read and change, and how a host invokes it (MCP tool, CLI command, API endpoint). The host — Genlock, the `skel` CLI, or an LLM agent — calls the MUSCLE at each hook point with a JSON payload and receives a JSON result. MUSCLEs never mutate documents; they return **patches** that the host validates and applies atomically.
 
 Staying with the skeleton metaphor: `.skel` is the body layout, `.bone` files are what attaches to it, `.muscle` files are what makes it move.
 
@@ -31,7 +31,7 @@ Staying with the skeleton metaphor: `.skel` is the body layout, `.bone` files ar
 | MIME type      | `application/muscle+json`  |
 | Encoding       | UTF-8                      |
 | Project folder | `muscles/` (workspace or project scope) |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json` |
 
 ---
 

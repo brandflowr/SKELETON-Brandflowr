@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/x-spore.schema.json",
-  "title": "SPORE Extension Data",
-  "description": "Supplementary schema for data stored under extensions.x-spore. The core SKEL schema remains vendor-neutral and does not require this schema.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/x-genlock.schema.json",
+  "title": "Genlock Extension Data",
+  "description": "Supplementary schema for data stored under extensions.x-genlock. `x-spore` is the pre-rename alias of this namespace and is still accepted by readers. The core SKEL schema remains vendor-neutral and does not require this schema.",
   "type": "object",
   "additionalProperties": true,
   "properties": {

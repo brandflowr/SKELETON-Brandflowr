@@ -27,7 +27,7 @@ Modes: `observe` = read-only, `transform` = may return patches or a `subject_rep
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json",
   "muscle_id": "my-shot-lint",
   "muscle_version": "1.0.0",
   "label": "My Shot Lint",
@@ -99,7 +99,7 @@ cd reference/muscle-host/demo
 node run-demo.mjs
 ```
 
-Drop your manifest in a `muscles/` folder, point `discoverMuscles()` at it, and invoke your hook with a real document (the spec ships [`example.skel.json`](./example.skel.json)). The reference host enforces the same rules SPORE does — if your plugin behaves there, it's conformant. See [reference/muscle-host/](../reference/muscle-host/) for three worked examples (a linter, a patcher, and a deliberately misbehaving plugin).
+Drop your manifest in a `muscles/` folder, point `discoverMuscles()` at it, and invoke your hook with a real document (the spec ships [`example.skel.json`](./example.skel.json)). The reference host enforces the same rules Genlock does — if your plugin behaves there, it's conformant. See [reference/muscle-host/](../reference/muscle-host/) for three worked examples (a linter, a patcher, and a deliberately misbehaving plugin).
 
 ## 6. Ship it
 

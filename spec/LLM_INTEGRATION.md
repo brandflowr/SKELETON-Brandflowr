@@ -7,7 +7,7 @@
 
 ## Why SKEL is LLM-Native
 
-Most production formats are built for human editors or specific tools. SKEL was designed to be read and written by both. The structural decisions that make SKEL good for Spore are the same ones that make it good for LLMs:
+Most production formats are built for human editors or specific tools. SKEL was designed to be read and written by both. The structural decisions that make SKEL good for Genlock are the same ones that make it good for LLMs:
 
 | SKEL Decision | Why It Helps LLMs |
 |---|---|
@@ -54,7 +54,7 @@ Prompt assembly uses the same contract as `BONE/spec/bone-spec.md`: `template`, 
 - Check `creative_status` before modifying any scene or shot — `locked` entities must not be changed
 
 ### 6. Store proposals without applying them
-- Write pending suggestions to `extensions.x-spore.proposals` when the user wants options rather than immediate edits
+- Write pending suggestions to `extensions.x-genlock.proposals` when the user wants options rather than immediate edits
 - Use stable `prop_` IDs, one of the approved proposal types, and one of the approved statuses
 - Do not treat `status: accepted` as a substitute for applying the change to the affected SKEL entity
 
@@ -93,18 +93,18 @@ FOR each shot (render phase):
   SET production_status → "review"
   SAVE story.skel
 
-DONE → Spore picks up new files on reload
+DONE → Genlock picks up new files on reload
 ```
 
 ---
 
 ## Proposal Storage
 
-When an LLM suggests changes that should remain reviewable, it MAY write proposal objects under `extensions.x-spore.proposals` on the affected entity. This keeps pending ideas out of core SKEL fields until the user accepts them.
+When an LLM suggests changes that should remain reviewable, it MAY write proposal objects under `extensions.x-genlock.proposals` on the affected entity. This keeps pending ideas out of core SKEL fields until the user accepts them.
 
 ```json
 "extensions": {
-  "x-spore": {
+  "x-genlock": {
     "proposals": [
       {
         "id": "prop_123",
@@ -124,7 +124,7 @@ Allowed statuses are `pending`, `accepted`, `rejected`, and `superseded`. Allowe
 
 Agents SHOULD preserve proposal history unless the user asks to remove it. To accept a proposal, apply the actual change to the target SKEL data, update the proposal status to `accepted`, and set `resolved_at`. To reject or supersede a proposal, update only its status and resolution metadata.
 
-The supplementary schema for this namespace is `SKEL/spec/x-spore.schema.json`; the core SKEL schema remains vendor-neutral.
+The supplementary schema for this namespace is `SKEL/spec/x-genlock.schema.json`; the core SKEL schema remains vendor-neutral.
 
 ---
 
@@ -212,12 +212,12 @@ After writing BONE data, run the SKEL validator. Fix errors before writing the f
 
 ## External Validator Contract
 
-SPORE-compatible tools MUST expose validation in a way that an LLM or external automation can run before saving or rendering.
+Genlock-compatible tools MUST expose validation in a way that an LLM or external automation can run before saving or rendering.
 
 ### CLI
 
 ```powershell
-spore validate projects/example/story.skel
+genlock validate projects/example/story.skel
 ```
 
 Optional flags:
@@ -300,7 +300,7 @@ After a generator returns a result, the storage path is always deterministic. An
 
 ```
 workspace_root  = from CLAUDE.md or project config
-project_slug    = metadata.extensions.x-spore.slug  (or derived from title)
+project_slug    = metadata.extensions.x-genlock.slug  (or derived from title)
 shot_id         = shot.id
 bone_id         = the BONE that generated this render
 format          = bone.output.format
@@ -317,7 +317,7 @@ After saving the file, write back:
 **For image targets** — edit `story.skel`, find the shot by ID, update:
 ```json
 "extensions": {
-  "x-spore": {
+  "x-genlock": {
     "startFrameImage": "projects/{slug}/renders/images/{shot_id}.{bone_id}.png",
     "production_status": { "image": "review" }
   }
@@ -350,7 +350,7 @@ Track type (`dialogue`, `sfx`, `music`) is determined by the BONE's `target` fie
 
 ## CLAUDE.md Skill File — Required Sections
 
-The `CLAUDE.md` file auto-installed in every Spore workspace teaches Claude the project context. It must contain:
+The `CLAUDE.md` file auto-installed in every Genlock workspace teaches Claude the project context. It must contain:
 
 1. **Workspace path** — so Claude can resolve absolute file paths
 2. **Active project slug** — or instructions to read it from `project.json`
@@ -383,7 +383,7 @@ To enable the full autonomous loop (read → write → generate → store), the 
 | `set_shot_status` | Update production status for a shot (image or video) |
 
 These can be implemented as:
-- Spore MCP server (dedicated server exposing these as tools to Claude)
+- Genlock MCP server (dedicated server exposing these as tools to Claude)
 - Direct file operations via the existing workspace file access Claude already has
 
 The minimal viable implementation uses direct file reads/writes — Claude reads `story.skel`, edits it in memory, writes it back. The MCP server approach is the production-grade path.
@@ -409,4 +409,4 @@ When Claude encounters a shot with BONE data, it:
 4. Assembles the prompt via `prompt_assembly`
 5. Calls the generator with the assembled prompt + any extra params (guidance, seed, duration, etc.)
 
-The routing table should be extensible — adding a new generator means adding a `.bone.json` + an entry in the routing table. No changes to SKEL or Spore required.
+The routing table should be extensible — adding a new generator means adding a `.bone.json` + an entry in the routing table. No changes to SKEL or Genlock required.

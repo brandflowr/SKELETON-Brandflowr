@@ -1,12 +1,12 @@
 {
-  "$schema": "https://spore.dev/schemas/vrad/v2.0/vrad.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/skel.schema.json",
   "skel_version": "2.0",
   "metadata": {
     "story_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "title": "The Last Signal",
     "lifecycle": "production",
     "logline": "A lighthouse keeper discovers a terrifying secret hidden in the patterns of his own transmissions.",
-    "author": "spore",
+    "author": "genlock",
     "created_at": "2025-01-15T10:00:00Z",
     "modified_at": "2025-01-15T14:30:00Z",
     "skin_key": "noir_v1",
@@ -15,7 +15,7 @@
       "runway-gen3": { "model": "gen3-alpha-turbo", "aspect": "16:9" }
     },
     "extensions": {
-      "x-spore": { "project_slug": "the-last-signal" }
+      "x-genlock": { "project_slug": "the-last-signal" }
     }
   },
   "bone_registry": {
@@ -195,7 +195,7 @@
         "runway-gen3": { "text": "Static close-up. Neon light pulses across Harlan's face. Expression shifts from fear to grim recognition. He whispers the line.", "motion_strength": 0.2 }
       },
       "extensions": {
-        "x-spore": { "hero_shot": true }
+        "x-genlock": { "hero_shot": true }
       }
     }
   ]

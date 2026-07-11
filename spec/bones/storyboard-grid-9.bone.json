@@ -1,10 +1,10 @@
 {
-  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
   "bone_id": "storyboard-grid-9",
   "bone_version": "1.0",
   "label": "9-Panel Cinematic Storyboard",
   "description": "AI filmmaking storyboard sheet. Produces a 3x3 grid of nine sequential panels for one continuous scene with readable production-note strips.",
-  "provider": "spore",
+  "provider": "genlock",
   "target": "image",
   "attaches_to": ["scene", "shot", "metadata"],
   "fields": {

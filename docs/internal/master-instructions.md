@@ -6,9 +6,9 @@
 
 ## What This Repo Is
 
-The canonical specification for the **SKEL format** — Story Keyframe Extensible Layout. This is the open storyboard data standard that Spore Studio reads and writes natively.
+The canonical specification for the **SKEL format** — Story Keyframe Extensible Layout. This is the open storyboard data standard that Genlock Studio reads and writes natively.
 
-This repo contains only spec files — no app code. Changes here define the format contract that `SPORE-Desktop` and any third-party tools must comply with.
+This repo contains only spec files — no app code. Changes here define the format contract that `SPORE-Desktop` (the Genlock Studio app repo) and any third-party tools must comply with.
 
 ---
 
@@ -44,7 +44,7 @@ spec/
 ├── ARCHITECTURE.md       ← System architecture overview
 ├── DECISIONS.md          ← Architecture Decision Records (ADRs)
 ├── LLM_INTEGRATION.md    ← LLM agent read/edit/validate guidance
-├── x-spore.schema.json   ← SPORE extension data schema
+├── x-genlock.schema.json ← Genlock extension data schema
 ├── audio-map.schema.json ← audio-map.json sidecar schema
 ├── video-map.schema.json ← video-map.json sidecar schema
 ├── canvas-layout.schema.json ← canvas-layout.json sidecar schema

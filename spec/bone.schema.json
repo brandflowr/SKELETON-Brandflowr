@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/bone.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
   "title": "BONE — Base Object Narrative Export",
   "description": "A plugin definition format for attaching AI generation config to SKEL story entities.",
   "type": "object",

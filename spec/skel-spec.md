@@ -11,10 +11,10 @@
 SKEL (Story Keyframe Extensible Layout) is a YAML-based native authoring format for encoding screenplays, storyboards, and visual narratives into a flat relational structure. It is designed for:
 
 - AI-driven image/video generation pipelines
-- Storyboard authoring tools (primary host: Spore Studio)
+- Storyboard authoring tools (primary host: Genlock Studio)
 - Cross-tool interchange between screenplay editors, production software, and rendering engines
 
-`.skel` is SPORE's native story file. It is the layout of the body - acts, scenes, shots, visual setup - before the BONEs (AI pipelines defined in `.bone.json` files) are attached to it. `.skel.json` is the export and interchange form of the same data model.
+`.skel` is Genlock's native story file. It is the layout of the body - acts, scenes, shots, visual setup - before the BONEs (AI pipelines defined in `.bone.json` files) are attached to it. `.skel.json` is the export and interchange form of the same data model.
 
 ### 1.1 Design Principles
 
@@ -33,7 +33,7 @@ SKEL (Story Keyframe Extensible Layout) is a YAML-based native authoring format 
 | Format         | YAML (UTF-8)                                            |
 | MIME type      | `application/skel+yaml`                                 |
 | JSON export    | `.skel.json` - portability format, same structure       |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/skel.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/skel.schema.json` |
 
 ---
 
@@ -281,7 +281,7 @@ Allowed values:
 
 | Value        | Meaning |
 | ------------ | ------- |
-| `draft`      | Work-in-progress authoring document. Empty arrays and incomplete story structure are allowed so a new SPORE project can be created before acts, scenes, or shots exist. |
+| `draft`      | Work-in-progress authoring document. Empty arrays and incomplete story structure are allowed so a new Genlock project can be created before acts, scenes, or shots exist. |
 | `production` | Active production document. Requires at least one act, scene, and shot, and requires non-empty `scene_refs` and `shot_refs` where those entities exist. Referential integrity MUST pass. |
 | `export`     | Portable handoff document. Includes all `production` requirements and SHOULD include all data needed by external tools, including embedded BONE definitions when BONE data exists. |
 
@@ -351,7 +351,7 @@ If a token is not found in the active key file, parsers MUST apply these default
 
 ### 4.3 Custom Tokens
 
-Vendors MAY register custom tokens by prefixing them with `x-` (e.g., `x-spore-dreamy`). Custom tokens MUST be defined in the key file's `custom` section.
+Vendors MAY register custom tokens by prefixing them with `x-` (e.g., `x-genlock-dreamy`). Custom tokens MUST be defined in the key file's `custom` section.
 
 ---
 
@@ -396,7 +396,7 @@ Every SKEL entity (metadata, act, scene, shot) includes an optional `extensions`
 ```json
 {
   "extensions": {
-    "x-spore": {
+    "x-genlock": {
       "production_status": "approved",
       "cost_estimate": 12.50
     },
@@ -414,15 +414,15 @@ Every SKEL entity (metadata, act, scene, shot) includes an optional `extensions`
 - Parsers MUST ignore unrecognized extension namespaces without error.
 - Extensions are NOT validated by the core JSON Schema; vendors MAY provide supplementary schemas.
 
-### 6.3 SPORE Proposals (`extensions.x-spore.proposals`)
+### 6.3 Genlock Proposals (`extensions.x-genlock.proposals`)
 
-SPORE MAY store AI-assisted proposed changes under the `x-spore` extension namespace. Proposals are intentionally extension data, not core SKEL fields, so the base schema stays vendor-neutral.
+Genlock MAY store AI-assisted proposed changes under the `x-genlock` extension namespace. Proposals are intentionally extension data, not core SKEL fields, so the base schema stays vendor-neutral.
 
 Proposals MAY be stored on the entity they affect (`metadata`, `act`, `scene`, or `shot`). If stored at a broader scope, include `target` to identify the affected entity.
 
 ```yaml
 extensions:
-  x-spore:
+  x-genlock:
     proposals:
       - id: prop_123
         by: codex
@@ -473,7 +473,7 @@ Allowed types:
 
 Agents MUST NOT silently apply a proposal by changing the proposal object alone. Accepted proposals should either be applied to the affected SKEL entity and marked `accepted`, or left as `pending` until the user confirms. Rejected and superseded proposals SHOULD remain in place as history unless the user explicitly asks to remove them.
 
-The supplementary schema for SPORE extension data is `SKEL/spec/x-spore.schema.json`.
+The supplementary schema for Genlock extension data is `SKEL/spec/x-genlock.schema.json`.
 
 ---
 
@@ -491,7 +491,7 @@ The supplementary schema for SPORE extension data is `SKEL/spec/x-spore.schema.j
 
 | Format                | Mapping Strategy                                                |
 | --------------------- | --------------------------------------------------------------- |
-| Spore MasterStory| Direct mapping: scenes → MasterScene, shots → MasterShot.      |
+| Genlock MasterStory| Direct mapping: scenes → MasterScene, shots → MasterShot.      |
 | OpenTimelineIO        | Shots → clips on a timeline track.                              |
 | CSV                   | Flat shot table for spreadsheet workflows.                      |
 

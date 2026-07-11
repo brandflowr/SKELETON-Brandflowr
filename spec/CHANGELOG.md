@@ -25,6 +25,20 @@ All notable changes to the SKEL specification and implementation.
 - Added `TRADEMARKS.md` (SKEL™, BONE™, MUSCLE™, SPORE™ — marks of Brandflowr AI LLC; conforming-use policy).
 - Moved internal session notes (`master-instructions.md`) out of the repo root into `docs/internal/`.
 
+---
+
+## [2.8.0] — 2026-07-10
+
+### Vendor Rename: SPORE → Genlock
+- The host application vendor name changed from SPORE to Genlock (Genlock Studio). SKEL, BONE, and MUSCLE keep their names.
+- Extension namespace renamed: `extensions.x-spore` → `extensions.x-genlock`. Writers now emit `x-genlock`; readers continue to accept the legacy `x-spore` namespace as a pre-rename alias.
+- Supplementary schema file renamed: `spec/x-spore.schema.json` → `spec/x-genlock.schema.json` (`$id`, title, and description updated; structure unchanged).
+- First-party starter bones renamed: `spore-video`/`spore-image`/`spore-style` → `genlock-video`/`genlock-image`/`genlock-style`.
+- Workspace config directory renamed: `.spore/` → `.genlock/`.
+- Docs, schema descriptions, and the reference MUSCLE host rebranded accordingly. Historical changelog entries below retain the names in use at the time.
+
+---
+
 ## [2.7.0] — 2026-07-07
 
 ### MUSCLE v1.0 — behavior plugin system (new spec, additive)

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
   "bone_id": "seedance-2",
   "bone_version": "1.0",
   "label": "Seedance 2 (Video Generation)",

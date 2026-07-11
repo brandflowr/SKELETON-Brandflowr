@@ -27,7 +27,7 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 | File extension | `.bone.json`               |
 | MIME type      | `application/bone+json`    |
 | Encoding       | UTF-8                      |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/bone.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json` |
 
 ---
 
@@ -97,7 +97,7 @@ Each key in `fields` is a field name. The value describes the field:
 
 ## 2.4 `prompt_assembly` Object
 
-Defines how the BONE's field data and story context, such as `v_setup` tokens, character refs, and scene header, combine into the final string sent to an AI generation API. This drives the Assembled Prompt Preview in SPORE.
+Defines how the BONE's field data and story context, such as `v_setup` tokens, character refs, and scene header, combine into the final string sent to an AI generation API. This drives the Assembled Prompt Preview in Genlock.
 
 | Field                 | Type   | Required | Description |
 | --------------------- | ------ | -------- | ----------- |
@@ -108,7 +108,7 @@ Defines how the BONE's field data and story context, such as `v_setup` tokens, c
 | `max_length`          | integer | no      | Maximum character length of the assembled prompt. Must be greater than `0`. Used for validation and preview warnings. |
 | `separator`           | string | no       | Separator between sequential elements. Default: space. |
 
-If a BONE omits `prompt_assembly`, SPORE SHOULD use `sequential` behavior with a single-space separator.
+If a BONE omits `prompt_assembly`, Genlock SHOULD use `sequential` behavior with a single-space separator.
 
 Template variables use double braces. `{{field_name}}` resolves from the effective BONE data after defaults and inheritance. System tokens include `{{v_setup.size}}`, `{{v_setup.angle}}`, `{{v_setup.lens}}`, `{{v_setup.move}}`, `{{v_setup.light}}`, `{{v_setup.tod}}`, `{{v_setup.dof}}`, `{{character_refs}}`, `{{scene.header}}`, `{{scene.location}}`, and `{{scene.tod}}`. Missing variables resolve to an empty string, and assemblers SHOULD trim repeated whitespace and dangling punctuation in preview/output.
 
@@ -138,7 +138,7 @@ Validators MUST report malformed `prompt_assembly` objects: unknown strategy nam
 
 ## 2.5 `llm_instructions` Object
 
-Tells a language model how to write prompts for this specific generator. When an LLM generates prompts for shots in SPORE, it reads this before writing. This makes the BONE a prompt authoring contract, not just a data container.
+Tells a language model how to write prompts for this specific generator. When an LLM generates prompts for shots in Genlock, it reads this before writing. This makes the BONE a prompt authoring contract, not just a data container.
 
 | Field           | Type     | Required | Description |
 | --------------- | -------- | -------- | ----------- |
@@ -155,14 +155,14 @@ Tells any LLM or automated pipeline where to store a rendered file after the gen
 | Field                | Type   | Required | Description |
 | -------------------- | ------ | -------- | ----------- |
 | `format`             | string | yes      | Output file extension: `png`, `jpg`, `mp4`, `gif`, `wav`, etc. |
-| `target`             | string | yes      | Which SPORE field or sidecar to write the result to. |
+| `target`             | string | yes      | Which Genlock field or sidecar to write the result to. |
 | `path_template`      | string | no       | Storage path relative to workspace root. Supports `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, and `{n}`. |
 | `completion_status` | string | no       | Production status to set on the shot after a successful download. Default: `review`. |
 
 Target values:
-- `startFrameImage`: write to `shot.extensions.x-spore.startFrameImage` in `story.skel`.
-- `endFrameImage`: write to `shot.extensions.x-spore.endFrameImage` in `story.skel`.
-- `image`: write to `shot.extensions.x-spore.image` in `story.skel`.
+- `startFrameImage`: write to `shot.extensions.x-genlock.startFrameImage` in `story.skel`.
+- `endFrameImage`: write to `shot.extensions.x-genlock.endFrameImage` in `story.skel`.
+- `image`: write to `shot.extensions.x-genlock.image` in `story.skel`.
 - `video_take`: append a new take to `video-map.json`, sets `isActive: true` on the new take, sets `isActive: false` on all prior takes for that shot.
 - `audio_track`: assign a track in `audio-map.json`. Track type (`dialogue`, `sfx`, or `music`) is determined by the BONE's `target` field.
 
@@ -180,19 +180,19 @@ failure logs:  projects/{slug}/renders/failures/{shot_id}.{bone_id}.log
 1. Resolve the storage path using the template and context (workspace root, slug, shot_id, bone_id, format).
 2. Download or move the file to that path.
 3. Write the path to the field specified by `target`:
-   - Image targets → update `shot.extensions.x-spore[target]` in `story.skel`
+   - Image targets → update `shot.extensions.x-genlock[target]` in `story.skel`
    - `video_take` → append entry to `video-map.json` with `isActive: true`; set `isActive: false` on all prior takes for that shot
    - `audio_track` → append entry to `audio-map.json` with the appropriate track type
-4. Set `shot.extensions.x-spore.production_status.image` (or `.video`) to `completion_status`.
+4. Set `shot.extensions.x-genlock.production_status.image` (or `.video`) to `completion_status`.
 5. Save `story.skel`.
 
-Spore picks up updated files on next reload or file-watch event. No app restart required. Failed renders SHOULD write a log entry to the `renders/failures/` path for diagnostics.
+Genlock picks up updated files on next reload or file-watch event. No app restart required. Failed renders SHOULD write a log entry to the `renders/failures/` path for diagnostics.
 
 ---
 
 ## 2.7 Provider Routing Metadata
 
-BONE definitions MAY declare provider and routing metadata so SPORE and agents can group generators, choose an execution path, and display provider readiness without hardcoding every generator in the app.
+BONE definitions MAY declare provider and routing metadata so Genlock and agents can group generators, choose an execution path, and display provider readiness without hardcoding every generator in the app.
 
 `provider` is a short lowercase namespace. Examples: `higgsfield`, `runway`, `kling`, `flux`.
 
@@ -378,7 +378,7 @@ Custom BONEs follow the same spec. The `target` field uses `custom` and the `bon
 
 ### 6.1 First-Party AI Filmmaking BONEs
 
-SPORE ships a small AI filmmaking base pack for character-locked, storyboard-driven video generation:
+Genlock ships a small AI filmmaking base pack for character-locked, storyboard-driven video generation:
 
 | BONE | Target | Purpose |
 | ---- | ------ | ------- |

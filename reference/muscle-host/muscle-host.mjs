@@ -4,7 +4,7 @@
 // via the `cli` execution route, mode enforcement, capability-scoped
 // RFC 6902 patch application with locked-entity protection, and atomic
 // rollback. This is a teaching/conformance artifact, not a product:
-// production hosts (SPORE, a `skel` CLI) implement the same rules.
+// production hosts (Genlock, a `skel` CLI) implement the same rules.
 //
 // See: spec/muscle-spec.md, spec/hook-payload.schema.json
 

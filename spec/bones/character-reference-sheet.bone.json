@@ -1,10 +1,10 @@
 {
-  "$schema": "https://spore.dev/schemas/bone/v1.0/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
   "bone_id": "character-reference-sheet",
   "bone_version": "1.0",
   "label": "Character Reference Sheet",
   "description": "AI filmmaking identity-lock sheet. Produces an 8-view reference image for character continuity across storyboards and video shots.",
-  "provider": "spore",
+  "provider": "genlock",
   "target": "image",
   "attaches_to": ["metadata", "scene", "shot"],
   "fields": {

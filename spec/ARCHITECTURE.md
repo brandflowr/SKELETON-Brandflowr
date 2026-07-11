@@ -9,7 +9,7 @@
 │                        INPUT SOURCES                                │
 │                                                                     │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
-│  │ Markdown │  │ Fountain │  │  Final   │  │ Spore UI          │  │
+│  │ Markdown │  │ Fountain │  │  Final   │  │ Genlock UI          │  │
 │  │ + <shot> │  │ .fountain│  │  Draft   │  │ (Vue/Pinia state) │  │
 │  │ tags     │  │          │  │  .fdx    │  │                   │  │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────────┬──────────┘  │
@@ -73,7 +73,7 @@
 │                       OUTPUT TARGETS                                │
 │                                                                     │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │  .skel.json  │  │ AI Pipeline  │  │ Spore        │             │
+│  │  .skel.json  │  │ AI Pipeline  │  │ Genlock        │             │
 │  │  (file on    │  │ (Runway,     │  │ UI State     │             │
 │  │   disk)      │  │  Kling, etc) │  │ (import)     │             │
 │  └──────────────┘  └──────────────┘  └──────────────┘             │
@@ -88,15 +88,15 @@
 
 ---
 
-## Spore-Specific Sidecar Data
+## Genlock-Specific Sidecar Data
 
-Spore stores sidecar files alongside `story.skel`, the native SKEL document. These files carry production data that extends SKEL but is scoped to the Spore host application. `story.json` is legacy/migration input only.
+Genlock stores sidecar files alongside `story.skel`, the native SKEL document. These files carry production data that extends SKEL but is scoped to the Genlock host application. `story.json` is legacy/migration input only.
 
 ```
 project/
   story.skel          ← native SKEL YAML document (acts, scenes, shots, bones)
-  audio-map.json      ← x-spore: shot ID → dialogue/SFX/music track assignments
-  video-map.json      ← x-spore: shot ID → V1/V2/V3/V4 takes + active take flag
+  audio-map.json      ← x-genlock: shot ID → dialogue/SFX/music track assignments
+  video-map.json      ← x-genlock: shot ID → V1/V2/V3/V4 takes + active take flag
 ```
 
 ### audio-map.json
@@ -146,12 +146,12 @@ When an external generator or LLM writes a rendered file back to a project, it u
 The `renders/` folders are created by the Render Output Protocol card in the Showrunner page. They are distinct from the `assets/` folders used for user-imported media.
 
 After writing a render file, the generator or LLM updates:
-- **Image renders** → `shot.extensions.x-spore.startFrameImage` (or `endFrameImage` / `image`) in `story.skel`
+- **Image renders** → `shot.extensions.x-genlock.startFrameImage` (or `endFrameImage` / `image`) in `story.skel`
 - **Video renders** → `video-map.json`: append a new take with `isActive: true`, set all prior takes for that shot to `isActive: false`
 - **Audio renders** → `audio-map.json`: assign the file as `dialogue`, `sfx`, or `music` per the BONE's target
-- **Production status** → `shot.extensions.x-spore.production_status.image` or `.video` set to `"review"`
+- **Production status** → `shot.extensions.x-genlock.production_status.image` or `.video` set to `"review"`
 
-Spore's Refresh Outputs action scans `renders/` folders and re-attaches any outputs that match shot IDs found in filenames.
+Genlock's Refresh Outputs action scans `renders/` folders and re-attaches any outputs that match shot IDs found in filenames.
 
 ---
 
@@ -168,10 +168,10 @@ Spore's Refresh Outputs action scans `renders/` folders and re-attaches any outp
   1. JSON Schema validation (structure, types, enums, constraints)
   2. Referential integrity (act↔scene↔shot ID cross-references, uniqueness)
 - Returns `{ valid: boolean, errors: SKELError[] }`
-- Called after every save in Spore (real-time validation badge in UI)
+- Called after every save in Genlock (real-time validation badge in UI)
 
 ### External validator contract
-- CLI entry point: `spore validate projects/example/story.skel`
+- CLI entry point: `genlock validate projects/example/story.skel`
 - MCP / agent tool: `validate_skel`
 - The external contract wraps the same validation behavior as `validator.ts`, but accepts a file path and returns stable machine-readable errors.
 - Required stages:
@@ -228,7 +228,7 @@ type SKELError = {
 ## Data Flow: Export
 
 ```
-Spore UI State (Pinia)
+Genlock UI State (Pinia)
         │
         ▼
   storyToSKEL()          ← converter.ts
@@ -320,15 +320,15 @@ Spore UI State (Pinia)
 
 ---
 
-## Integration Points with Spore
+## Integration Points with Genlock
 
-| Spore Component | SKEL Integration |
+| Genlock Component | SKEL Integration |
 |---|---|
 | `story.skel` (project disk format) | Native SKEL YAML document - written by `useTauri.saveStory()`, read by `useTauri.loadStory()` |
 | `story.json` | Legacy/migration input only. Read when present in older projects, then migrated to `story.skel` on save. |
 | `useTauri.loadStory()` | Reads native `story.skel`, `.skel.json` imports, and legacy project formats. Auto-migrates legacy data on first save. |
 | `useTauri.saveStory()` | Always writes native SKEL v2.0 YAML to `story.skel`. Migrates legacy fields (imagePrompt → bones.flux-dev.text, etc.) |
-| `app/types/Spore.ts` → `Shot` | Token maps normalize `shotType`, `cameraAngle`, `cameraMovement`, `lighting` |
+| `app/types/genlock.ts` → `Shot` | Token maps normalize `shotType`, `cameraAngle`, `cameraMovement`, `lighting` |
 | `useSKEL` composable | `validate()`, `resolveSetup()`, `resolveBonesForShot()`, `sizeLabel()`, etc. |
 | Showrunner page | Fountain import button → `fountainToSkel()` → `SKELToStory()` → hydrate store |
 | Showrunner page | Export `.skel.json` button → `storyToSKEL()` → `validateSKEL()` → native save dialog |

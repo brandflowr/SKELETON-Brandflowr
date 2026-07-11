@@ -151,7 +151,7 @@
 | Max `prompt` length | **300 chars** |
 | Max `logline` length | **280 chars** |
 | ID format (recommended) | `nanoid(12)` or UUID v4 |
-| Extension key prefix | `x-` (e.g., `x-spore`) |
+| Extension key prefix | `x-` (e.g., `x-genlock`) |
 
 ---
 
@@ -186,7 +186,7 @@
     "dof": "shallow"
   },
   "extensions": {
-    "x-spore": { "production_status": "approved" }
+    "x-genlock": { "production_status": "approved" }
   }
 }
 ```

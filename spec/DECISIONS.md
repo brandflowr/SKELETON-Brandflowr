@@ -76,9 +76,9 @@
 **Date:** 2025-07-15
 **Status:** Accepted
 
-**Context:** Different tools (Spore, Runway, Kling) need to attach tool-specific data to shots and scenes without breaking the core format.
+**Context:** Different tools (Genlock, Runway, Kling) need to attach tool-specific data to shots and scenes without breaking the core format.
 
-**Decision:** Every SKEL entity has an optional `extensions` object. Keys must be namespaced with `x-` prefix (e.g., `x-spore`, `x-runway`). The core schema does not validate extension contents.
+**Decision:** Every SKEL entity has an optional `extensions` object. Keys must be namespaced with `x-` prefix (e.g., `x-genlock`, `x-runway`). The core schema does not validate extension contents.
 
 **Consequences:**
 - Core spec stays clean and stable
@@ -93,31 +93,31 @@
 **Date:** 2025-07-15
 **Status:** Accepted
 
-**Context:** Spore uses free-text strings for shot types ("WS", "Wide Shot", "wide_shot"), camera angles ("Eye Level", "eye_level"), etc. SKEL uses strict enum tokens (`ws`, `eye`).
+**Context:** Genlock uses free-text strings for shot types ("WS", "Wide Shot", "wide_shot"), camera angles ("Eye Level", "eye_level"), etc. SKEL uses strict enum tokens (`ws`, `eye`).
 
 **Decision:** `converter.ts` contains explicit mapping tables (`SIZE_TO_TOKEN`, `ANGLE_TO_TOKEN`, etc.) that normalize any known variant to the SKEL token. Unknown values fall back to spec defaults.
 
 **Consequences:**
-- Handles the messy reality of existing Spore data
+- Handles the messy reality of existing Genlock data
 - New string variants need to be added to the mapping tables manually
 - Fallback defaults prevent conversion failures on unknown values
 - Round-trip fidelity: export → import preserves all SKEL-compatible data
 
 ---
 
-## ADR-007: Integrated Into Spore First, Extract Later
+## ADR-007: Integrated Into Genlock First, Extract Later
 
 **Date:** 2025-07-15
 **Status:** Accepted
 
-**Context:** Two options were considered: (A) standalone npm package from day one, or (B) build inside Spore and extract when the spec stabilizes.
+**Context:** Two options were considered: (A) standalone npm package from day one, or (B) build inside Genlock and extract when the spec stabilizes.
 
-**Decision:** Option B. The SKEL engine lives in `app/utils/SKEL/` and imports Spore types directly.
+**Decision:** Option B. The SKEL engine lives in `app/utils/SKEL/` and imports Genlock types directly.
 
 **Consequences:**
 - Can iterate on the spec and implementation together without maintaining two repos
-- Direct access to Spore types for the converter
-- When ready to extract: move `types.ts`, `validator.ts`, `keyfile.ts` to a standalone package; converter stays in Spore as the "glue"
+- Direct access to Genlock types for the converter
+- When ready to extract: move `types.ts`, `validator.ts`, `keyfile.ts` to a standalone package; converter stays in Genlock as the "glue"
 - Spec files in `/spec` are already standalone and can be published independently
 
 ---
@@ -192,7 +192,7 @@ Rationale for YAML:
 **Date:** 2026-05-22
 **Status:** Accepted
 
-**Context:** SPORE needs to create a new project before the author has written acts, scenes, or shots. The original schema required non-empty `acts`, `scenes`, `shots`, `scene_refs`, and `shot_refs`, which made an empty but valid new project impossible. At the same time, production and export workflows still need stricter validation so broken structure does not reach rendering or handoff.
+**Context:** Genlock needs to create a new project before the author has written acts, scenes, or shots. The original schema required non-empty `acts`, `scenes`, `shots`, `scene_refs`, and `shot_refs`, which made an empty but valid new project impossible. At the same time, production and export workflows still need stricter validation so broken structure does not reach rendering or handoff.
 
 **Decision:** SKEL adds optional `metadata.lifecycle` with three values: `draft`, `production`, and `export`. If omitted, parsers treat the document as `draft`.
 
@@ -202,7 +202,7 @@ Validation behavior:
 - `export` inherits production-level structural requirements and is the mode where portable handoff requirements, such as embedded BONE definitions, should be enforced.
 
 **Consequences:**
-- New SPORE projects can be created and saved immediately as valid `draft` documents.
+- New Genlock projects can be created and saved immediately as valid `draft` documents.
 - Production/export validation can remain strict without blocking early ideation.
 - Validators must select behavior based on `metadata.lifecycle`, not only the base schema.
 - Future lifecycle-specific requirements can be added without changing the core data model.
@@ -258,14 +258,14 @@ LLM integration docs specify that agents must read `intent` before rewriting `ac
 **Date:** 2026-07-07
 **Status:** Accepted
 
-**Context:** BONE answers "what data/config attaches to this entity" but not "who gets to run logic when something happens in the workflow." Users need to inject behavior — custom validators, prompt post-processors, render post-processing, external-app sync, format adapters — without forking Spore or the spec. Overloading BONE with behavior would blur its role as a portable, embeddable data contract (code cannot be safely embedded on export the way field definitions can).
+**Context:** BONE answers "what data/config attaches to this entity" but not "who gets to run logic when something happens in the workflow." Users need to inject behavior — custom validators, prompt post-processors, render post-processing, external-app sync, format adapters — without forking Genlock or the spec. Overloading BONE with behavior would blur its role as a portable, embeddable data contract (code cannot be safely embedded on export the way field definitions can).
 
 **Decision:** Add a second plugin kind: MUSCLE (Modular User-Scripted Companion Logic Extension), specified in `muscle-spec.md`. A MUSCLE is a `.muscle.json` manifest — not code — declaring: named lifecycle hooks it subscribes to (`import.*`, `document.validate`, `token.resolve`, `prompt.assemble.*`, `generate.route`, `render.complete`, `entity.changed`, `export.*`), a hook mode (`observe`/`transform`/`veto`), scoped capabilities, and `execution_routes` reusing the BONE §2.7 vocabulary (`mcp`, `cli`, `skill`, `api`, `manual`). Hosts invoke MUSCLEs as external processes/tools with a versioned JSON envelope and result (`hook-payload.schema.json`).
 
 **Consequences:**
 - BONE stays a pure data contract; MUSCLE owns behavior. A generator integration may ship both.
 - Language-agnostic and LLM-native: an MCP tool is a valid plugin; agents can act as plugin executors.
-- No embedded scripting runtime or sandbox required in Spore.
+- No embedded scripting runtime or sandbox required in Genlock.
 - Behavior is recorded, not embedded: `metadata.plugins` lists what acted on a document; documents with unknown plugin records must still load everywhere.
 - Deterministic ordering (priority, then registration order) keeps multiple plugins on one hook predictable.
 

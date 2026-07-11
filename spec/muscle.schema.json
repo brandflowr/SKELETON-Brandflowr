@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/muscle.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json",
   "title": "MUSCLE Manifest",
   "description": "Validates .muscle.json behavior-plugin manifests. MUSCLE Spec v1.0.",
   "type": "object",

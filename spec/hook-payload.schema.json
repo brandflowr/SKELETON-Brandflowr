@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Spec/main/spec/hook-payload.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/hook-payload.schema.json",
   "title": "MUSCLE Hook Payload Contract",
   "description": "Envelope (host to MUSCLE) and result (MUSCLE to host) for hook invocations. MUSCLE Spec v1.0, payload_version 1.0. Validate an envelope against #/definitions/HookEnvelope and a result against #/definitions/HookResult.",
   "definitions": {

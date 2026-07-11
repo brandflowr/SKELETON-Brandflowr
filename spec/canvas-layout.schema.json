@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://spore.dev/schemas/skel/v1.0/canvas-layout.schema.json",
-  "title": "SPORE Canvas Layout",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/canvas-layout.schema.json",
+  "title": "Genlock Canvas Layout",
   "description": "Production Canvas node positions and viewport state. Stored at projects/{slug}/canvas/layout.json. This file is purely presentational — it stores node positions and zoom state so the canvas can restore its layout across sessions. It does not contain or modify story data.",
   "type": "object",
   "required": ["nodes"],
@@ -63,7 +63,7 @@
         },
         "extensions": {
           "type": "object",
-          "description": "Vendor-specific extension data for canvas node display. Keys SHOULD be x- namespaced (e.g. x-spore-color)."
+          "description": "Vendor-specific extension data for canvas node display. Keys SHOULD be x- namespaced (e.g. x-genlock-color)."
         }
       }
     },

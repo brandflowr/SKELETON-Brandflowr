@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://spore.dev/schemas/skel/v1.0/audio-map.schema.json",
-  "title": "SPORE Audio Map",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/audio-map.schema.json",
+  "title": "Genlock Audio Map",
   "description": "Per-project mapping of shot IDs to audio track assignments. Stored at projects/{slug}/audio-map.json. Each shot may have up to three track types: dialogue, sfx, and music. Used by the Audio page, Timeline, and Production Player for synced playback.",
   "type": "object",
   "patternProperties": {

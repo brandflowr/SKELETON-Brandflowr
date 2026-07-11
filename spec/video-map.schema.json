@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://spore.dev/schemas/skel/v1.0/video-map.schema.json",
-  "title": "SPORE Video Map",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/video-map.schema.json",
+  "title": "Genlock Video Map",
   "description": "Per-project mapping of shot IDs to video takes. Stored at projects/{slug}/video-map.json. Both AI-rendered takes (renders/video/) and user-imported takes (assets/video/) are valid entries; the path prefix distinguishes their origin.",
   "type": "object",
   "patternProperties": {

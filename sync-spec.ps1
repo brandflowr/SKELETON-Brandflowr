@@ -48,7 +48,7 @@ $formatFiles = @(
     "CHANGELOG.md",
     "DECISIONS.md",
     "LLM_INTEGRATION.md",
-    "x-spore.schema.json",
+    "x-genlock.schema.json",
     "audio-map.schema.json",
     "video-map.schema.json",
     "canvas-layout.schema.json"
@@ -65,7 +65,7 @@ if (Test-Path (Join-Path $src "muscles")) {
                     Select-Object -ExpandProperty Name
 }
 
-# ── Spore-specific files (never touched by this script) ───────────────────────
+# ── Genlock-app-specific files (never touched by this script) ─────────────────────────────────────
 $preserved = @(
     "PUNCHLIST.md",
     "BONE_BUILDER_DESIGN.md",
@@ -132,7 +132,7 @@ foreach ($f in $musclesFiles) {
 }
 
 Write-Host ""
-Write-Host "Preserved (Spore-specific, not touched):" -ForegroundColor White
+Write-Host "Preserved (Genlock-app-specific, not touched):" -ForegroundColor White
 foreach ($f in $preserved) {
     $exists = Test-Path (Join-Path $dst $f)
     $status = if ($exists) { "  --   $f" } else { "  --   $f (not present)" }
