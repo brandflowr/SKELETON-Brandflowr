@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/skel.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
+  "$comment": "This $id is a versioned, immutable release URL (git tag v2.9.0). The same path under 'main' always carries the latest published schema. Pin the tagged URL in documents; see skel-spec.md §8 and GOVERNANCE.md for the release policy.",
   "title": "SKEL — Skeleton",
   "description": "A flat, relational SKEL data model for representing visual narratives. Native files are YAML; JSON is used for validation and export.",
   "type": "object",
@@ -11,6 +12,7 @@
       "if": {
         "properties": {
           "metadata": {
+            "type": "object",
             "properties": {
               "lifecycle": { "enum": ["production", "export"] }
             },
@@ -21,22 +23,26 @@
       "then": {
         "properties": {
           "acts": {
+            "type": "array",
             "minItems": 1,
             "items": {
+              "type": "object",
               "properties": {
-                "scene_refs": { "minItems": 1 }
+                "scene_refs": { "type": "array", "minItems": 1 }
               }
             }
           },
           "scenes": {
+            "type": "array",
             "minItems": 1,
             "items": {
+              "type": "object",
               "properties": {
-                "shot_refs": { "minItems": 1 }
+                "shot_refs": { "type": "array", "minItems": 1 }
               }
             }
           },
-          "shots": { "minItems": 1 }
+          "shots": { "type": "array", "minItems": 1 }
         }
       }
     },
@@ -44,6 +50,7 @@
       "if": {
         "properties": {
           "metadata": {
+            "type": "object",
             "properties": {
               "lifecycle": { "const": "export" }
             },
@@ -59,6 +66,7 @@
       "if": {
         "properties": {
           "metadata": {
+            "type": "object",
             "required": ["bones"]
           }
         }
@@ -71,7 +79,9 @@
       "if": {
         "properties": {
           "acts": {
+            "type": "array",
             "contains": {
+              "type": "object",
               "required": ["bones"]
             }
           }
@@ -85,7 +95,9 @@
       "if": {
         "properties": {
           "scenes": {
+            "type": "array",
             "contains": {
+              "type": "object",
               "required": ["bones"]
             }
           }
@@ -99,7 +111,9 @@
       "if": {
         "properties": {
           "shots": {
+            "type": "array",
             "contains": {
+              "type": "object",
               "required": ["bones"]
             }
           }
@@ -114,8 +128,8 @@
     "$schema": { "type": "string" },
     "skel_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+$",
-      "description": "Spec version (semver MAJOR.MINOR)."
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Spec version (semver). MAJOR.MINOR required; the PATCH component MAY be included (e.g. \"2.0\" or \"2.0.1\"). Parsers MUST reject unsupported major versions."
     },
     "metadata": { "$ref": "#/definitions/Metadata" },
     "bone_registry": {
@@ -137,18 +151,33 @@
     },
     "characters": {
       "type": "array",
-      "description": "Optional embedded character snapshots. Primary reference is by id (studio.json); embed on lifecycle: export for a portable, self-contained file.",
+      "description": "Optional embedded character snapshots referenced by shots' character_refs. Primary reference is by id into the studio registry (studio.json, see studio.schema.json); embed on lifecycle: export for a portable, self-contained file.",
       "items": { "$ref": "#/definitions/Character" }
     },
     "environments": {
       "type": "array",
-      "description": "Optional embedded environment snapshots. Primary reference is by id (studio.json); embed on export.",
+      "description": "Optional embedded environment snapshots referenced by scenes' environment_ref. An environment is a dressed/lit variant of a location. Primary reference is by id (studio.json); embed on export.",
       "items": { "$ref": "#/definitions/Environment" }
+    },
+    "locations": {
+      "type": "array",
+      "description": "Optional embedded location snapshots referenced by scenes' location_ref and environments' location_ref. A location is the physical place; environments are its dressed/lit variants. Primary reference is by id (studio.json); embed on export.",
+      "items": { "$ref": "#/definitions/Location" }
+    },
+    "props": {
+      "type": "array",
+      "description": "Optional embedded prop snapshots referenced by shots' prop_refs and characters' props_carried. First-class continuity objects. Primary reference is by id (studio.json); embed on export.",
+      "items": { "$ref": "#/definitions/Prop" }
     },
     "audio_assets": {
       "type": "array",
-      "description": "Optional embedded audio asset snapshots. Primary reference is via shots' sound_effects / audio-map.json; embed on export.",
+      "description": "Optional embedded audio asset snapshots. Primary reference is via shots' sound_effects / music_cues / audio-map.json; embed on export.",
       "items": { "$ref": "#/definitions/AudioAsset" }
+    },
+    "music_cues": {
+      "type": "array",
+      "description": "Optional document-level music/score cues that span shots. Each cue references an audio asset and in/out points anchored to shots. Per-shot assignment stays in sound_effects and the audio-map sidecar; music_cues is the score lane.",
+      "items": { "$ref": "#/definitions/MusicCue" }
     },
     "story_analysis": { "$ref": "#/definitions/StoryAnalysis" },
     "production": { "$ref": "#/definitions/Production" },
@@ -163,7 +192,8 @@
   "definitions": {
     "Extensions": {
       "type": "object",
-      "description": "Vendor-namespaced extension data (keys must start with 'x-')."
+      "description": "Vendor-namespaced extension data. Keys MUST start with 'x-' (enforced via propertyNames).",
+      "propertyNames": { "pattern": "^x-" }
     },
     "Bones": {
       "type": "object",
@@ -199,7 +229,7 @@
         "provider": { "type": "string" },
         "attaches_to": {
           "type": "array",
-          "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] }
+          "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "character", "environment"] }
         },
         "fields": {
           "type": "object",
@@ -234,7 +264,7 @@
         }
       },
       "properties": {
-        "bone_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "bone_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
         "label": { "type": "string" },
         "description": { "type": "string" },
         "target": { "type": "string", "enum": ["image", "video", "audio", "style", "custom"] },
@@ -245,7 +275,7 @@
         },
         "attaches_to": {
           "type": "array",
-          "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] },
+          "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "character", "environment"] },
           "minItems": 1
         },
         "fields": {
@@ -278,7 +308,59 @@
           "type": "object",
           "description": "Vendor-specific extension data. Keys should be x- namespaced.",
           "additionalProperties": true
+        },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Capability ids this BONE needs in order to fire (host capability matrix)."
+        },
+        "pipeline_stage": {
+          "type": "string",
+          "description": "Optional pipeline stage this BONE participates in (e.g. proposal, scene_plan, generation, review)."
+        },
+        "authoring_mode": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["templated", "atelier", "hybrid"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "Templated, Atelier/Bespoke, or Hybrid authoring. Absence = unset."
+        },
+        "render_runtime": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["native", "remotion", "hyperframes", "ffmpeg"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "Preferred composition runtime. Governance/selector metadata only."
+        },
+        "style_tokens": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional color/typography/motion/grading/caption/a11y tokens for style-family BONEs."
+        },
+        "decision_log_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of host decision-log entries that motivated or constrain this BONE."
+        },
+        "quality_gates": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/QualityGate" },
+          "description": "Optional quality gates this BONE must satisfy — governance metadata for host reviewer surfaces."
         }
+      }
+    },
+    "QualityGate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["severity", "message"],
+      "description": "A quality gate a BONE declares it must satisfy, shaped like a reviewer finding. Runtime-only fields (id/timestamp) are optional because a BONE declares gates rather than emitting findings.",
+      "properties": {
+        "severity": { "type": "string" },
+        "message": { "type": "string" },
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" }
       }
     },
     "PromptAssembly": {
@@ -328,7 +410,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["size", "angle", "lens", "move", "light", "tod", "dof", "aspect", "color", "mood", "custom"]
+            "enum": ["size", "angle", "lens", "move", "light", "tod", "dof", "aspect", "color", "mood", "weather", "texture", "custom"]
           }
         }
       }
@@ -336,6 +418,7 @@
     "CharacterInjection": {
       "type": "object",
       "additionalProperties": true,
+      "description": "Controls injection of character data from character_refs. Format 'consistency_modifier' MUST emit each referenced character's identity_lock text verbatim.",
       "properties": {
         "enabled": { "type": "boolean", "default": false },
         "position": { "type": "string", "enum": ["prepend", "append", "subject_prefix"] },
@@ -390,16 +473,31 @@
         "genre": { "type": "string" },
         "classification": { "type": "string" },
         "target_audience": { "type": "string" },
-        "target_duration_seconds": { "type": "number", "minimum": 0 },
-        "target_duration_minutes": { "type": "number", "minimum": 0 },
+        "target_duration_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Target runtime in seconds. Canonical duration field: when both duration fields are present, target_duration_seconds wins and validators SHOULD warn (DURATION_CONFLICT) if the two disagree by more than one second."
+        },
+        "target_duration_minutes": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Target runtime in minutes. Derived display convenience only; target_duration_seconds is canonical."
+        },
         "budget_range": { "type": "string" },
         "status": { "type": "string", "description": "Free-form production status label. Distinct from per-entity status.image/status.video." },
+        "language": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$",
+          "description": "Project default language as a BCP 47 tag (e.g. en, en-US, pt-BR). Per-line overrides live on Dialogue.lang."
+        },
         "content_warnings": { "type": "array", "items": { "type": "string" } },
         "tags": { "type": "array", "items": { "type": "string" } },
         "production_notes": { "type": "string" },
         "created_at": { "type": "string", "format": "date-time" },
         "modified_at": { "type": "string", "format": "date-time" },
-        "skin_key": { "type": "string" },
+        "skin_key": { "type": "string", "description": "Reference to a visual style/skin preset. Resolves against the studio registry's skins collection (studio.schema.json)." },
+        "series": { "$ref": "#/definitions/SeriesRef" },
+        "delivery": { "$ref": "#/definitions/Delivery" },
         "source": { "$ref": "#/definitions/SourceProvenance" },
         "plugins": {
           "type": "array",
@@ -409,6 +507,70 @@
         "constraints": { "$ref": "#/definitions/Constraints" },
         "bones": { "$ref": "#/definitions/Bones" },
         "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "SeriesRef": {
+      "type": "object",
+      "required": ["series_id"],
+      "additionalProperties": false,
+      "description": "Marks this document as one episode of a series. The series document itself (seasons, episode index, arcs, shared cast) lives in the studio registry (studio.schema.json).",
+      "properties": {
+        "series_id": { "type": "string" },
+        "series_title": { "type": "string" },
+        "season": { "type": "integer", "minimum": 0 },
+        "episode": { "type": "integer", "minimum": 0 },
+        "episode_code": { "type": "string", "description": "Display code such as S01E03." },
+        "arc_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Season/series arc IDs from the series document that this episode advances."
+        },
+        "previously": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "story_ids of episodes whose events this episode assumes."
+        }
+      }
+    },
+    "Delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Project delivery facts: frame rate, resolution, aspect, color, and audio targets. Required for timecode math, OTIO/NLE export, and render pipelines.",
+      "properties": {
+        "frame_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Frames per second; the timecode base (e.g. 24, 23.976, 25, 30)."
+        },
+        "resolution": {
+          "type": "object",
+          "required": ["width", "height"],
+          "additionalProperties": false,
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aspect": {
+          "type": "string",
+          "description": "Project default aspect ratio (e.g. \"2.39:1\"). v_setup.aspect overrides per shot."
+        },
+        "color_space": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["rec709", "srgb", "p3-d65", "rec2020", "aces-cct"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sample_rate": { "type": "integer", "minimum": 1, "description": "Hz, e.g. 48000." },
+            "channels": { "type": "integer", "minimum": 1 },
+            "loudness_target_lufs": { "type": "number", "description": "Integrated loudness target, e.g. -14 (streaming) or -23 (EBU R128)." }
+          }
+        }
       }
     },
     "SourceProvenance": {
@@ -439,7 +601,7 @@
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string" },
-        "order": { "type": "integer" },
+        "order": { "type": "integer", "description": "Derived display index. The refs arrays (and the acts array order) are canonical; validators SHOULD warn (ORDER_MISMATCH) when order fields disagree with ref-array order." },
         "title": { "type": "string" },
         "scene_refs": { "type": "array", "items": { "type": "string" } },
         "bones": { "$ref": "#/definitions/Bones" },
@@ -450,10 +612,19 @@
       "type": "object",
       "required": ["type", "name", "tod"],
       "additionalProperties": false,
+      "description": "Parsed location block. loc is canonical; the scene header string is derived display text and validators SHOULD warn (HEADER_LOC_MISMATCH) when the two disagree.",
       "properties": {
         "type": { "type": "string", "enum": ["INT", "EXT", "INT/EXT"] },
         "name": { "type": "string" },
-        "tod": { "type": "string", "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "CONT"], "default": "DAY" }
+        "tod": {
+          "type": "string",
+          "default": "DAY",
+          "anyOf": [
+            { "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "MORNING", "AFTERNOON", "EVENING", "LATER", "SAME", "CONT"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "Time-of-day token (see key file). CONT means continuous with the previous scene — previous by act order, then scene_refs order; validators SHOULD warn (TOD_CONT_FIRST_SCENE) when the first scene uses CONT. SAME means the same time as the previous scene after a cutaway; LATER means an unspecified jump forward."
+        }
       }
     },
     "CreativeStatus": {
@@ -512,17 +683,41 @@
       "properties": {
         "id": { "type": "string" },
         "act_id": { "type": "string" },
-        "order": { "type": "integer" },
-        "header": { "type": "string" },
+        "order": { "type": "integer", "description": "Derived display index. The refs arrays are canonical ordering; validators SHOULD warn (ORDER_MISMATCH) on disagreement." },
+        "header": { "type": "string", "description": "Screenplay slug line for display (e.g. INT. LIGHTHOUSE - NIGHT). Derived from loc, which is canonical." },
         "loc": { "$ref": "#/definitions/Loc" },
-        "location_ref": { "type": "string" },
-        "environment_ref": { "type": "string" },
+        "location_ref": { "type": "string", "description": "Reference to the physical place (Location). A location is the place itself; an environment is a dressed/lit variant of it." },
+        "environment_ref": { "type": "string", "description": "Reference to the dressed/lit variant of the location (Environment) this scene plays in." },
         "shot_refs": { "type": "array", "items": { "type": "string" } },
         "narrative": { "type": "string" },
         "notes": { "type": "string" },
         "duration_seconds": { "type": "number", "minimum": 0 },
         "mood": { "type": "string" },
         "key_story_elements": { "type": "array", "items": { "type": "string" } },
+        "story_time": {
+          "type": ["string", "number"],
+          "description": "Sortable in-world chronological position: an ISO timestamp, a day number, or an ordinal. Presentation order (acts/scene_refs) is separate from story chronology; this is the chronology axis."
+        },
+        "time_elapsed_since_previous": {
+          "type": "string",
+          "description": "Display string for the in-world time gap since the previous scene in presentation order (e.g. \"three days later\")."
+        },
+        "narrative_mode": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["present", "flashback", "flashforward", "dream", "montage", "imagined"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "How this scene relates to the story's present timeline. Default when omitted: present."
+        },
+        "transition_out": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["cut", "dissolve", "fade_in", "fade_out", "smash_cut", "match_cut", "wipe", "iris", "whip"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "Editorial transition out of this scene (see key file transition category). Omitted implies a straight cut."
+        },
         "intent": { "$ref": "#/definitions/SceneIntent" },
         "creative_status": { "$ref": "#/definitions/CreativeStatus" },
         "bones": { "$ref": "#/definitions/Bones" },
@@ -533,23 +728,97 @@
       "type": "object",
       "required": ["size", "angle"],
       "additionalProperties": false,
+      "description": "Visual setup tokens. Every token field accepts either a core enum value or an x- prefixed custom token declared in the key file's custom section with a matching category.",
       "properties": {
-        "size":   { "type": "string", "enum": ["ws", "mws", "ms", "mcu", "cu", "ecu", "pov", "ots", "2s"] },
-        "angle":  { "type": "string", "enum": ["eye", "low", "high", "dutch", "bird", "worm"] },
-        "lens":   { "type": "string", "enum": ["wide", "std", "tele", "macro", "anamorphic"], "default": "std" },
-        "move":   { "type": "string", "enum": ["static", "pan", "tilt", "dolly", "crane", "handheld", "steadicam", "drone"], "default": "static" },
-        "light":  { "type": "string", "enum": ["natural", "noir", "high_key", "low_key", "golden", "blue", "practical", "neon"], "default": "natural" },
-        "dof":    { "type": "string", "enum": ["deep", "shallow", "rack"], "default": "deep" },
-        "aspect": { "type": "string", "enum": ["16:9", "9:16", "1:1", "4:3", "2.39:1", "21:9"] },
-        "color":  { "type": "string" },
-        "mood":   { "type": "string" }
+        "size": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["ws", "mws", "ms", "mcu", "cu", "ecu", "pov", "ots", "2s", "est", "fs", "cowboy", "ins", "3s", "group"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "angle": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["eye", "low", "high", "dutch", "bird", "worm", "profile", "three_quarter"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "lens": {
+          "type": "string",
+          "default": "std",
+          "anyOf": [
+            { "enum": ["wide", "std", "tele", "macro", "anamorphic"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "move": {
+          "type": "string",
+          "default": "static",
+          "anyOf": [
+            { "enum": ["static", "pan", "tilt", "dolly", "crane", "handheld", "steadicam", "drone", "zoom_in", "zoom_out", "dolly_zoom", "arc", "truck", "pedestal", "whip_pan", "roll", "push_in", "pull_out"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "light": {
+          "type": "string",
+          "default": "natural",
+          "anyOf": [
+            { "enum": ["natural", "noir", "high_key", "low_key", "golden", "blue", "practical", "neon", "silhouette", "backlit", "rembrandt", "moonlight", "firelight", "overcast", "harsh_sun", "strobe", "volumetric"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "dof": {
+          "type": "string",
+          "default": "deep",
+          "anyOf": [
+            { "enum": ["deep", "shallow", "rack", "split", "tilt_shift"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "aspect": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["16:9", "9:16", "1:1", "4:3", "2.39:1", "21:9", "4:5", "1.85:1", "3:2"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "color": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["warm", "cool", "teal_orange", "monochrome", "sepia", "desaturated", "vibrant", "pastel", "bleach_bypass"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "mood": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["tense", "romantic", "eerie", "melancholic", "hopeful", "foreboding", "serene", "chaotic", "nostalgic", "oppressive", "whimsical", "triumphant"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "weather": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["clear", "rain", "heavy_rain", "snow", "fog", "storm", "wind", "overcast", "heat_haze"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "texture": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["film_35mm", "film_16mm", "digital_clean", "vhs", "grainy"] },
+            { "pattern": "^x-" }
+          ]
+        }
       }
     },
     "Status": {
       "type": "object",
+      "description": "Per-shot media production status. This core field is the canonical home of production status; extensions.x-genlock.production_status is a deprecated mirror (see MIGRATIONS.md).",
       "properties": {
-        "image": { "type": "string", "enum": ["pending", "generating", "review", "approved", "rejected"] },
-        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected"] }
+        "image": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected", "failed"] },
+        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected", "failed"] }
       },
       "additionalProperties": false
     },
@@ -560,24 +829,42 @@
       "properties": {
         "id": { "type": "string" },
         "scene_id": { "type": "string" },
-        "order": { "type": "integer" },
+        "order": { "type": "integer", "description": "Derived display index. The refs arrays are canonical ordering; validators SHOULD warn (ORDER_MISMATCH) on disagreement." },
         "title": { "type": "string" },
         "action": { "type": "string", "maxLength": 200 },
         "visual_focus": { "type": "string" },
         "dialogue": {
           "oneOf": [
             { "type": "string" },
-            { "$ref": "#/definitions/Dialogue" }
+            { "$ref": "#/definitions/Dialogue" },
+            { "type": "array", "items": { "$ref": "#/definitions/Dialogue" }, "minItems": 1 }
           ],
-          "description": "Either a plain spoken line (string) or a structured dialogue object with timing, emotion, and voice settings."
+          "description": "A plain spoken line (string), a structured dialogue object, or an ordered array of Dialogue objects for multi-line exchanges within one shot."
         },
         "character_refs": { "type": "array", "items": { "type": "string" } },
+        "prop_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of props visible or used in this shot. Enables machine-checkable prop continuity."
+        },
         "duration": { "type": "number", "minimum": 0 },
         "notes": { "type": "string" },
         "status": { "$ref": "#/definitions/Status" },
         "v_setup": { "$ref": "#/definitions/VSetup" },
         "cinematography": { "$ref": "#/definitions/Cinematography" },
         "sound_effects": { "type": "array", "items": { "$ref": "#/definitions/SoundCue" } },
+        "transition_out": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["cut", "dissolve", "fade_in", "fade_out", "smash_cut", "match_cut", "wipe", "iris", "whip"] },
+            { "pattern": "^x-" }
+          ],
+          "description": "Editorial transition out of this shot (see key file transition category). Omitted implies a straight cut."
+        },
+        "audio_description": {
+          "type": "string",
+          "description": "Optional described-video text for accessibility: what a non-sighted audience needs narrated for this shot."
+        },
         "intent": { "$ref": "#/definitions/ShotIntent" },
         "creative_status": { "$ref": "#/definitions/CreativeStatus" },
         "bones": { "$ref": "#/definitions/Bones" },
@@ -588,10 +875,24 @@
       "type": "object",
       "required": ["text"],
       "additionalProperties": true,
-      "description": "Structured dialogue: the spoken line plus timing, emotion, and voice direction.",
+      "description": "Structured dialogue: the spoken line plus timing, emotion, and voice direction. character_ref SHOULD be present when the shot lists more than one character (validators warn DIALOGUE_AMBIGUOUS_SPEAKER).",
       "properties": {
         "text": { "type": "string" },
         "character_ref": { "type": "string" },
+        "mode": {
+          "type": "string",
+          "enum": ["spoken", "vo", "os", "thought", "song", "radio"],
+          "description": "Delivery mode: on-screen spoken (default), voice-over (V.O.), off-screen (O.S.), inner thought, sung, or through an in-world device/radio."
+        },
+        "lang": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$",
+          "description": "BCP 47 language tag for this line. Defaults to metadata.language."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Optional display/subtitle text when it differs from the spoken text (translation, stylization)."
+        },
         "timing_start_seconds": { "type": "number", "minimum": 0 },
         "timing_end_seconds": { "type": "number", "minimum": 0 },
         "emotion": { "type": "string" },
@@ -603,13 +904,40 @@
       "type": "object",
       "required": ["audio_ref"],
       "additionalProperties": true,
-      "description": "A per-shot reference to an audio asset with placement.",
+      "description": "A per-shot reference to an audio asset with placement. For score/music spanning multiple shots use the document-level music_cues collection.",
       "properties": {
         "audio_ref": { "type": "string" },
         "timing_start_seconds": { "type": "number", "minimum": 0 },
         "timing_end_seconds": { "type": "number", "minimum": 0 },
         "volume": { "type": "number", "minimum": 0, "maximum": 1 },
         "loop": { "type": "boolean" }
+      }
+    },
+    "MusicCue": {
+      "type": "object",
+      "required": ["id", "audio_ref", "in"],
+      "additionalProperties": false,
+      "description": "A music/score cue spanning one or more shots. in/out anchor to shots by ID with optional offsets so a single cue can cross scene boundaries without duplication.",
+      "properties": {
+        "id": { "type": "string" },
+        "audio_ref": { "type": "string", "description": "Audio asset ID. SHOULD resolve to audio_assets when embedded, or to the studio registry." },
+        "in": { "$ref": "#/definitions/CuePoint" },
+        "out": {
+          "$ref": "#/definitions/CuePoint",
+          "description": "Optional end anchor. Omitted means the cue runs to the end of its audio or the end of the timeline, whichever comes first."
+        },
+        "volume": { "type": "number", "minimum": 0, "maximum": 1 },
+        "notes": { "type": "string" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "CuePoint": {
+      "type": "object",
+      "required": ["shot_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "shot_ref": { "type": "string", "description": "Shot ID this point anchors to. MUST resolve to a shot." },
+        "offset_seconds": { "type": "number", "description": "Offset from the start of the anchored shot. Defaults to 0. Negative values lead the cut." }
       }
     },
     "Cinematography": {
@@ -627,17 +955,230 @@
     },
     "Character": {
       "type": "object",
-      "required": ["id"],
+      "required": ["id", "name"],
       "additionalProperties": true,
-      "description": "Embedded character snapshot (export/portable). Referenced by id from studio.json in working files.",
-      "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+      "description": "A character definition. Embedded in .skel documents as a snapshot (export/portable) and stored canonically in the studio registry (studio.schema.json). additionalProperties stays open for backward compatibility with pre-2.9 loose snapshots; new vendor fields SHOULD use extensions.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "pronouns": { "type": "string" },
+        "age": { "type": ["string", "number"] },
+        "age_range": { "type": "string", "description": "e.g. \"55-65\". Preferred over exact age for casting/generation latitude." },
+        "species": { "type": "string" },
+        "role": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["protagonist", "antagonist", "deuteragonist", "supporting", "minor", "background", "narrator"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "archetype": { "type": "string" },
+        "identity_lock": {
+          "type": "string",
+          "description": "THE canonical 30-60-word appearance description. This exact text is what the character-reference-sheet BONE consumes and every downstream prompt (storyboard, video) MUST reuse verbatim. CharacterInjection format 'consistency_modifier' emits this field."
+        },
+        "height": { "type": "string" },
+        "build": { "type": "string" },
+        "hair": { "type": "string" },
+        "eyes": { "type": "string" },
+        "skin": { "type": "string" },
+        "distinguishing_marks": { "type": "array", "items": { "type": "string" } },
+        "default_wardrobe": { "type": "string" },
+        "wardrobe_variants": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/WardrobeVariant" },
+          "description": "Costume variants with the scenes they apply to. The costume-continuity backbone."
+        },
+        "voice": { "$ref": "#/definitions/VoiceProfile" },
+        "reference_sheet": { "type": "string", "description": "Path to the rendered character reference sheet image." },
+        "reference_images": { "type": "array", "items": { "type": "string" } },
+        "identity_refs": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Machine identity anchors for generation pipelines.",
+          "properties": {
+            "lora": { "type": "string" },
+            "embedding": { "type": "string" },
+            "soul_id": { "type": "string" },
+            "face_ref": { "type": "string" }
+          }
+        },
+        "thumbnail": { "type": "string" },
+        "bio": { "type": "string" },
+        "want": { "type": "string", "description": "External goal: what the character pursues." },
+        "need": { "type": "string", "description": "Internal truth: what the character actually requires." },
+        "flaw": { "type": "string" },
+        "arc": { "type": "string" },
+        "secrets": { "type": "array", "items": { "type": "string" } },
+        "relationships": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Relationship" }
+        },
+        "first_appearance": { "type": "string", "description": "Shot ID of the character's first appearance." },
+        "props_carried": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Prop IDs habitually carried by this character."
+        },
+        "state_overrides": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CharacterStateOverride" },
+          "description": "Per-scene continuity state: wardrobe, injuries, notes."
+        },
+        "creative_status": { "$ref": "#/definitions/CreativeStatus" },
+        "notes": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "WardrobeVariant": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "scene_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Scenes in which this wardrobe variant is worn."
+        }
+      }
+    },
+    "VoiceProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "accent": { "type": "string" },
+        "casting": { "type": "string", "description": "Casting note or voice reference (\"in the register of ...\")." },
+        "voice_settings": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "TTS provider settings (provider, voice_id, stability, ...). Feeds TTS BONEs; per-line overrides live on Dialogue.voice_settings."
+        }
+      }
+    },
+    "Relationship": {
+      "type": "object",
+      "required": ["character_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "character_ref": { "type": "string" },
+        "type": { "type": "string", "description": "Free-form relationship type: estranged_son, mentor, rival, ..." },
+        "description": { "type": "string" }
+      }
+    },
+    "CharacterStateOverride": {
+      "type": "object",
+      "required": ["scene_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "scene_ref": { "type": "string" },
+        "wardrobe_ref": { "type": "string", "description": "WardrobeVariant id in effect for this scene." },
+        "injuries": { "type": "string", "description": "Visible injury/damage state carried into this scene." },
+        "notes": { "type": "string" }
+      }
     },
     "Environment": {
       "type": "object",
-      "required": ["id"],
+      "required": ["id", "name"],
       "additionalProperties": true,
-      "description": "Embedded environment snapshot (export/portable). Referenced by id from studio.json in working files.",
-      "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+      "description": "A dressed/lit variant of a location (e.g. lighthouse-interior-storm-night). Scenes point at environments via environment_ref; environments point at their physical place via location_ref. additionalProperties stays open for backward compatibility with pre-2.9 loose snapshots.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "loc_type": { "type": "string", "enum": ["INT", "EXT", "INT/EXT"] },
+        "location_ref": { "type": "string", "description": "The parent Location this environment dresses." },
+        "description": { "type": "string" },
+        "style_lock": {
+          "type": "string",
+          "description": "The canonical prompt text for this environment, mirroring Character.identity_lock: reused verbatim by downstream prompts for set consistency."
+        },
+        "era_period": { "type": "string" },
+        "geography": {
+          "type": "string",
+          "description": "Spatial layout notes: what is left of the door, where the window faces. The thing AI shot continuity always breaks without."
+        },
+        "tod_variants": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TodVariant" },
+          "description": "Per-time-of-day lighting/description variants; the same room at NIGHT is a different prompt than at DAWN."
+        },
+        "weather_default": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["clear", "rain", "heavy_rain", "snow", "fog", "storm", "wind", "overcast", "heat_haze"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "soundscape_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Audio asset IDs for ambient beds belonging to this environment."
+        },
+        "reference_images": { "type": "array", "items": { "type": "string" } },
+        "props_present": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Prop IDs dressed into this environment."
+        },
+        "bones": { "$ref": "#/definitions/Bones" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "TodVariant": {
+      "type": "object",
+      "required": ["tod"],
+      "additionalProperties": false,
+      "properties": {
+        "tod": {
+          "type": "string",
+          "anyOf": [
+            { "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "MORNING", "AFTERNOON", "EVENING", "LATER", "SAME", "CONT"] },
+            { "pattern": "^x-" }
+          ]
+        },
+        "lighting": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "description": "A physical place (one lighthouse). Environments are its dressed/lit variants; scenes reference both.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "reference_images": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
+    },
+    "Prop": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "description": "A first-class continuity object. significance: plot_critical props are machine-checkable: validators SHOULD warn (PROP_CONTINUITY) when a plot-critical prop appears once and never again.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "significance": {
+          "type": "string",
+          "enum": ["set_dressing", "recurring", "plot_critical"]
+        },
+        "first_appearance": { "type": "string", "description": "Shot ID where the prop first appears." },
+        "carried_by": { "type": "string", "description": "Character ID that habitually carries this prop." },
+        "reference_image": { "type": "string" },
+        "notes": { "type": "string" },
+        "extensions": { "$ref": "#/definitions/Extensions" }
+      }
     },
     "AudioAsset": {
       "type": "object",
@@ -649,12 +1190,62 @@
     "StoryAnalysis": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Optional, informational story-development analysis. Does not affect validation strictness or generation."
+      "description": "Optional, informational story-development analysis. Does not affect validation strictness or generation. The properties below are the RECOMMENDED shape so tools converge; the object stays open.",
+      "properties": {
+        "themes": { "type": "array", "items": { "type": "string" } },
+        "motifs": { "type": "array", "items": { "type": "string" } },
+        "character_arcs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "character_ref": { "type": "string" },
+              "arc": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "emotional_curve": {
+          "type": "array",
+          "description": "Per-scene emotional intensity samples in presentation order.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "scene_ref": { "type": "string" },
+              "emotion": { "type": "string" },
+              "intensity": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "pacing_notes": { "type": "string" }
+      }
     },
     "Production": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Optional, informational production planning + tracking. Tool-managed; not validated strictly."
+      "description": "Optional, informational production planning + tracking. Tool-managed; not validated strictly. The properties below are the RECOMMENDED shape so tools converge; the object stays open.",
+      "properties": {
+        "schedule": { "type": "object", "additionalProperties": true },
+        "budget": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Budget tracking; per-BONE generation cost estimates belong here."
+        },
+        "crew": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "role": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        },
+        "generation_stats": { "type": "object", "additionalProperties": true }
+      }
     },
     "KeyFileToken": {
       "type": "object",
@@ -666,22 +1257,40 @@
         "description": { "type": "string" }
       }
     },
+    "CustomKeyFileToken": {
+      "type": "object",
+      "required": ["token", "label", "category"],
+      "additionalProperties": true,
+      "description": "A vendor-registered custom token. The x- prefixed token validates in the schema's token fields; category declares which token field it belongs to.",
+      "properties": {
+        "token": { "type": "string", "pattern": "^x-" },
+        "label": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["size", "angle", "lens", "move", "light", "tod", "dof", "aspect", "color", "mood", "weather", "texture", "transition"]
+        },
+        "description": { "type": "string" }
+      }
+    },
     "KeyFile": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "version": { "type": "string" },
-        "size":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "angle":  { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "lens":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "move":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "light":  { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "tod":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "dof":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "aspect": { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "color":  { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "mood":   { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
-        "custom": { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } }
+        "size":       { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "angle":      { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "lens":       { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "move":       { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "light":      { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "tod":        { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "dof":        { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "aspect":     { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "color":      { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "mood":       { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "weather":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "texture":    { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "transition": { "type": "array", "items": { "$ref": "#/definitions/KeyFileToken" } },
+        "custom":     { "type": "array", "items": { "$ref": "#/definitions/CustomKeyFileToken" } }
       }
     }
   }

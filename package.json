@@ -1,0 +1,44 @@
+{
+  "name": "@skel/spec",
+  "version": "2.9.0",
+  "description": "SKEL (Story Keyframe Extensible Layout) — JSON Schemas, default token key file, TypeScript types, and reference tooling for the open storyboard data format.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brandflowr/SKELETON-Brandflowr.git"
+  },
+  "keywords": ["skel", "bone", "muscle", "storyboard", "screenplay", "json-schema", "ai-filmmaking"],
+  "files": [
+    "spec/**",
+    "types/**",
+    "README.md",
+    "LICENSE",
+    "TRADEMARKS.md"
+  ],
+  "types": "./types/skel.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/skel.d.ts"
+    },
+    "./spec/*": "./spec/*",
+    "./package.json": "./package.json"
+  },
+  "workspaces": [
+    "reference/cli"
+  ],
+  "scripts": {
+    "check": "npm run validate:examples && npm run conformance && npm run demo && npm run continuity && npm run roundtrip && npm run links",
+    "validate:examples": "node scripts/validate-examples.mjs",
+    "conformance": "node scripts/run-conformance.mjs",
+    "demo": "node reference/muscle-host/demo/run-demo.mjs",
+    "continuity": "node reference/continuity-guard/test-continuity-guard.mjs",
+    "roundtrip": "node reference/fountain-adapter/test-roundtrip.mjs",
+    "links": "node scripts/check-links.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "js-yaml": "^4.1.0"
+  }
+}

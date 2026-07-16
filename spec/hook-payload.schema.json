@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/hook-payload.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/hook-payload.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "MUSCLE Hook Payload Contract",
-  "description": "Envelope (host to MUSCLE) and result (MUSCLE to host) for hook invocations. MUSCLE Spec v1.0, payload_version 1.0. Validate an envelope against #/definitions/HookEnvelope and a result against #/definitions/HookResult.",
+  "description": "Envelope (host to MUSCLE) and result (MUSCLE to host) for hook invocations. MUSCLE Spec v1.1, payload_version 1.1 (additive over 1.0: entity.changed subjects and entity filters may name character/environment). Validate an envelope against #/definitions/HookEnvelope and a result against #/definitions/HookResult.",
   "definitions": {
     "HookEnvelope": {
       "type": "object",
@@ -116,7 +117,7 @@
           "description": "Prefixed with the muscle_id, e.g. studio-style-guard.tone."
         },
         "severity": { "type": "string", "enum": ["error", "warning"] },
-        "path": { "type": "string" },
+        "path": { "type": "string", "description": "RFC 6901 JSON Pointer into the SKELDocument (e.g. /shots/3/bones/flux-dev). The single path syntax used across SKEL error reporting." },
         "message": { "type": "string" }
       }
     },
@@ -181,7 +182,7 @@
         "required": ["entity", "id"],
         "additionalProperties": false,
         "properties": {
-          "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] },
+          "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "character", "environment"] },
           "id": { "type": "string" },
           "changed_paths": { "type": "array", "items": { "type": "string" } }
         }

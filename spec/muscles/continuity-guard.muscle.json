@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json",
+  "muscle_id": "continuity-guard",
+  "muscle_version": "1.0.0",
+  "label": "Continuity Guard",
+  "description": "Story-continuity lint on document.validate: cross-checks props (significance, first_appearance, carried_by) and character wardrobe/state data against the shots that actually use them. A worked example of a veto-mode MUSCLE over the SKEL 2.9 asset layer — reference tool in reference/continuity-guard/.",
+  "hooks": [
+    {
+      "on": "document.validate",
+      "mode": "veto",
+      "priority": 120,
+      "timeout_ms": 10000
+    }
+  ],
+  "capabilities": [
+    "read:document"
+  ],
+  "execution_routes": [
+    {
+      "type": "cli",
+      "label": "Continuity Guard CLI",
+      "command": "node reference/continuity-guard/continuity-guard.mjs",
+      "requires": []
+    }
+  ]
+}

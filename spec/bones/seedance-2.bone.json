@@ -1,7 +1,7 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json",
   "bone_id": "seedance-2",
-  "bone_version": "1.0",
+  "bone_version": "1.1",
   "label": "Seedance 2 (Video Generation)",
   "description": "ByteDance Seedance 2. AI filmmaking video prompts with text-only, storyboard-driven, and character-sheet-plus-storyboard reference modes.",
   "target": "video",
@@ -121,7 +121,7 @@
   },
   "output": {
     "format": "mp4",
-    "target": "videoTake",
+    "target": "video_take",
     "completion_status": "review"
   },
   "prompt_assembly": {

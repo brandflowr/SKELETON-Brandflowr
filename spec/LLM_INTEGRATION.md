@@ -62,6 +62,13 @@ Prompt assembly uses the same contract as `BONE/spec/bone-spec.md`: `template`, 
 - Run the SKEL validator on modified data before saving
 - Report schema errors or referential integrity issues
 
+### 8. Work with the asset layer
+- Read `characters[]` (or the studio registry) before writing any prompt that shows a character; reuse `identity_lock` **verbatim** — never paraphrase it
+- Respect wardrobe continuity: check `wardrobe_variants[].scene_refs` and `state_overrides` for the scene you are prompting
+- Reuse `environment.style_lock` and `geography` verbatim for set consistency across shots
+- Track props: when a shot's action mentions a tracked prop, add it to `prop_refs`; flag plot-critical props that vanish (`continuity_note` proposal)
+- For episodic work, read `metadata.series` and the registry series document to know which arcs this episode advances and which cast is shared
+
 ---
 
 ## The Full Generation Loop (LLM Perspective)
@@ -88,9 +95,10 @@ FOR each shot (render phase):
   DOWNLOAD rendered file
   RESOLVE output path from bone.output    → workspace + slug + shot_id + bone_id + format
   SAVE file to resolved path
-  UPDATE story.skel shot extensions        → startFrameImage / image / etc.
-  UPDATE video-map.json or audio-map.json  → for video/audio targets
-  SET production_status → "review"
+  UPDATE the target's write-back slot      → still / start_frame / end_frame (host image slots),
+                                             video-map.json, or audio-map.json
+  RECORD provenance                        → bone_id, provider, model, prompt, params (BONE Spec §2.8)
+  SET shot.status.image or .video → "review"   (core status is canonical; "failed" on error)
   SAVE story.skel
 
 DONE → Genlock picks up new files on reload
@@ -258,7 +266,7 @@ Output:
     {
       "code": "BONE_UNRESOLVED",
       "severity": "error",
-      "path": "shots[3].bones.flux-dev",
+      "path": "/shots/3/bones/flux-dev",
       "message": "Referenced BONE key does not exist in bone_registry."
     }
   ],
@@ -266,31 +274,24 @@ Output:
 }
 ```
 
+`path` is always an RFC 6901 JSON Pointer — the same syntax MUSCLE hook results use. Dot/bracket paths are non-conformant.
+
 Minimum checks:
 - `.skel` YAML parses correctly.
 - The parsed SKEL data model passes schema validation for the selected lifecycle.
-- IDs are unique across acts, scenes, and shots.
+- IDs are unique across acts, scenes, shots, and embedded asset collections.
 - `act.scene_refs` match real scenes.
 - `scene.shot_refs` match real shots.
 - `scene.act_id` matches a real act.
 - `shot.scene_id` matches a real scene.
+- `music_cues` in/out anchors match real shots.
+- Asset references resolve (`character_refs`, `dialogue.character_ref`, `environment_ref`, `location_ref`, `prop_refs`, `audio_ref`s) — errors when the embedded collection is present, warnings when only a studio registry could resolve them (skel-spec §3.4).
 - Any entity with `bones` requires `bone_registry`.
 - Every entity `bones` key resolves to `bone_registry`.
-- BONE data passes required-field checks after inheritance resolution.
+- BONE data passes required-field checks after inheritance resolution (defaults → metadata → act → scene → shot).
 - Sidecar shot IDs resolve to real shots when sidecar validation is enabled.
 
-Recommended error codes:
-- `YAML_PARSE_ERROR`
-- `SCHEMA_ERROR`
-- `DUPLICATE_ID`
-- `ACT_SCENE_REF_MISSING`
-- `SCENE_SHOT_REF_MISSING`
-- `SCENE_ACT_MISSING`
-- `SHOT_SCENE_MISSING`
-- `BONE_REGISTRY_MISSING`
-- `BONE_UNRESOLVED`
-- `BONE_REQUIRED_FIELD_MISSING`
-- `SIDECAR_SHOT_MISSING`
+Error codes are normative and stable — the complete catalog with severities and conditions is [`spec/errors.md`](./errors.md). Core codes: `YAML_PARSE_ERROR`, `SCHEMA_ERROR`, `DUPLICATE_ID`, `ACT_SCENE_REF_MISSING`, `SCENE_SHOT_REF_MISSING`, `SCENE_ACT_MISSING`, `SHOT_SCENE_MISSING`, `MUSIC_CUE_SHOT_MISSING`, `CHARACTER_REF_MISSING`, `ENVIRONMENT_REF_MISSING`, `LOCATION_REF_MISSING`, `PROP_REF_MISSING`, `AUDIO_REF_MISSING`, `BONE_REGISTRY_MISSING`, `BONE_UNRESOLVED`, `BONE_REQUIRED_FIELD_MISSING`, `SIDECAR_SHOT_MISSING`.
 
 ---
 
@@ -314,15 +315,17 @@ Failure path:  {workspace_root}/projects/{slug}/renders/failures/{shot_id}.{bone
 
 After saving the file, write back:
 
-**For image targets** — edit `story.skel`, find the shot by ID, update:
+**For image targets** (`still` / `start_frame` / `end_frame`) — edit `story.skel`, find the shot by ID, write the file path into the host's mapped image slot and set the **core status**:
 ```json
+"status": { "image": "review" },
 "extensions": {
   "x-genlock": {
     "startFrameImage": "projects/{slug}/renders/images/{shot_id}.{bone_id}.png",
-    "production_status": { "image": "review" }
+    "provenance": { "start_frame": { "bone_id": "{bone_id}", "model": "...", "prompt": "...", "params": { "seed": 42 } } }
   }
 }
 ```
+(`x-genlock.startFrameImage` is Genlock's slot for the neutral `start_frame` target — see GENLOCK_HOST_PROFILE.md. Core `shot.status` is canonical; `x-genlock.production_status` is a deprecated mirror you no longer need to write.)
 
 **For video_take targets** — edit `video-map.json`:
 ```json

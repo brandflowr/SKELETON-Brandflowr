@@ -1,0 +1,58 @@
+{
+  "skel_version": "2.0",
+  "metadata": {
+    "story_id": "fixture-026",
+    "title": "Fixture 26",
+    "lifecycle": "production"
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "Act One",
+      "scene_refs": [
+        "sc_1"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "header": "INT. ROOM - DAY",
+      "loc": {
+        "type": "INT",
+        "name": "ROOM",
+        "tod": "DAY"
+      },
+      "shot_refs": [
+        "sh_1"
+      ]
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "action": "A thing happens.",
+      "v_setup": {
+        "size": "ms",
+        "angle": "eye"
+      },
+      "character_refs": [
+        "char_a",
+        "char_b"
+      ],
+      "dialogue": "Who is saying this?"
+    }
+  ],
+  "characters": [
+    {
+      "id": "char_a",
+      "name": "Aya"
+    },
+    {
+      "id": "char_b",
+      "name": "Ben"
+    }
+  ]
+}

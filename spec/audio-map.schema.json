@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/audio-map.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/audio-map.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Audio Map",
   "description": "Per-project mapping of shot IDs to audio track assignments. Stored at projects/{slug}/audio-map.json. Each shot may have up to three track types: dialogue, sfx, and music. Used by the Audio page, Timeline, and Production Player for synced playback.",
   "type": "object",
@@ -27,7 +28,35 @@
         "music": {
           "type": ["string", "null"],
           "description": "Path to the music audio file for this shot, relative to the workspace root. Null clears the assignment."
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional per-track generation provenance for AI-generated audio, keyed by track type.",
+          "properties": {
+            "dialogue": { "$ref": "#/definitions/Provenance" },
+            "sfx": { "$ref": "#/definitions/Provenance" },
+            "music": { "$ref": "#/definitions/Provenance" }
+          }
         }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this render was made: enough to reproduce it, audit it, and disclose it. Hosts SHOULD write this block for every AI-generated track.",
+      "properties": {
+        "bone_id": { "type": "string", "description": "BONE that generated this render." },
+        "provider": { "type": "string", "description": "Provider namespace, e.g. elevenlabs, sonilo, mirelo." },
+        "model": { "type": "string", "description": "Exact model identifier." },
+        "prompt": { "type": "string", "description": "The final assembled prompt sent to the generator." },
+        "params": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Generation parameters: seed, voice_id, duration, ..."
+        },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "job_id": { "type": "string", "description": "Provider job/request ID for audit trails." }
       }
     }
   }

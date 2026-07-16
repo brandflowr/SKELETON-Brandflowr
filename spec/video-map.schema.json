@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/video-map.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/video-map.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Video Map",
   "description": "Per-project mapping of shot IDs to video takes. Stored at projects/{slug}/video-map.json. Both AI-rendered takes (renders/video/) and user-imported takes (assets/video/) are valid entries; the path prefix distinguishes their origin.",
   "type": "object",
@@ -52,7 +53,7 @@
         },
         "bone_id": {
           "type": "string",
-          "description": "The bone_id of the BONE definition that generated this take, if it was produced by the AI pipeline."
+          "description": "The bone_id of the BONE definition that generated this take, if it was produced by the AI pipeline. Duplicated inside provenance.bone_id when a full provenance block is present."
         },
         "duration": {
           "type": "number",
@@ -63,7 +64,40 @@
           "type": "string",
           "description": "ISO 8601 timestamp when this take was created or imported.",
           "format": "date-time"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The assembled prompt text that produced this take (legacy provenance field, kept for pre-2.9 writers). New writers SHOULD also populate provenance.prompt."
+        },
+        "promptJson": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "The structured prompt object that produced this take (legacy provenance field, kept for pre-2.9 writers). New writers SHOULD also populate provenance.params."
+        },
+        "provenance": { "$ref": "#/definitions/Provenance" },
+        "extensions": {
+          "type": "object",
+          "description": "Vendor-namespaced extension data. Keys MUST start with 'x-'.",
+          "propertyNames": { "pattern": "^x-" }
         }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this render was made: enough to reproduce it, audit it, and disclose it. Hosts SHOULD write this block for every AI-generated take.",
+      "properties": {
+        "bone_id": { "type": "string", "description": "BONE that generated this render." },
+        "provider": { "type": "string", "description": "Provider namespace, e.g. bytedance, runway, higgsfield." },
+        "model": { "type": "string", "description": "Exact model identifier, e.g. seedance-2.0." },
+        "prompt": { "type": "string", "description": "The final assembled prompt sent to the generator." },
+        "params": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Generation parameters: seed, duration, guidance, resolution, ..."
+        },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "job_id": { "type": "string", "description": "Provider job/request ID for audit trails." }
       }
     }
   }

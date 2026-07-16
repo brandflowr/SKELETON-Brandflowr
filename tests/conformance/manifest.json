@@ -1,0 +1,306 @@
+[
+  {
+    "file": "valid/minimal-draft.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [],
+      "forbid": [
+        "SCHEMA_ERROR"
+      ]
+    }
+  },
+  {
+    "file": "valid/production-basic.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [],
+      "forbid": []
+    }
+  },
+  {
+    "file": "valid/patch-version.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [],
+      "forbid": [
+        "SCHEMA_ERROR"
+      ]
+    }
+  },
+  {
+    "file": "valid/custom-token-declared.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [],
+      "forbid": [
+        "CUSTOM_TOKEN_UNDECLARED",
+        "CUSTOM_TOKEN_CATEGORY_MISMATCH"
+      ]
+    }
+  },
+  {
+    "file": "valid/export-empty-registry.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [],
+      "forbid": []
+    }
+  },
+  {
+    "file": "invalid/yaml-parse-error.skel",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "YAML_PARSE_ERROR"
+      ]
+    }
+  },
+  {
+    "file": "invalid/schema-error.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SCHEMA_ERROR"
+      ]
+    }
+  },
+  {
+    "file": "invalid/duplicate-id.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "DUPLICATE_ID"
+      ]
+    }
+  },
+  {
+    "file": "invalid/act-scene-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "ACT_SCENE_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/scene-shot-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SCENE_SHOT_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/scene-act-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SCENE_ACT_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/shot-scene-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SHOT_SCENE_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/music-cue-shot-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "MUSIC_CUE_SHOT_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/bone-registry-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "BONE_REGISTRY_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/bone-unresolved.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "BONE_UNRESOLVED"
+      ]
+    }
+  },
+  {
+    "file": "invalid/bone-required-field-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "BONE_REQUIRED_FIELD_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/character-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "CHARACTER_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/environment-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "ENVIRONMENT_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/location-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "LOCATION_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/prop-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "PROP_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/audio-ref-missing.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "AUDIO_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "invalid/custom-token-category-mismatch.skel.json",
+    "expect": {
+      "valid": false,
+      "codes": [
+        "CUSTOM_TOKEN_CATEGORY_MISMATCH"
+      ]
+    }
+  },
+  {
+    "file": "invalid/sidecar-shot-missing/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SIDECAR_SHOT_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "warn/header-loc-mismatch.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "HEADER_LOC_MISMATCH"
+      ]
+    }
+  },
+  {
+    "file": "warn/duration-conflict.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "DURATION_CONFLICT"
+      ]
+    }
+  },
+  {
+    "file": "warn/tod-cont-first-scene.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "TOD_CONT_FIRST_SCENE"
+      ],
+      "forbid": [
+        "HEADER_LOC_MISMATCH"
+      ]
+    }
+  },
+  {
+    "file": "warn/order-mismatch.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "ORDER_MISMATCH"
+      ]
+    }
+  },
+  {
+    "file": "warn/dialogue-ambiguous-speaker.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "DIALOGUE_AMBIGUOUS_SPEAKER"
+      ]
+    }
+  },
+  {
+    "file": "warn/prop-continuity.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "PROP_CONTINUITY"
+      ]
+    }
+  },
+  {
+    "file": "warn/custom-token-undeclared.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "CUSTOM_TOKEN_UNDECLARED"
+      ]
+    }
+  },
+  {
+    "file": "warn/registry-resolved-refs.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "CHARACTER_REF_MISSING"
+      ]
+    }
+  },
+  {
+    "file": "warn/bone-attachment-invalid.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "BONE_ATTACHMENT_INVALID"
+      ]
+    }
+  },
+  {
+    "file": "warn/asset-ref-warnings.skel.json",
+    "expect": {
+      "valid": true,
+      "codes": [
+        "ASSET_SHOT_REF_MISSING",
+        "ASSET_SCENE_REF_MISSING"
+      ]
+    }
+  }
+]

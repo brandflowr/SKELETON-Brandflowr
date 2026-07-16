@@ -27,7 +27,7 @@ Modes: `observe` = read-only, `transform` = may return patches or a `subject_rep
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json",
   "muscle_id": "my-shot-lint",
   "muscle_version": "1.0.0",
   "label": "My Shot Lint",

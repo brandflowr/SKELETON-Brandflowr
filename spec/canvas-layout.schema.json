@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/canvas-layout.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/canvas-layout.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Canvas Layout",
   "description": "Production Canvas node positions and viewport state. Stored at projects/{slug}/canvas/layout.json. This file is purely presentational — it stores node positions and zoom state so the canvas can restore its layout across sessions. It does not contain or modify story data.",
   "type": "object",

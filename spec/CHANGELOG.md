@@ -6,24 +6,86 @@ All notable changes to the SKEL specification and implementation.
 
 ## [Unreleased]
 
-### MUSCLE v1.0 hardening — from spec to working plugin system
-- **Removed the `token.resolve` hook** from `muscle-spec.md`, `muscle.schema.json`, and `hook-payload.schema.json` (with its `TokenResolveSubject`). Its result contract was undefined; deferred to a future minor version, noted in the spec.
+---
+
+## [2.9.0] — 2026-07-16
+
+The launch-readiness release: every P0–P3 item from `docs/PRODUCTION-ROADMAP.md`. All data-model changes are additive (optional fields, widened `oneOf`s, new token categories) — existing 2.x documents remain valid.
+
+### P0 — correctness fixes
+- **Canonical production status** (ADR-018): core `shot.status` is the single home; the write-back protocol (BONE §2.6, LLM_INTEGRATION, ARCHITECTURE) now updates it. `extensions.x-genlock.production_status` is a deprecated mirror (sunset SKEL 3.0, MIGRATIONS.md §4). Both `status.image` and `status.video` gain `not_started` and `failed` — failed renders finally have a representable state, paired with the `renders/failures/` log path.
+- **Custom tokens actually work**: every `v_setup` token field, `loc.tod`, and `transition_out` accepts `enum-or-^x-`; key-file `custom` entries now require a `category` (`CustomKeyFileToken`); validator rules `CUSTOM_TOKEN_UNDECLARED` / `CUSTOM_TOKEN_CATEGORY_MISMATCH` (skel-spec §4.3).
+- `skel_version` / `bone_version` patterns widened to `^\d+\.\d+(\.\d+)?$` — `"2.0.1"` validates, matching §8's documented policy.
+- **`loc.tod` enum extended** with `MORNING`, `AFTERNOON`, `EVENING`, `LATER`, `SAME` (+ `x-` customs); `CONT` semantics defined (previous scene by act order, then `scene_refs` order; `TOD_CONT_FIRST_SCENE` warning); normative screenplay import mapping table (§7.1.1) so Fountain/FDX time-of-day variants never destroy data.
+- **Act-level BONE data resolves**: inheritance chain is now `defaults → metadata → act → scene → shot` (BONE §5, §4.4).
+- `skel-spec.md` §2.2 metadata table caught up with the schema (`source`, `plugins` documented).
+- **One path syntax**: RFC 6901 JSON Pointers everywhere (validator results, MUSCLE hook results, LLM examples); dot/bracket paths are non-conformant.
+- `video-map.schema.json` accepts what hosts write: `VideoTake` gains legacy `prompt`/`promptJson`, the new `provenance` block, and an `extensions` escape hatch.
+- ADR-014 amended (the removed `token.resolve` hook is noted as history).
+- Input-format tag attributes are the `v_setup` field names verbatim (`<shot size="cu">`); `cam` is a deprecated read-only alias.
+- Doc-drift sweep: README stray artifact removed; token counts unified; `target_duration_seconds` canonical over `_minutes` (`DURATION_CONFLICT`); `loc` canonical over `header` (`HEADER_LOC_MISMATCH`); `Extensions` keys schema-enforced to `^x-` via `propertyNames`; changelog repo name aligned to the actual remote (`brandflowr/SKELETON-Brandflowr`).
+- **Referential integrity beyond structure** (§3.4): `character_refs`, `dialogue.character_ref`, `environment_ref`, `location_ref`, `prop_refs`, `carried_by`, audio refs — errors against embedded collections, warnings when only a studio registry could resolve them. New codes: `CHARACTER_REF_MISSING`, `ENVIRONMENT_REF_MISSING`, `LOCATION_REF_MISSING`, `PROP_REF_MISSING`, `AUDIO_REF_MISSING`, `MUSIC_CUE_SHOT_MISSING`.
+- **Import truncation never destroys data** (§3.5): overlong source paragraphs park under `x-<format>` (e.g. `x-fountain.full_action`) per ADR-016.
+
+### P1 — the asset & series layer (ADR-017)
+- **Rich `Character`**: identity (`role`, `pronouns`, `age_range`, `aliases`), appearance with **`identity_lock`** (the canonical 30–60-word contract that `CharacterInjection: consistency_modifier` emits verbatim), `wardrobe_variants[]` with scene refs, `voice` profile feeding TTS BONEs, `identity_refs` (`lora`/`embedding`/`soul_id`/`face_ref`), narrative fields (`want`/`need`/`flaw`/`arc`/`relationships`), continuity state (`first_appearance`, `props_carried`, `state_overrides[]`), workflow fields.
+- **`Environment` vs `Location` defined**: location = physical place; environment = dressed/lit variant with `style_lock`, `geography`, `tod_variants[]`, `weather_default`, `soundscape_refs`, `props_present`. New top-level `locations[]`.
+- **`Prop`** continuity objects (new top-level `props[]` + `shot.prop_refs`): `significance` enum with the `PROP_CONTINUITY` storytelling lint for plot-critical props.
+- **Studio registry specified**: `studio-spec.md` + `studio.schema.json` — `studio.json` is the story bible (characters/environments/locations/props/audio/voices/skins/palettes/series), with asset definitions `$ref`'d from `skel.schema.json` and snapshot/precedence rules. `metadata.skin_key` finally has a target.
+- **Series & episodes**: `metadata.series` (`series_id`, `season`/`episode`/`episode_code`, `arc_refs`, `previously`) + registry `Series` documents (seasons → episodes, arcs, shared `cast_refs`).
+- **Dialogue upgrades**: array form for multi-line exchanges in one shot; `mode` (`spoken|vo|os|thought|song|radio`) so Fountain `(V.O.)`/`(O.S.)` lands losslessly; `lang` (BCP 47) + `subtitle` + `metadata.language`; `DIALOGUE_AMBIGUOUS_SPEAKER` warning.
+- **Transitions**: `transition_out` on shots and scenes, key-file-backed `transition` category (`cut`, `dissolve`, `fade_in`, `fade_out`, `smash_cut`, `match_cut`, `wipe`, `iris`, `whip`).
+- **Plugin surface extended** (payload 1.1): `attaches_to` gains `character`/`environment`; MUSCLE capabilities gain `patch:characters`/`patch:environments`/`patch:props`; proposal types gain `add_character`/`rewrite_character`/`continuity_note`; `entity.changed` subjects/filters may name the new entities.
+- **Temporal model**: `scene.story_time`, `time_elapsed_since_previous`, `narrative_mode` (`present|flashback|flashforward|dream|montage|imagined`) — a chronology axis for nonlinear stories.
+- **Music cues**: document-level `music_cues[]` with shot-anchored in/out points — the score lane; the audio-map stays per-shot.
+- **`metadata.delivery`**: `frame_rate`, `resolution`, `aspect`, `color_space`, `audio` targets — the facts OTIO export and timecode math need.
+- **Recommended shapes** for `story_analysis` and `production` (still open objects).
+
+### P2 — standards-grade hardening (ADR-019)
+- **Versioned, immutable schema URLs**: every `$id` and doc Schema-URI points at the `v2.9.0` tag; `main` stays as latest; release process in GOVERNANCE.md.
+- **Conformance classes** (Reader / Writer / Validator / Full Host, skel-spec §9) + **conformance corpus** (`tests/conformance/`, 33 fixtures with a machine-readable manifest) — the trademark policy's conformance condition is now objectively testable.
+- **RFC 2119/8174 boilerplate** + terminology section; **vendor-neutral core**: neutral BONE output targets (`still`/`start_frame`/`end_frame`/`video_take`/`audio_track`) with read-accepted legacy aliases, host mapping moved to the new `GENLOCK_HOST_PROFILE.md` (ADR-018). First-party bones bumped to 1.1 on the neutral names.
+- **Security Considerations**: skel-spec §10 (YAML safe-load, alias/size caps, key-file integrity hashes, path safety, NFC) and muscle-spec §10 (consent-based enablement, argv-style invocation, payload/patch caps, filesystem boundaries, envelope privacy).
+- **Token vocabulary expansion**: 13 categories, 131 tokens (+ per-category additions: `est`/`fs`/`cowboy`/`ins`/`3s`/`group`, `profile`/`three_quarter`, 10 new moves incl. `dolly_zoom`/`arc`, 9 new lights incl. `silhouette`/`volumetric`, `split`/`tilt_shift`, 7 new colors, 10 new moods, new **`weather`** and **`texture`** categories, aspect additions `4:5`/`1.85:1`/`3:2`); `color`/`mood` promoted from free strings to validated enums-or-`x-`.
+- **Normative error catalog** (`spec/errors.md`): stable codes, severities, dual-severity asset-ref rule, MUSCLE namespacing, registry policy.
+- **Generation provenance** (BONE §2.8): `{bone_id, provider, model, prompt, params, generated_at, job_id}` blocks in `video-map` takes, `audio-map` tracks, and `x-genlock` image slots — reproducibility + AI-content disclosure.
+- **i18n & accessibility**: `metadata.language` + `Dialogue.lang`/`subtitle`, NFC normalization guidance, `shot.audio_description` for described video.
+- **Media types** interim-switched to the vendor tree (`application/vnd.skel+yaml`, `vnd.skel.bone+json`, `vnd.skel.muscle+json`, `vnd.skel.studio+json`) pending IANA registration; **editor modeline convention** documented (yaml-language-server `$schema` line).
+- **YAML authoring profile** (skel-spec §11) + `spec/example.skel` — the annotated native-YAML twin of the JSON example (closes SKEL-S1/S2).
+- **Ordering precedence** (§3.6): refs arrays canonical, `order` derived, `ORDER_MISMATCH` warning.
+
+### P3 — ecosystem & launch assets
+- **Reference `skel` CLI** (`reference/cli/`, `@skel/cli`): `validate` (full contract: lifecycle, RFC 6901 paths, `--json`, `--with-sidecars`, `--studio`), `convert` (YAML⇄JSON), `inspect`. The validator library (`lib/validate.mjs`) implements `spec/errors.md` end to end.
+- **CI** (`.github/workflows/ci.yml`): validates every shipped artifact against its schema, AJV-strict meta-validation, conformance corpus, MUSCLE host demo with sanity assertion, continuity-guard test, Fountain round-trip, markdown link check. Root `package.json` (`@skel/spec`) with `npm run check` running the same suite locally.
+- **`@skel/spec` package**: schemas + key file + hand-maintained TypeScript types (`types/skel.d.ts`) covering the full 2.9 model, sidecars, studio registry, and validation shapes.
+- **OSS hygiene**: `SECURITY.md` (disclosure policy for a spec that executes plugins), `GOVERNANCE.md` (change + release process; tags make `$id` URLs live), `CODE_OF_CONDUCT.md`, issue templates (spec change / token proposal / bug) and a spec-change PR checklist.
+- **Working Fountain adapter** (`reference/fountain-adapter/`): import + export with per-element raw parking under `x-fountain`; round-trip test proves byte-identical export, schema-valid import, stable IDs across cycles, and edit-aware re-rendering (ADR-016 made demonstrable).
+- **Worked MUSCLE beyond lint**: `continuity-guard` (manifest + reference tool + test) cross-checks props/wardrobe/first-appearance against shots via the real veto-hook contract — dogfoods the P1 asset layer.
+- **Examples**: `spec/examples/kitchen-sink.skel.json` (every 2.9 feature in one valid export document) and `spec/examples/episodic/` (two thin episodes + one `studio.json` sharing cast and identity lock — the cross-episode guarantee, demonstrated).
+- **Community registry** (`registry/`): first-party BONE/MUSCLE index with conformance flags and the reverse-prefix collision policy.
+- **`spec/MIGRATIONS.md`**: v1→v2, legacy `story.json`, `x-spore`→`x-genlock` sunset, status-mirror migration, target aliases, `$id` policy, media types.
+- `sync-spec.ps1`: new spec files added to the Genlock sync list.
+- **Governance fields upstreamed** from the Genlock host's diverged schema copy into the canonical `bone.schema.json` / `skel.schema.json` `BoneDefinition` (healing the fork): optional `requires[]`, `pipeline_stage`, `authoring_mode` (`templated|atelier|hybrid` or `x-`), `render_runtime` (`native|remotion|hyperframes|ffmpeg` or `x-`), `style_tokens`, `decision_log_refs[]`, `quality_gates[]` (`QualityGate` def). Documented in bone-spec §2.2.
+
+### MUSCLE v1.0→1.1 hardening — from spec to working plugin system
+- **Removed the `token.resolve` hook** from `muscle-spec.md`, `muscle.schema.json`, and `hook-payload.schema.json` (with its `TokenResolveSubject`). Its result contract was undefined; deferred to a future minor version, noted in the spec (ADR-014 amendment).
 - `muscle-spec.md` §3.3: **mode enforcement is now an explicit host obligation** — results exceeding the declared `observe`/`transform`/`veto` mode are rejected as MUSCLE failures.
 - `muscle-spec.md` §4.2: `subject_replacement` is explicitly restricted to **derived, non-persisted values** (it is not capability-checked because it can never reach `story.skel`); on `generate.route` it MUST be one of the candidate routes, otherwise hosts fall back to default selection.
 - `muscle-spec.md` §4.3 rule 7: hosts MUST **auto-create the `extensions` container** when applying a patch under a declared `patch:extensions.x-<ns>` capability (found by running the reference host: namespace-scoped plugins were otherwise unable to write to untouched entities).
 - `muscle-spec.md` §1.1: fixed per-patch/atomic wording — a patch outside capabilities rejects the entire (atomic) patch set.
 - `muscle.schema.json`: allow a top-level `$schema` field in manifests.
 - New `spec/MUSCLE_AUTHORING.md`: step-by-step plugin authoring guide (hook/mode selection, manifest, tool, patches, testing, shipping).
-- New `spec/muscles/` example manifests: `studio-style-guard.muscle.json`, `fountain-adapter.muscle.json` — both validate against `muscle.schema.json`.
+- New `spec/muscles/` example manifests: `studio-style-guard.muscle.json`, `fountain-adapter.muscle.json`, `continuity-guard.muscle.json` — all validate against `muscle.schema.json`.
 - New `reference/muscle-host/`: zero-dependency Node reference host implementing discovery (§6.1), CLI-route invocation (§4), mode enforcement (§3.3), capability-scoped atomic patch application with locked-entity protection and rollback (§4.3), and `metadata.plugins` recording (§6.3). Ships a runnable demo (`demo/run-demo.mjs`) with three plugins: a veto linter, a conforming patcher, and a deliberately misbehaving plugin whose undeclared write is rejected.
-- `sync-spec.ps1`: added `MUSCLE_AUTHORING.md` and the `spec/muscles/` folder to the sync list.
 
 ### Public release preparation
 - README: documented the MUSCLE spec and schemas in the spec table; replaced the external BONE repo pointer with a two-layer plugin system section (BONE = data, MUSCLE = behavior) — this repo is the single canonical home for SKEL, BONE, and MUSCLE.
-- `bone-spec.md` / `bone.schema.json`: Schema URI and `$id` now point to this repo (`brandflowr/SKELETON-Spec`) instead of the retired separate BONE repo.
+- `bone-spec.md` / `bone.schema.json`: Schema URI and `$id` now point to this repo (`brandflowr/SKELETON-Brandflowr`) instead of the retired separate BONE repo.
 - LICENSE copyright year updated to 2025–2026; copyright and trademark notices added to README.
 - Added `TRADEMARKS.md` (SKEL™, BONE™, MUSCLE™, SPORE™ — marks of Brandflowr AI LLC; conforming-use policy).
 - Moved internal session notes (`master-instructions.md`) out of the repo root into `docs/internal/`.
+
+> **Release checklist reminder:** this release's schema `$id`s point at the `v2.9.0` tag — create and push the `v2.9.0` git tag on the release commit (GOVERNANCE.md §Release Process) so those URLs go live.
 
 ---
 

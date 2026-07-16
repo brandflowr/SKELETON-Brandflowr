@@ -1,8 +1,10 @@
-# BONE Specification v1.0
+# BONE Specification v1.1
 
 **Base Object Narrative Export**
 
 > A pluggable definition format for attaching AI generation config, production metadata, or any structured data to SKEL story entities.
+
+Conformance language (MUST/SHOULD/MAY) follows skel-spec.md §1.1 (BCP 14).
 
 ---
 
@@ -16,7 +18,7 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 
 - **Replaceable**: Any BONE can be swapped for another without altering the story structure.
 - **Self-describing**: A BONE definition declares its own fields, types, defaults, and UI hints.
-- **Inheritable**: BONEs cascade — project defaults → scene overrides → shot overrides.
+- **Inheritable**: BONEs cascade — project defaults → act → scene → shot overrides.
 - **Portable**: On export, BONE definitions embed into the SKEL file. One JSON, everything included.
 - **Open**: BONE data on entities is a fully open object. The definition file describes the expected shape, but the schema doesn't constrain it.
 
@@ -25,9 +27,9 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 | Property       | Value                      |
 | -------------- | -------------------------- |
 | File extension | `.bone.json`               |
-| MIME type      | `application/bone+json`    |
+| Media type     | `application/vnd.skel.bone+json` |
 | Encoding       | UTF-8                      |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
 
 ---
 
@@ -62,12 +64,12 @@ A `.bone.json` file describes a single tool, generator, or pipeline attachment. 
 | Field          | Type     | Required | Description                                                    |
 | -------------- | -------- | -------- | -------------------------------------------------------------- |
 | `bone_id`      | string   | yes      | Unique identifier. Lowercase, hyphens allowed.                 |
-| `bone_version` | string   | yes      | Semver version of this BONE definition.                        |
+| `bone_version` | string   | yes      | Semver version of this BONE definition (`MAJOR.MINOR`, PATCH optional). |
 | `label`        | string   | yes      | Human-readable name for UI display.                            |
 | `description`  | string   | no       | What this BONE does.                                           |
 | `target`       | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
 | `provider`     | string   | no       | Provider namespace used for grouping/configuration, e.g. `higgsfield`, `runway`, `kling`, `flux`. |
-| `attaches_to`  | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`. |
+| `attaches_to`  | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`, `character`, `environment`. |
 | `fields`       | object   | yes      | Field definitions (see §2.3).                                  |
 | `defaults`     | object   | no       | Default values for fields.                                     |
 | `prompt_assembly` | object | no       | How field values and story context assemble into the final prompt string. See Section 2.4. |
@@ -76,6 +78,13 @@ A `.bone.json` file describes a single tool, generator, or pipeline attachment. 
 | `routing`      | object   | no       | Optional provider routing metadata or lookup hints. See Section 2.7. |
 | `execution_routes` | array | no       | Optional executable routes an agent can choose from. See Section 2.7. |
 | `extensions`   | object   | no       | Vendor-specific extension data. Keys SHOULD be `x-` namespaced. |
+| `requires`     | string[] | no       | Capability ids this BONE needs to fire; hosts join against their capability matrix for armed / needs-setup / unavailable readiness. |
+| `pipeline_stage` | string | no       | Pipeline stage this BONE participates in (`proposal`, `scene_plan`, `generation`, `review`, ...). |
+| `authoring_mode` | string | no       | `templated`, `atelier`, `hybrid`, or `x-` custom — how this BONE's prompts are authored. |
+| `render_runtime` | string | no       | Preferred composition runtime (`native`, `remotion`, `hyperframes`, `ffmpeg`, or `x-` custom). Selector metadata only. |
+| `style_tokens` | object   | no       | Color/typography/motion/grading/caption/a11y tokens for style-family BONEs. |
+| `decision_log_refs` | string[] | no  | Host decision-log entry IDs that motivated or constrain this BONE. |
+| `quality_gates` | array   | no       | Quality gates this BONE must satisfy (`{severity, message, ...}`) — governance metadata for host reviewer surfaces. |
 
 ### 2.3 Field Definitions
 
@@ -97,7 +106,7 @@ Each key in `fields` is a field name. The value describes the field:
 
 ## 2.4 `prompt_assembly` Object
 
-Defines how the BONE's field data and story context, such as `v_setup` tokens, character refs, and scene header, combine into the final string sent to an AI generation API. This drives the Assembled Prompt Preview in Genlock.
+Defines how the BONE's field data and story context, such as `v_setup` tokens, character refs, and scene header, combine into the final string sent to an AI generation API. Hosts use it to drive assembled-prompt previews.
 
 | Field                 | Type   | Required | Description |
 | --------------------- | ------ | -------- | ----------- |
@@ -108,7 +117,7 @@ Defines how the BONE's field data and story context, such as `v_setup` tokens, c
 | `max_length`          | integer | no      | Maximum character length of the assembled prompt. Must be greater than `0`. Used for validation and preview warnings. |
 | `separator`           | string | no       | Separator between sequential elements. Default: space. |
 
-If a BONE omits `prompt_assembly`, Genlock SHOULD use `sequential` behavior with a single-space separator.
+If a BONE omits `prompt_assembly`, hosts SHOULD use `sequential` behavior with a single-space separator.
 
 Template variables use double braces. `{{field_name}}` resolves from the effective BONE data after defaults and inheritance. System tokens include `{{v_setup.size}}`, `{{v_setup.angle}}`, `{{v_setup.lens}}`, `{{v_setup.move}}`, `{{v_setup.light}}`, `{{v_setup.tod}}`, `{{v_setup.dof}}`, `{{character_refs}}`, `{{scene.header}}`, `{{scene.location}}`, and `{{scene.tod}}`. Missing variables resolve to an empty string, and assemblers SHOULD trim repeated whitespace and dangling punctuation in preview/output.
 
@@ -155,16 +164,23 @@ Tells any LLM or automated pipeline where to store a rendered file after the gen
 | Field                | Type   | Required | Description |
 | -------------------- | ------ | -------- | ----------- |
 | `format`             | string | yes      | Output file extension: `png`, `jpg`, `mp4`, `gif`, `wav`, etc. |
-| `target`             | string | yes      | Which Genlock field or sidecar to write the result to. |
-| `path_template`      | string | no       | Storage path relative to workspace root. Supports `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, and `{n}`. |
+| `target`             | string | yes      | Which write-back slot receives the result. Neutral vocabulary below; hosts map slots to their own storage. |
+| `path_template`      | string | no       | Storage path relative to workspace root. Supports `{slug}`, `{shot_id}`, `{bone_id}`, `{format}`, and `{n}`. Resolved paths are subject to the path-safety rules of skel-spec.md §10.3: inside the workspace root, no `..`, no absolute paths, no symlink escapes. |
 | `completion_status` | string | no       | Production status to set on the shot after a successful download. Default: `review`. |
 
-Target values:
-- `startFrameImage`: write to `shot.extensions.x-genlock.startFrameImage` in `story.skel`.
-- `endFrameImage`: write to `shot.extensions.x-genlock.endFrameImage` in `story.skel`.
-- `image`: write to `shot.extensions.x-genlock.image` in `story.skel`.
-- `video_take`: append a new take to `video-map.json`, sets `isActive: true` on the new take, sets `isActive: false` on all prior takes for that shot.
-- `audio_track`: assign a track in `audio-map.json`. Track type (`dialogue`, `sfx`, or `music`) is determined by the BONE's `target` field.
+**Neutral target vocabulary.** `target` names a write-back slot, not a vendor field:
+
+| Target | Meaning | Write-back |
+|---|---|---|
+| `still` | A standalone image for the shot | Host's still-image slot for the shot |
+| `start_frame` | The shot's first-frame reference image | Host's start-frame slot |
+| `end_frame` | The shot's last-frame reference image | Host's end-frame slot |
+| `video_take` | A new video take | Append to `video-map.json`: new take `isActive: true`, all prior takes for that shot `isActive: false` |
+| `audio_track` | An audio track assignment | Assign in `audio-map.json`; track type (`dialogue`, `sfx`, or `music`) is determined by the BONE's top-level `target` category |
+
+Each **host profile** documents where the image slots physically live. Genlock Studio's mapping (see `GENLOCK_HOST_PROFILE.md`): `still` → `shot.extensions.x-genlock.image`, `start_frame` → `…startFrameImage`, `end_frame` → `…endFrameImage`.
+
+*Deprecated aliases:* readers MUST also accept the pre-1.1 target values `image`, `startFrameImage`, `endFrameImage`, and `videoTake` as synonyms of `still`, `start_frame`, `end_frame`, and `video_take`; writers MUST emit the neutral names (see MIGRATIONS.md).
 
 **Default path templates (used when `path_template` is omitted):**
 
@@ -179,14 +195,16 @@ failure logs:  projects/{slug}/renders/failures/{shot_id}.{bone_id}.log
 
 1. Resolve the storage path using the template and context (workspace root, slug, shot_id, bone_id, format).
 2. Download or move the file to that path.
-3. Write the path to the field specified by `target`:
-   - Image targets → update `shot.extensions.x-genlock[target]` in `story.skel`
+3. Write the path to the slot specified by `target`:
+   - Image targets (`still`/`start_frame`/`end_frame`) → update the host's mapped image slot in `story.skel`
    - `video_take` → append entry to `video-map.json` with `isActive: true`; set `isActive: false` on all prior takes for that shot
    - `audio_track` → append entry to `audio-map.json` with the appropriate track type
-4. Set `shot.extensions.x-genlock.production_status.image` (or `.video`) to `completion_status`.
-5. Save `story.skel`.
+4. Set the **core** `shot.status.image` (or `.video`) to `completion_status`. (Core `status` is canonical since SKEL 2.9; hosts MAY additionally mirror to a vendor extension for pre-2.9 readers — see MIGRATIONS.md.)
+5. Record generation provenance for the render (§2.8).
+6. On failure, set `shot.status.image`/`.video` to `failed` and write a log entry to the `renders/failures/` path.
+7. Save `story.skel`.
 
-Genlock picks up updated files on next reload or file-watch event. No app restart required. Failed renders SHOULD write a log entry to the `renders/failures/` path for diagnostics.
+Hosts pick up updated files on reload or file-watch. No app restart required.
 
 ---
 
@@ -236,6 +254,38 @@ Unknown top-level fields are rejected by the core BONE schema unless they are ex
 
 ---
 
+## 2.8 Generation Provenance
+
+Renders should carry enough metadata to be reproduced, audited, and disclosed as AI-generated. Wherever a render lands (a `video-map.json` take, an audio-map track, a host image slot), the writer SHOULD record a **provenance block**:
+
+```json
+{
+  "provenance": {
+    "bone_id": "seedance-2",
+    "provider": "bytedance",
+    "model": "seedance-2.0",
+    "prompt": "...the final assembled prompt...",
+    "params": { "seed": 777, "duration": 15 },
+    "generated_at": "2026-07-16T12:00:00Z",
+    "job_id": "..."
+  }
+}
+```
+
+| Field | Description |
+|---|---|
+| `bone_id` | BONE that generated the render. |
+| `provider` | Provider namespace (matches the BONE's `provider`). |
+| `model` | Exact model identifier used. |
+| `prompt` | The final assembled prompt string sent to the generator. |
+| `params` | Generation parameters (seed, guidance, duration, resolution, ...). |
+| `generated_at` | ISO 8601 timestamp. |
+| `job_id` | Provider job/request ID. |
+
+Three wins: **reproducibility** (re-render the same take), **auditability** (which model made this frame — increasingly a disclosure requirement for AI content), and a stable home for the prompt-per-render guarantee. Schema homes: `video-map.schema.json` (`VideoTake.provenance`), `audio-map.schema.json` (`ShotAudioEntry.provenance`), and host image-slot namespaces (Genlock: `x-genlock.provenance`, see `x-genlock.schema.json`).
+
+---
+
 ## 3. BONE Registry (in SKEL Document)
 
 When a SKEL document is exported, all active BONE definitions are embedded in a top-level `bone_registry` object. This makes the file fully self-contained and portable.
@@ -274,7 +324,7 @@ The key in `bone_registry` matches the `bone_id` from the definition file.
 
 ## 4. BONE Data on Entities
 
-Any SKEL entity (metadata, act, scene, shot) can carry a `bones` object. Each key references a registered BONE, and the value is a free-form object containing that BONE's data.
+Any SKEL entity (metadata, act, scene, shot) and any asset entity (character, environment) can carry a `bones` object. Each key references a registered BONE, and the value is a free-form object containing that BONE's data.
 
 ### 4.1 Shot-Level BONEs
 
@@ -335,14 +385,22 @@ Project-wide defaults. Every entity inherits these unless overridden.
 }
 ```
 
+### 4.4 Act-Level and Asset-Level BONEs
+
+Acts participate in the inheritance chain between metadata and scene (§5): an act-level `bones` entry sets defaults for every shot in that act — useful when Act 2 shifts the whole look ("everything after the storm goes desaturated").
+
+Characters and environments MAY carry `bones` for **per-asset** pipelines that are not shot-scoped: the `character-reference-sheet` BONE is conceptually per-character, and `attaches_to: ["character"]` expresses exactly that. Asset-level BONE data does not participate in the shot inheritance chain — it configures generation *about the asset* (a reference sheet, an environment plate), not generation of a specific shot.
+
 ---
 
 ## 5. Inheritance Chain
 
-BONEs cascade from project → scene → shot. More specific levels override less specific ones. The merge is shallow (per-field replacement, not deep merge).
+BONEs cascade from project → act → scene → shot. More specific levels override less specific ones. The merge is shallow (per-field replacement, not deep merge).
 
 ```
 metadata.bones["flux-dev"]     → { negative: "blurry", guidance: 7.5 }
+  ↓ act overrides
+act.bones["flux-dev"]          → { color_hint: "desaturated" }
   ↓ scene overrides
 scene.bones["flux-dev"]        → { guidance: 8 }
   ↓ shot overrides
@@ -352,6 +410,7 @@ Resolved for shot:
 {
   text: "Close-up of...",       ← from shot
   negative: "blurry",           ← inherited from metadata
+  color_hint: "desaturated",    ← inherited from act
   guidance: 9,                  ← shot overrides scene overrides metadata
   seed: 42                      ← from shot
 }
@@ -360,8 +419,9 @@ Resolved for shot:
 Resolution order:
 1. BONE definition `defaults`
 2. `metadata.bones[bone_id]`
-3. `scene.bones[bone_id]` (for shots in that scene)
-4. `shot.bones[bone_id]`
+3. `act.bones[bone_id]` (for shots in scenes of that act)
+4. `scene.bones[bone_id]` (for shots in that scene)
+5. `shot.bones[bone_id]`
 
 ---
 
@@ -382,11 +442,11 @@ Genlock ships a small AI filmmaking base pack for character-locked, storyboard-d
 
 | BONE | Target | Purpose |
 | ---- | ------ | ------- |
-| `character-reference-sheet` | image | Creates neutral 8-view identity sheets for character continuity. |
+| `character-reference-sheet` | image | Creates neutral 8-view identity sheets for character continuity. Attaches per-character (`attaches_to: ["character", ...]`) and consumes the character's `identity_lock` verbatim. |
 | `storyboard-grid-9` | image | Creates a 3x3 continuous-scene storyboard grid with readable production-note strips. |
 | `seedance-2` | video | Creates 15-second Seedance 2 video prompts from text, storyboard grids, or character sheets plus storyboard grids. |
 
-These BONEs are prompt authoring contracts. LLMs SHOULD read their `llm_instructions` before writing prompt data and SHOULD preserve character-lock text verbatim across the character sheet, storyboard, and video BONEs. When a storyboard grid exists, video BONEs SHOULD prefer storyboard-driven prompting over independent text-only shot prompts because it reduces character, geography, and camera drift.
+These BONEs are prompt authoring contracts. LLMs SHOULD read their `llm_instructions` before writing prompt data and SHOULD preserve character-lock text (`identity_lock`, skel-spec.md §2.7.1) verbatim across the character sheet, storyboard, and video BONEs. When a storyboard grid exists, video BONEs SHOULD prefer storyboard-driven prompting over independent text-only shot prompts because it reduces character, geography, and camera drift.
 
 ---
 
@@ -407,7 +467,7 @@ These BONEs are prompt authoring contracts. LLMs SHOULD read their `llm_instruct
 
 ### 7.3 Attachment Validation
 
-- A BONE's data on an entity type not listed in `attaches_to` SHOULD produce a warning.
+- A BONE's data on an entity type not listed in `attaches_to` SHOULD produce a warning (`BONE_ATTACHMENT_INVALID`, see `spec/errors.md`).
 
 ---
 

@@ -1,0 +1,11 @@
+{
+  "sh_ghost": {
+    "takes": [
+      {
+        "id": "V1",
+        "file": "assets/video/x.mp4",
+        "isActive": true
+      }
+    ]
+  }
+}

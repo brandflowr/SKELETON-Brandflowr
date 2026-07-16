@@ -1,0 +1,284 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json
+#
+# example.skel — "The Last Signal" in native SKEL YAML.
+# This is the same story as example.skel.json (the JSON export form); the YAML
+# form is what humans author: comments, folded block scalars, no bracket noise.
+# Conventions here follow the YAML authoring profile (skel-spec.md §11).
+
+skel_version: "2.0"          # quote it — bare 2.0 is a YAML float
+
+metadata:
+  story_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+  title: The Last Signal
+  lifecycle: production       # draft | production | export (validation strictness only)
+  logline: >
+    A lighthouse keeper discovers a terrifying secret hidden in the patterns
+    of his own transmissions.
+  author: genlock
+  created_at: "2025-01-15T10:00:00Z"   # quote timestamps — bare ISO dates become YAML date objects
+  modified_at: "2025-01-15T14:30:00Z"
+  skin_key: noir_v1           # resolves to a skin in the studio registry
+  bones:                      # project-wide BONE defaults — shots inherit these
+    flux-dev:
+      negative: blurry, low quality, cartoon, anime
+      guidance: 7.5
+      aspect: "2.39:1"
+    runway-gen3:
+      model: gen3-alpha-turbo
+      aspect: "16:9"
+  extensions:
+    x-genlock:
+      project_slug: the-last-signal
+
+# Every BONE referenced by any entity's `bones` must exist here (§2.9).
+bone_registry:
+  flux-dev:
+    bone_version: "1.0"
+    label: Flux Dev (Image Generation)
+    target: image
+    attaches_to: [shot, scene, metadata]
+    fields:
+      text:      { type: string,  required: true,  ui: textarea, label: Prompt }
+      negative:  { type: string,  required: false, ui: textarea, label: Negative Prompt }
+      guidance:  { type: number,  required: false, ui: slider,   label: Guidance Scale, min: 1, max: 20, default: 7.5 }
+      seed:      { type: number,  required: false, ui: number,   label: Seed }
+      aspect:    { type: string,  required: false, ui: select,   label: Aspect Ratio, options: ["1:1", "16:9", "9:16", "2.39:1"] }
+      lora:      { type: string,  required: false, ui: text,     label: LoRA Reference }
+      style_ref: { type: string,  required: false, ui: file,     label: Style Reference Image }
+    defaults: { guidance: 7.5, aspect: "16:9" }
+  runway-gen3:
+    bone_version: "1.0"
+    label: Runway Gen-3 Alpha (Video)
+    target: video
+    attaches_to: [shot, scene, metadata]
+    fields:
+      text:            { type: string,  required: true,  ui: textarea, label: Prompt }
+      duration:        { type: number,  required: false, ui: select,   label: Duration, options: [4, 10, 16], default: 4 }
+      reference_image: { type: string,  required: false, ui: file,     label: Start Frame }
+      motion_strength: { type: number,  required: false, ui: slider,   label: Motion, min: 0, max: 1, default: 0.5 }
+      aspect:          { type: string,  required: false, ui: select,   label: Aspect Ratio, options: ["16:9", "9:16", "1:1"] }
+      model:           { type: string,  required: false, ui: select,   label: Model, options: [gen3-alpha, gen3-alpha-turbo] }
+    defaults: { duration: 4, motion_strength: 0.5, model: gen3-alpha-turbo }
+
+# Flat relational structure (ADR-001): acts, scenes, shots are top-level
+# arrays linked by IDs. The refs arrays are the canonical order (§3.6).
+acts:
+  - { id: act_1, order: 0, title: The Discovery, scene_refs: [sc_1, sc_2] }
+  - { id: act_2, order: 1, title: The Descent,   scene_refs: [sc_3] }
+
+scenes:
+  - id: sc_1
+    act_id: act_1
+    order: 0
+    header: INT. LIGHTHOUSE - NIGHT     # display text; loc below is canonical
+    loc: { type: INT, name: LIGHTHOUSE, tod: NIGHT }
+    shot_refs: [sh_1, sh_2, sh_3]
+    intent:                             # the WHY — LLMs must preserve it (§2.6)
+      purpose: Establish Harlan's obsessive routine and plant the seed of the anomaly.
+      conflict: Harlan's need for order versus the chaos encoded in his own transmissions.
+      emotional_turn: Quiet dread replaces numb routine.
+      story_function: setup
+    creative_status: approved
+    bones:                              # scene-level override: shots in sc_1 inherit
+      flux-dev:
+        guidance: 8
+        negative: blurry, low quality, cartoon, anime, bright colors
+
+  - id: sc_2
+    act_id: act_1
+    order: 1
+    header: EXT. CLIFF EDGE - DAWN
+    loc: { type: EXT, name: CLIFF EDGE, tod: DAWN }
+    shot_refs: [sh_4, sh_5]
+
+  - id: sc_3
+    act_id: act_2
+    order: 0
+    header: INT. LIGHTHOUSE BASEMENT - NIGHT
+    loc: { type: INT, name: LIGHTHOUSE BASEMENT, tod: NIGHT }
+    shot_refs: [sh_6, sh_7, sh_8, sh_9]
+    narrative: Harlan descends into the basement and finds the source of the signal.
+
+shots:
+  - id: sh_1
+    scene_id: sc_1
+    order: 0
+    action: Harlan Morse hunches over the logbook, scrawling coordinates by candlelight.
+    v_setup: { size: cu, angle: high, light: noir, lens: std, move: static, dof: shallow, aspect: "2.39:1", mood: tense }
+    character_refs: [char_harlan]
+    duration: 4
+    status: { image: approved, video: pending }
+    bones:
+      flux-dev:
+        text: >
+          Close-up of weathered hands writing in a leather logbook, candlelight
+          flickering, noir lighting, film grain, shallow depth of field, high
+          angle looking down at desk.
+        guidance: 9        # shot overrides scene (8) overrides metadata (7.5)
+        seed: 42
+      runway-gen3:
+        text: >
+          Static camera, slight flicker from candle flame casting moving shadows
+          across the logbook pages. Harlan's pen scratches steadily.
+        duration: 4
+        motion_strength: 0.3
+
+  - id: sh_2
+    scene_id: sc_1
+    order: 1
+    action: The radio crackles. A pattern emerges in the static.
+    v_setup: { size: ms, angle: eye, light: practical, aspect: "2.39:1" }
+    duration: 3
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          Medium shot of vintage radio on wooden desk, green indicator light
+          glowing, static visualized as waveform, practical lighting from radio dial.
+      runway-gen3:
+        text: >
+          Camera holds static. Radio crackles, green light pulses rhythmically.
+          Waveform pattern slowly becomes visible in the static.
+
+  - id: sh_3
+    scene_id: sc_1
+    order: 2
+    action: Harlan freezes. His eyes widen as he recognizes the pattern.
+    v_setup: { size: ecu, angle: eye, light: noir, dof: shallow, aspect: "2.39:1", mood: tense }
+    character_refs: [char_harlan]
+    duration: 2
+    intent:
+      beat: The moment Harlan understands the pattern is his own voice.
+      function: reveal
+      emphasis: Hold on the eyes — do not cut away until recognition is complete.
+    creative_status: locked             # frozen: no automated rewrites (§2.6.2)
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          Extreme close-up of Harlan's eyes reflecting candlelight, pupils
+          dilating, shallow depth of field, noir lighting with hard shadows across brow.
+      runway-gen3:
+        text: >
+          Slow push in on Harlan's eyes. Candlelight flickers in reflection.
+          Pupils dilate as recognition dawns.
+        motion_strength: 0.2
+
+  - id: sh_4
+    scene_id: sc_2
+    order: 0
+    action: Dawn breaks over the cliff. The lighthouse beam still sweeps the fog.
+    v_setup: { size: ws, angle: eye, light: golden, lens: wide, move: drone, aspect: "2.39:1", color: warm }
+    duration: 5
+    status: { image: approved, video: generating }
+    bones:
+      flux-dev:
+        text: >
+          Wide shot of lighthouse on cliff edge at dawn, beam cutting through
+          fog, golden hour light on ocean, anamorphic lens flare from sun.
+      runway-gen3:
+        text: >
+          Drone sweeps slowly along coastline toward lighthouse. Beam rotates
+          through fog. Golden light intensifies as sun crests horizon.
+        duration: 5
+        motion_strength: 0.7
+
+  - id: sh_5
+    scene_id: sc_2
+    order: 1
+    action: Harlan stands at the edge, staring down at the rocks below.
+    v_setup: { size: mws, angle: low, light: golden, move: dolly, aspect: "2.39:1", color: warm }
+    character_refs: [char_harlan]
+    duration: 4
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          Medium wide shot from behind Harlan at cliff edge, wind in coat, dawn
+          sky, vertigo-inducing depth below, golden hour backlight.
+      runway-gen3:
+        text: >
+          Slow dolly toward Harlan from behind. Wind catches his coat. Camera
+          creeps to edge revealing the drop.
+
+  - id: sh_6
+    scene_id: sc_3
+    order: 0
+    action: A bare bulb swings overhead as Harlan descends the stone stairs.
+    v_setup: { size: ms, angle: high, light: low_key, move: crane, dof: deep, aspect: "2.39:1", mood: tense, color: cool }
+    character_refs: [char_harlan]
+    duration: 4
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          High angle looking down spiral stone staircase, single swinging bulb
+          casting moving shadows, low key lighting, deep focus showing full
+          depth of stairwell.
+      runway-gen3:
+        text: >
+          Crane shot descending with Harlan. Bare bulb swings, casting rhythmic
+          shadows across damp stone walls. Footsteps echo.
+
+  - id: sh_7
+    scene_id: sc_3
+    order: 1
+    action: His hand brushes the wall. Symbols are carved into the stone.
+    v_setup: { size: cu, angle: eye, light: practical, dof: rack, aspect: "2.39:1" }
+    duration: 3
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          Close-up of fingers tracing carved symbols on damp stone wall,
+          practical lighting from below, rack focus from hand to symbols.
+      runway-gen3:
+        text: >
+          Static frame. Harlan's fingers enter frame and trace carved symbols.
+          Rack focus pulls from fingertips to deep-carved glyphs.
+
+  - id: sh_8
+    scene_id: sc_3
+    order: 2
+    action: The basement opens into a vast chamber. A machine hums at its center.
+    v_setup: { size: ws, angle: low, light: neon, lens: anamorphic, move: steadicam, aspect: "2.39:1", color: cool }
+    duration: 5
+    status: { image: pending, video: not_started }
+    bones:
+      flux-dev:
+        text: >
+          Wide shot reveal of underground chamber, massive unknown machine with
+          pulsing lights, fog on floor, anamorphic lens, neon glow, low angle
+          emphasizing scale.
+      runway-gen3:
+        text: >
+          Steadicam follows Harlan through doorway into vast chamber. Camera
+          drifts left revealing the machine. Pulsing neon lights reflect off fog.
+        motion_strength: 0.6
+
+  - id: sh_9
+    scene_id: sc_3
+    order: 3
+    action: Harlan's face, lit by the machine's glow. He understands now.
+    v_setup: { size: cu, angle: eye, light: neon, dof: shallow, aspect: "2.39:1", mood: tense }
+    character_refs: [char_harlan]
+    dialogue: It was me. It was always me.
+    duration: 3
+    notes: Hero shot. Final beat of Act 2. Hold on face for full 3 seconds.
+    status: { image: approved, video: review }
+    bones:
+      flux-dev:
+        text: >
+          Close-up of Harlan's face bathed in pulsing neon light, expression
+          shifting from fear to recognition, shallow depth of field, machine
+          glow reflected in eyes.
+        guidance: 10
+        seed: 777
+      runway-gen3:
+        text: >
+          Static close-up. Neon light pulses across Harlan's face. Expression
+          shifts from fear to grim recognition. He whispers the line.
+        motion_strength: 0.2
+    extensions:
+      x-genlock:
+        hero_shot: true

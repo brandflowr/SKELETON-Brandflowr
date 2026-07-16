@@ -1,19 +1,19 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json",
   "bone_id": "character-reference-sheet",
-  "bone_version": "1.0",
+  "bone_version": "1.1",
   "label": "Character Reference Sheet",
   "description": "AI filmmaking identity-lock sheet. Produces an 8-view reference image for character continuity across storyboards and video shots.",
   "provider": "genlock",
   "target": "image",
-  "attaches_to": ["metadata", "scene", "shot"],
+  "attaches_to": ["character", "metadata", "scene", "shot"],
   "fields": {
     "character_description": {
       "type": "string",
       "required": false,
       "ui": "textarea",
       "label": "Character Description",
-      "description": "Tight identity traits only: age range, build, skin, hair, eyes, brief wardrobe, key prop. Omit scene effects."
+      "description": "Tight identity traits only: age range, build, skin, hair, eyes, brief wardrobe, key prop. Omit scene effects. When the character has an identity_lock, reuse that text verbatim here."
     },
     "reference_images": {
       "type": "array",
@@ -52,7 +52,7 @@
   },
   "output": {
     "format": "png",
-    "target": "startFrameImage",
+    "target": "start_frame",
     "completion_status": "review"
   },
   "prompt_assembly": {

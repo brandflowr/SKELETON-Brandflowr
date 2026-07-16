@@ -1,0 +1,17 @@
+{
+  "$comment": "Community registry of public BONE and MUSCLE ids. Additive; PRs welcome per registry/README.md. conformance: 'verified' means the maintainers ran the artifact against the published schemas and (for muscles) the reference host.",
+  "registry_version": "1.0",
+  "bones": [
+    { "id": "flux-dev", "label": "Flux Dev (Image Generation)", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/flux-dev.bone.json", "provider": "flux", "conformance": "verified" },
+    { "id": "runway-gen3", "label": "Runway Gen-3 Alpha (Video)", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/runway-gen3.bone.json", "provider": "runway", "conformance": "verified" },
+    { "id": "kling-v1", "label": "Kling v1.6 (Video)", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/kling-v1.bone.json", "provider": "kling", "conformance": "verified" },
+    { "id": "seedance-2", "label": "Seedance 2 (Video)", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/seedance-2.bone.json", "provider": "bytedance", "conformance": "verified" },
+    { "id": "character-reference-sheet", "label": "Character Reference Sheet", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/character-reference-sheet.bone.json", "provider": "genlock", "conformance": "verified" },
+    { "id": "storyboard-grid-9", "label": "9-Panel Cinematic Storyboard", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/bones/storyboard-grid-9.bone.json", "provider": "genlock", "conformance": "verified" }
+  ],
+  "muscles": [
+    { "id": "studio-style-guard", "label": "Studio Style Guard", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/muscles/studio-style-guard.muscle.json", "conformance": "verified" },
+    { "id": "fountain-adapter", "label": "Fountain Round-Trip Adapter", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/muscles/fountain-adapter.muscle.json", "implementation": "https://github.com/brandflowr/SKELETON-Brandflowr/tree/main/reference/fountain-adapter", "conformance": "verified" },
+    { "id": "continuity-guard", "label": "Continuity Guard", "source": "https://github.com/brandflowr/SKELETON-Brandflowr/blob/main/spec/muscles/continuity-guard.muscle.json", "implementation": "https://github.com/brandflowr/SKELETON-Brandflowr/tree/main/reference/continuity-guard", "conformance": "verified" }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
+  "skel_version": "2.9",
+  "metadata": {
+    "story_id": "str-e01-landfall",
+    "title": "The Last Signal — S01E01: Landfall",
+    "lifecycle": "production",
+    "logline": "Eli comes home with a tape that should not exist.",
+    "language": "en-US",
+    "skin_key": "noir_v1",
+    "series": {
+      "series_id": "srs_lastsignal",
+      "series_title": "The Last Signal",
+      "season": 1,
+      "episode": 1,
+      "episode_code": "S01E01",
+      "arc_refs": ["arc_signal_origin"]
+    },
+    "delivery": { "frame_rate": 24, "aspect": "2.39:1" },
+    "extensions": { "x-genlock": { "project_slug": "last-signal-e01" } }
+  },
+  "acts": [
+    { "id": "act_1", "order": 0, "title": "Landfall", "scene_refs": ["sc_1"] }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "order": 0,
+      "header": "INT. LIGHTHOUSE - NIGHT",
+      "loc": { "type": "INT", "name": "LIGHTHOUSE", "tod": "NIGHT" },
+      "location_ref": "loc_lighthouse",
+      "environment_ref": "env_lighthouse_storm",
+      "shot_refs": ["sh_1", "sh_2"],
+      "narrative": "Eli arrives unannounced with the tape.",
+      "creative_status": "approved"
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "order": 0,
+      "action": "The door bangs open with the storm. Eli stands in the frame, soaked, a tape reel in one hand.",
+      "v_setup": { "size": "ws", "angle": "low", "light": "practical", "weather": "storm", "texture": "film_35mm" },
+      "character_refs": ["char_eli"],
+      "duration": 5,
+      "status": { "image": "not_started", "video": "not_started" }
+    },
+    {
+      "id": "sh_2",
+      "scene_id": "sc_1",
+      "order": 1,
+      "action": "Harlan does not turn around. In the window's reflection, he watches his son hold up the reel.",
+      "v_setup": { "size": "mcu", "angle": "eye", "light": "noir", "dof": "shallow", "mood": "foreboding" },
+      "character_refs": ["char_harlan", "char_eli"],
+      "prop_refs": ["prop_watch"],
+      "dialogue": [
+        { "character_ref": "char_eli", "text": "Thirty-one years of logs, and this one isn't in any of them.", "mode": "spoken" }
+      ],
+      "duration": 7,
+      "status": { "image": "not_started", "video": "not_started" },
+      "transition_out": "smash_cut"
+    }
+  ]
+}

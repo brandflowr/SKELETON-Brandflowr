@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "MUSCLE Manifest",
   "description": "Validates .muscle.json behavior-plugin manifests. MUSCLE Spec v1.0.",
   "type": "object",
@@ -93,7 +94,7 @@
             "bone_ids": { "type": "array", "items": { "type": "string" } },
             "entities": {
               "type": "array",
-              "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot"] }
+              "items": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "character", "environment"] }
             }
           }
         }
@@ -113,6 +114,9 @@
             "patch:shot.bones",
             "patch:scene.bones",
             "patch:v_setup",
+            "patch:characters",
+            "patch:environments",
+            "patch:props",
             "patch:sidecars",
             "write:renders"
           ]

@@ -1,7 +1,7 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json",
   "bone_id": "storyboard-grid-9",
-  "bone_version": "1.0",
+  "bone_version": "1.1",
   "label": "9-Panel Cinematic Storyboard",
   "description": "AI filmmaking storyboard sheet. Produces a 3x3 grid of nine sequential panels for one continuous scene with readable production-note strips.",
   "provider": "genlock",
@@ -76,7 +76,7 @@
   },
   "output": {
     "format": "png",
-    "target": "startFrameImage",
+    "target": "start_frame",
     "completion_status": "review"
   },
   "prompt_assembly": {

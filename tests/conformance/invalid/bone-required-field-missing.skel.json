@@ -1,0 +1,63 @@
+{
+  "skel_version": "2.0",
+  "metadata": {
+    "story_id": "fixture-014",
+    "title": "Fixture 14",
+    "lifecycle": "production"
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "Act One",
+      "scene_refs": [
+        "sc_1"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "header": "INT. ROOM - DAY",
+      "loc": {
+        "type": "INT",
+        "name": "ROOM",
+        "tod": "DAY"
+      },
+      "shot_refs": [
+        "sh_1"
+      ]
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "action": "A thing happens.",
+      "v_setup": {
+        "size": "ms",
+        "angle": "eye"
+      },
+      "bones": {
+        "flux-dev": {
+          "seed": 1
+        }
+      }
+    }
+  ],
+  "bone_registry": {
+    "flux-dev": {
+      "label": "Flux",
+      "target": "image",
+      "attaches_to": [
+        "shot"
+      ],
+      "fields": {
+        "text": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  }
+}

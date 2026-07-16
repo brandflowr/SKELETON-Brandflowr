@@ -46,25 +46,36 @@ SKEL uses the term **Acts** for the top-level story grouping. Genlock Studio sur
 | [`hook-payload.schema.json`](./hook-payload.schema.json) | Hook invocation contract. Envelope (host → MUSCLE) and result (MUSCLE → host) shapes, per-hook subjects. |
 | [`MUSCLE_AUTHORING.md`](./MUSCLE_AUTHORING.md) | Practical guide: how to write, test, and ship a MUSCLE plugin. |
 | [`muscles/`](./muscles/) | Example MUSCLE manifests: `studio-style-guard` (prompt transform), `fountain-adapter` (round-trip format adapter per ADR-016). |
-| [`skel.schema.json`](./skel.schema.json) | SKEL JSON Schema (Draft 7). Validates the parsed `.skel` data model and `.skel.json` exports. Includes `bone_registry` and `bones` on all entities. |
+| [`skel.schema.json`](./skel.schema.json) | SKEL JSON Schema (Draft 7). Validates the parsed `.skel` data model and `.skel.json` exports. Includes `bone_registry`, `bones` on all entities, and the full asset layer (characters, environments, locations, props, music cues). |
 | [`bone.schema.json`](./bone.schema.json) | BONE JSON Schema. Validates `.bone.json` definition files. |
+| [`studio-spec.md`](./studio-spec.md) | Studio registry spec: `studio.json`, the cross-project story bible (characters, environments, props, voices, skins, palettes, series). |
+| [`studio.schema.json`](./studio.schema.json) | Studio registry JSON Schema. Asset definitions `$ref` `skel.schema.json` so snapshots and registry records cannot drift. |
+| [`errors.md`](./errors.md) | Normative error catalog: stable codes, severities, RFC 6901 path convention. |
+| [`GENLOCK_HOST_PROFILE.md`](./GENLOCK_HOST_PROFILE.md) | Genlock's mapping of the neutral spec onto its storage; the template for third-party host profiles. |
+| [`MIGRATIONS.md`](./MIGRATIONS.md) | Rename/structure migrations and alias sunsets (`x-spore`, output targets, status mirror, legacy `story.json`). |
 | [`skel-keyfile.json`](./skel-keyfile.json) | Default token dictionary. Maps shorthand tokens to full production definitions. |
 | [`example.skel.json`](./example.skel.json) | Complete export/interchange example. "The Last Signal" - 2 acts, 3 scenes, 9 shots with BONE data. |
-| [`bones/`](./bones/) | Starter BONE definitions: `flux-dev`, `runway-gen3`, `kling-v1`. |
+| [`example.skel`](./example.skel) | The same example in native YAML with comments — the annotated read-first file. |
+| [`examples/`](./examples/) | `kitchen-sink.skel.json` (every 2.9 feature) + `episodic/` (two episodes sharing one `studio.json`). |
+| [`bones/`](./bones/) | Starter BONE definitions: `flux-dev`, `runway-gen3`, `kling-v1`, `seedance-2`, `character-reference-sheet`, `storyboard-grid-9`. |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture map. Data flow, module responsibilities, integration points. |
 | [`LLM_INTEGRATION.md`](./LLM_INTEGRATION.md) | How LLMs read, write, and act on SKEL/BONE. The full generation loop: prompt → generator → storage → write-back. MCP tool map. |
 | [`DECISIONS.md`](./DECISIONS.md) | Architecture Decision Records. Why we made the choices we made. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
 
-### Implementation (`/app/utils/SKEL`)
+### Implementation
+
+Reference implementations in this repo: [`reference/cli/`](../reference/cli/) (validator/converter/inspector, published as `@skel/cli`), [`reference/muscle-host/`](../reference/muscle-host/), [`reference/fountain-adapter/`](../reference/fountain-adapter/), [`reference/continuity-guard/`](../reference/continuity-guard/), plus TypeScript types in [`types/skel.d.ts`](../types/skel.d.ts) (published as `@skel/spec`).
+
+The Genlock Studio host implementation lives in the app repo (`app/utils/skel/`):
 
 | File | Purpose |
 |---|---|
-| [`types.ts`](../app/utils/SKEL/types.ts) | TypeScript interfaces matching the JSON Schema. `SKELDocument`, `SKELScene`, `SKELShot`, `SKELVSetup`, etc. |
-| [`validator.ts`](../app/utils/SKEL/validator.ts) | Schema validation (AJV) + referential integrity checks + duplicate ID detection. |
-| [`keyfile.ts`](../app/utils/SKEL/keyfile.ts) | `SKELKeyResolver` class. Expands shorthand tokens to full definitions with spec-compliant fallback defaults. |
-| [`converter.ts`](../app/utils/SKEL/converter.ts) | Bidirectional conversion: `masterStoryToSKEL()`, `storyToSKEL()`, `SKELToStory()`. |
-| [`bone.ts`](../app/utils/SKEL/bone.ts) | `BoneResolver` class. Loads definitions, resolves inheritance chain, validates BONE data. |
+| `types.ts` | TypeScript interfaces matching the JSON Schema. `SKELDocument`, `SKELScene`, `SKELShot`, `SKELVSetup`, etc. |
+| `validator.ts` | Schema validation (AJV) + referential integrity checks + duplicate ID detection. |
+| `keyfile.ts` | `SKELKeyResolver` class. Expands shorthand tokens to full definitions with spec-compliant fallback defaults. |
+| `converter.ts` | Bidirectional conversion: `masterStoryToSKEL()`, `storyToSKEL()`, `SKELToStory()`. |
+| `bone.ts` | `BoneResolver` class. Loads definitions, resolves inheritance chain, validates BONE data. |
 
 ### Genlock-Specific Extension Data (stored in `x-genlock` namespace)
 
@@ -109,7 +120,7 @@ import { BoneResolver } from '~/utils/SKEL/bone'
 const resolver = new BoneResolver(SKELDoc.bone_registry)
 const result = resolver.resolveForShot('flux-dev', SKELDoc, shot)
 // result.data → { text: "...", negative: "blurry...", guidance: 9, seed: 42 }
-// result.source → ['defaults', 'metadata', 'scene', 'shot']
+// result.source → ['defaults', 'metadata', 'act', 'scene', 'shot']
 ```
 
 ### Resolve tokens from a shot
@@ -172,9 +183,10 @@ Any entity can carry vendor-specific data via `extensions` with `x-` namespaced 
 Genlock proposal history lives under `extensions.x-genlock.proposals`. Proposal objects have stable IDs, a `type`, a `status` (`pending`, `accepted`, `rejected`, or `superseded`), and a short `summary`. See `SKEL/spec/x-genlock.schema.json` for the supplementary schema.
 
 ### Production Status (split image / video)
-Shots carry a `status` object with separate image and video production states:
-- **Image**: `pending` | `generating` | `review` | `approved` | `rejected`
-- **Video**: `not_started` | `pending` | `generating` | `review` | `approved` | `rejected`
+Shots carry a `status` object with separate image and video production states. Both take:
+`not_started` | `pending` | `generating` | `review` | `approved` | `rejected` | `failed`
+
+The core `status` field is the canonical home of production status (since 2.9); `extensions.x-genlock.production_status` is a deprecated mirror (see MIGRATIONS.md §4).
 
 ### Audio Map (Genlock extension)
 `audio-map.json` maps each shot ID to up to three track types — `dialogue`, `sfx`, `music`. Persisted outside the SKEL document to keep media references decoupled from story structure.
@@ -188,9 +200,16 @@ Shots carry a `status` object with separate image and video production states:
 
 | Aspect | Status |
 |---|---|
-| Specification | ✅ v2.0 complete |
-| JSON Schema | ✅ Draft 7, validated |
-| Key File | ✅ 7 categories, 47 tokens |
+| Specification | ✅ v2.9 complete |
+| JSON Schema | ✅ Draft 7, validated (AJV strict-clean) |
+| Key File | ✅ 13 categories, 131 tokens |
+| Asset layer (characters/environments/locations/props) | ✅ v2.9 (`identity_lock`, `style_lock`, continuity state) |
+| Studio registry (`studio.json`) | ✅ `studio-spec.md` + `studio.schema.json` |
+| Series & episodes | ✅ `metadata.series` + registry series documents |
+| Music cues / transitions / temporal model / delivery facts | ✅ v2.9 |
+| Normative error catalog | ✅ `errors.md` |
+| Conformance classes + corpus | ✅ spec §9 + `tests/conformance/` |
+| Versioned schema URLs | ✅ tagged `$id`s (`v2.9.0`), `main` = latest |
 | TypeScript types | ✅ Matches schema |
 | Validator | ✅ Schema + referential integrity |
 | Key resolver | ✅ With spec-compliant fallbacks |
@@ -208,8 +227,10 @@ Shots carry a `status` object with separate image and video production states:
 | Final Draft import | 🔲 Planned |
 | OpenTimelineIO export | 🔲 Planned |
 | CSV export | 🔲 Planned |
-| Standalone CLI | 🔲 Planned |
-| Schema hosting | ✅ GitHub raw URL (this repo) |
+| Standalone CLI | ✅ `reference/cli/` — validate / convert / inspect |
+| Fountain round-trip adapter (reference) | ✅ `reference/fountain-adapter/` — byte-identical round-trip test |
+| CI (validate artifacts, corpus, demo, round-trip) | ✅ `.github/workflows/ci.yml` |
+| Schema hosting | ✅ GitHub raw URLs, tagged per release |
 | MUSCLE spec (behavior plugins) | ✅ v1.0 spec complete |
 | MUSCLE schema + hook payload schema | ✅ Validates manifests and hook envelopes/results |
 | MUSCLE authoring guide + example manifests | ✅ `MUSCLE_AUTHORING.md`, `muscles/` |

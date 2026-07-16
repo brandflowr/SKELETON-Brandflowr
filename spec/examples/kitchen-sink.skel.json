@@ -1,0 +1,460 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
+  "skel_version": "2.9",
+  "metadata": {
+    "story_id": "b7c9d2e1-4f6a-4b8c-9d3e-a1b2c3d4e5f6",
+    "title": "The Last Signal — S01E03: The Pattern Breaks",
+    "lifecycle": "export",
+    "logline": "Harlan decodes the final transmission and learns who has been answering him.",
+    "author": "genlock",
+    "genre": "psychological thriller",
+    "language": "en-US",
+    "target_duration_seconds": 90,
+    "created_at": "2026-07-10T09:00:00Z",
+    "modified_at": "2026-07-16T12:00:00Z",
+    "skin_key": "noir_v1",
+    "series": {
+      "series_id": "srs_lastsignal",
+      "series_title": "The Last Signal",
+      "season": 1,
+      "episode": 3,
+      "episode_code": "S01E03",
+      "arc_refs": ["arc_signal_origin"],
+      "previously": ["str-e01-landfall", "str-e02-pattern"]
+    },
+    "delivery": {
+      "frame_rate": 24,
+      "resolution": { "width": 3840, "height": 2160 },
+      "aspect": "2.39:1",
+      "color_space": "rec709",
+      "audio": { "sample_rate": 48000, "channels": 2, "loudness_target_lufs": -14 }
+    },
+    "source": {
+      "format": "fountain",
+      "file": "the-pattern-breaks.fountain",
+      "tool": "skel-fountain 2.9.0",
+      "imported_at": "2026-07-10T09:00:00Z"
+    },
+    "plugins": [
+      { "id": "continuity-guard", "version": "1.0.0", "last_ran": "2026-07-16T11:58:00Z" }
+    ],
+    "bones": {
+      "flux-dev": { "negative": "blurry, low quality", "guidance": 7.5 }
+    },
+    "extensions": {
+      "x-genlock": { "project_slug": "last-signal-e03" }
+    }
+  },
+  "bone_registry": {
+    "flux-dev": {
+      "bone_version": "1.0",
+      "label": "Flux Dev (Image Generation)",
+      "target": "image",
+      "attaches_to": ["shot", "scene", "act", "metadata"],
+      "fields": {
+        "text": { "type": "string", "required": true, "ui": "textarea", "label": "Prompt" },
+        "negative": { "type": "string", "required": false, "ui": "textarea", "label": "Negative Prompt" },
+        "guidance": { "type": "number", "required": false, "ui": "slider", "label": "Guidance", "min": 1, "max": 20, "default": 7.5 },
+        "seed": { "type": "number", "required": false, "ui": "number", "label": "Seed" }
+      },
+      "defaults": { "guidance": 7.5 }
+    },
+    "seedance-2": {
+      "bone_version": "1.1",
+      "label": "Seedance 2 (Video Generation)",
+      "target": "video",
+      "attaches_to": ["shot", "scene", "metadata"],
+      "fields": {
+        "action": { "type": "string", "required": true, "ui": "textarea", "label": "Action / Motion" },
+        "subject": { "type": "string", "required": false, "ui": "text", "label": "Subject" },
+        "duration": { "type": "number", "required": false, "ui": "select", "label": "Duration", "options": [5, 10, 15], "default": 15 }
+      },
+      "defaults": { "duration": 15 },
+      "output": { "format": "mp4", "target": "video_take", "completion_status": "review" }
+    },
+    "character-reference-sheet": {
+      "bone_version": "1.1",
+      "label": "Character Reference Sheet",
+      "target": "image",
+      "attaches_to": ["character", "metadata", "scene", "shot"],
+      "fields": {
+        "character_description": { "type": "string", "required": false, "ui": "textarea", "label": "Character Description" },
+        "style": { "type": "string", "required": false, "ui": "text", "label": "Rendering Style" }
+      },
+      "output": { "format": "png", "target": "start_frame", "completion_status": "review" }
+    }
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "order": 0,
+      "title": "The Answer",
+      "scene_refs": ["sc_1", "sc_2"],
+      "bones": {
+        "flux-dev": { "negative": "blurry, low quality, bright colors, cheerful" }
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "order": 0,
+      "header": "INT. LIGHTHOUSE - NIGHT",
+      "loc": { "type": "INT", "name": "LIGHTHOUSE", "tod": "NIGHT" },
+      "location_ref": "loc_lighthouse",
+      "environment_ref": "env_lighthouse_storm",
+      "shot_refs": ["sh_1", "sh_2"],
+      "narrative": "The storm peaks as Harlan decodes the final transmission.",
+      "duration_seconds": 45,
+      "mood": "dread compressing into certainty",
+      "story_time": "1998-10-02T21:40:00",
+      "narrative_mode": "present",
+      "transition_out": "dissolve",
+      "intent": {
+        "purpose": "Pay off two episodes of pattern-decoding with the answer.",
+        "conflict": "Harlan wants the signal to be noise; the signal insists on being him.",
+        "emotional_turn": "Dread becomes recognition.",
+        "story_function": "reveal"
+      },
+      "creative_status": "approved",
+      "bones": {
+        "flux-dev": { "guidance": 8 }
+      }
+    },
+    {
+      "id": "sc_2",
+      "act_id": "act_1",
+      "order": 1,
+      "header": "EXT. WRECK BEACH - DAY",
+      "loc": { "type": "EXT", "name": "WRECK BEACH", "tod": "DAY" },
+      "location_ref": "loc_lighthouse",
+      "shot_refs": ["sh_3"],
+      "narrative": "Twenty years earlier: the wreck Harlan never speaks of.",
+      "story_time": "1978-06-14T15:00:00",
+      "time_elapsed_since_previous": "twenty years earlier",
+      "narrative_mode": "flashback",
+      "transition_out": "fade_out",
+      "creative_status": "drafted"
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "order": 0,
+      "title": "The decode",
+      "action": "Harlan cross-references the logbook against the tape counter, pocket watch open beside the receiver.",
+      "visual_focus": "The watch face reflecting the VU needle.",
+      "v_setup": {
+        "size": "ins",
+        "angle": "high",
+        "lens": "macro",
+        "move": "push_in",
+        "light": "practical",
+        "dof": "split",
+        "aspect": "2.39:1",
+        "color": "teal_orange",
+        "mood": "foreboding",
+        "weather": "storm",
+        "texture": "film_35mm"
+      },
+      "character_refs": ["char_harlan"],
+      "prop_refs": ["prop_watch"],
+      "duration": 6,
+      "status": { "image": "review", "video": "not_started" },
+      "audio_description": "A brass pocket watch lies open beside a reel-to-reel receiver; its ticking hand and the meter's needle fall into the same rhythm.",
+      "sound_effects": [
+        { "audio_ref": "aud_fog_horn", "timing_start_seconds": 2, "volume": 0.4 }
+      ],
+      "intent": {
+        "beat": "The watch and the signal tick in sync.",
+        "function": "reveal",
+        "emphasis": "Mechanical rhythm — the audience should hear the match before Harlan sees it."
+      },
+      "creative_status": "approved",
+      "bones": {
+        "flux-dev": {
+          "text": "Split diopter macro: brass pocket watch face razor sharp in foreground, VU meter needle sharp in background, storm light through window, teal and orange grade, 35mm grain.",
+          "seed": 4242
+        },
+        "seedance-2": {
+          "subject": "Weathered white man in his early sixties, heavy build, salt-and-pepper beard, deep-set gray eyes, wind-burned skin, navy wool keeper's coat over a cable-knit sweater, brass pocket watch on a chain.",
+          "action": "0:00-0:03: Insert — the watch hand and VU needle tick into sync. 0:03-0:06: Slow push in as both freeze on the same beat."
+        }
+      },
+      "extensions": {
+        "x-genlock": {
+          "startFrameImage": "projects/last-signal-e03/renders/images/sh_1.flux-dev.png",
+          "provenance": {
+            "start_frame": {
+              "bone_id": "flux-dev",
+              "provider": "flux",
+              "model": "flux-dev",
+              "prompt": "Split diopter macro: brass pocket watch face razor sharp in foreground...",
+              "params": { "seed": 4242, "guidance": 8 },
+              "generated_at": "2026-07-16T11:30:00Z",
+              "job_id": "flux_a1b2c3"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "sh_2",
+      "scene_id": "sc_1",
+      "order": 1,
+      "title": "The answer",
+      "action": "Harlan and Eli face each other across the receiver as the decoded voice plays.",
+      "v_setup": {
+        "size": "2s",
+        "angle": "eye",
+        "lens": "std",
+        "move": "arc",
+        "light": "x-genlock-dreamy",
+        "dof": "shallow",
+        "aspect": "2.39:1",
+        "mood": "oppressive",
+        "weather": "storm"
+      },
+      "character_refs": ["char_harlan", "char_eli"],
+      "prop_refs": ["prop_watch"],
+      "duration": 9,
+      "status": { "image": "pending", "video": "failed" },
+      "dialogue": [
+        { "character_ref": "char_eli", "text": "You knew.", "mode": "spoken", "emotion": "cold" },
+        { "character_ref": "char_harlan", "text": "I suspected.", "mode": "spoken", "delivery_notes": "barely audible under the storm" },
+        { "character_ref": "char_harlan", "text": "Eu sempre suspeitei.", "mode": "vo", "lang": "pt-BR", "subtitle": "I always suspected." }
+      ],
+      "transition_out": "smash_cut",
+      "creative_status": "needs_review",
+      "bones": {
+        "flux-dev": {
+          "text": "Two shot across a reel-to-reel receiver, storm light, slow orbit blur, oppressive shadow, dreamy haze."
+        }
+      }
+    },
+    {
+      "id": "sh_3",
+      "scene_id": "sc_2",
+      "order": 0,
+      "title": "The wreck",
+      "action": "Young Harlan drags a rowboat ashore; the pocket watch glints in the wet sand beside a broken hull.",
+      "v_setup": {
+        "size": "est",
+        "angle": "bird",
+        "lens": "wide",
+        "move": "drone",
+        "light": "overcast",
+        "dof": "deep",
+        "aspect": "2.39:1",
+        "color": "desaturated",
+        "mood": "melancholic",
+        "weather": "overcast",
+        "texture": "film_16mm"
+      },
+      "character_refs": ["char_harlan"],
+      "prop_refs": ["prop_watch"],
+      "duration": 8,
+      "status": { "image": "not_started", "video": "not_started" },
+      "audio_description": "From above, a lone figure hauls a rowboat onto a gray beach littered with wreckage; something small glints gold in the sand.",
+      "transition_out": "fade_out",
+      "creative_status": "drafted",
+      "bones": {
+        "flux-dev": {
+          "text": "Establishing bird's-eye of gray wreck-strewn beach, lone figure dragging rowboat, desaturated 16mm documentary grain, overcast flat light, tiny gold glint in sand."
+        }
+      },
+      "extensions": {
+        "x-genlock": {
+          "proposals": [
+            {
+              "id": "prop_cont_001",
+              "by": "continuity-guard",
+              "type": "continuity_note",
+              "status": "pending",
+              "summary": "prop_watch is plot-critical and appears in all three shots — confirm it should also be planted in the S01E02 recap.",
+              "target": { "entity": "shot", "id": "sh_3" },
+              "rationale": "Cross-episode continuity: metadata.series.previously includes str-e02-pattern."
+            },
+            {
+              "id": "prop_cast_002",
+              "by": "claude",
+              "type": "add_character",
+              "status": "pending",
+              "summary": "The decoded voice needs a credited character (THE ANSWERER) for casting and TTS.",
+              "rationale": "Voice plays in sh_2 but no character owns it."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "characters": [
+    {
+      "id": "char_harlan",
+      "name": "Harlan Morse",
+      "aliases": ["The Keeper"],
+      "pronouns": "he/him",
+      "age_range": "55-65",
+      "species": "human",
+      "role": "protagonist",
+      "archetype": "hermit guardian",
+      "identity_lock": "Weathered white man in his early sixties, heavy build, salt-and-pepper beard, deep-set gray eyes, wind-burned skin, navy wool keeper's coat over a cable-knit sweater, brass pocket watch on a chain.",
+      "height": "6'1\"",
+      "build": "heavy",
+      "hair": "salt-and-pepper, unkempt",
+      "eyes": "deep-set gray",
+      "skin": "wind-burned",
+      "distinguishing_marks": ["scar through left eyebrow", "missing tip of right ring finger"],
+      "default_wardrobe": "Navy wool keeper's coat over cable-knit sweater",
+      "wardrobe_variants": [
+        {
+          "id": "ward_storm",
+          "label": "Storm gear",
+          "description": "Yellow oilskin over the keeper's coat, sou'wester hat",
+          "scene_refs": ["sc_1"]
+        },
+        {
+          "id": "ward_young",
+          "label": "1978 deckhand",
+          "description": "Canvas work jacket, rolled sleeves, no beard",
+          "scene_refs": ["sc_2"]
+        }
+      ],
+      "voice": {
+        "description": "Low, gravelled, deliberate; long pauses",
+        "accent": "Maine coastal",
+        "casting": "in the register of a foghorn remembering being a man",
+        "voice_settings": { "provider": "elevenlabs", "voice_id": "vx_harlan_01", "stability": 0.7 }
+      },
+      "reference_sheet": "assets/characters/harlan_refsheet.png",
+      "reference_images": ["assets/characters/harlan_01.png", "assets/characters/harlan_02.png"],
+      "identity_refs": { "lora": "loras/harlan_v3.safetensors", "soul_id": "hf_abc123" },
+      "thumbnail": "assets/characters/harlan_thumb.png",
+      "bio": "Keeper of the Point Merrow light for thirty-one years; sole survivor of the Elder Maid wreck.",
+      "want": "To keep the light running and be left alone.",
+      "need": "To admit the signal is his own guilt, encoded.",
+      "flaw": "Mistakes silence for penance.",
+      "arc": "Denial to confession.",
+      "secrets": ["He shut the lamp off the night of the wreck."],
+      "relationships": [
+        { "character_ref": "char_eli", "type": "estranged_son", "description": "Blames Harlan for the wreck." }
+      ],
+      "first_appearance": "sh_1",
+      "props_carried": ["prop_watch"],
+      "state_overrides": [
+        { "scene_ref": "sc_2", "wardrobe_ref": "ward_young", "injuries": "fresh cut across left eyebrow (origin of the scar)", "notes": "No beard; twenty years younger." }
+      ],
+      "creative_status": "locked",
+      "tags": ["cast:principal"],
+      "bones": {
+        "character-reference-sheet": {
+          "character_description": "Weathered white man in his early sixties, heavy build, salt-and-pepper beard, deep-set gray eyes, wind-burned skin, navy wool keeper's coat over a cable-knit sweater, brass pocket watch on a chain.",
+          "style": "photorealistic, life-like live action shot on a DSLR camera with 35mm film and muted color tones"
+        }
+      }
+    },
+    {
+      "id": "char_eli",
+      "name": "Eli Morse",
+      "pronouns": "he/him",
+      "age_range": "30-38",
+      "role": "deuteragonist",
+      "identity_lock": "Lean white man in his mid-thirties, storm-gray parka over a fisherman's sweater, short dark beard, his father's gray eyes, a radio operator's headset worn around the neck.",
+      "relationships": [
+        { "character_ref": "char_harlan", "type": "father", "description": "Came back with proof, not forgiveness." }
+      ],
+      "first_appearance": "sh_2",
+      "creative_status": "approved"
+    }
+  ],
+  "environments": [
+    {
+      "id": "env_lighthouse_storm",
+      "name": "Lighthouse Interior — Storm Night",
+      "loc_type": "INT",
+      "location_ref": "loc_lighthouse",
+      "description": "The lamp room and radio bench of Point Merrow light during a full gale.",
+      "style_lock": "Cramped octagonal lamp room, brass and salt-pitted iron, rain hammering black windows, single practical desk lamp and the rotating beam bleeding through the floor hatch, teal-orange storm grade, 35mm grain.",
+      "era_period": "1998",
+      "geography": "Radio bench against the north window; stair hatch center floor; the beam sweeps clockwise, crossing the bench every eight seconds; door to the gallery on the seaward east side.",
+      "tod_variants": [
+        { "tod": "NIGHT", "lighting": "practical desk lamp + rotating beam spill", "description": "Black windows, rain streaks, beam strobing the room every eight seconds." },
+        { "tod": "DAWN", "lighting": "cold blue window light, lamp still on", "description": "The storm's tail; gray-blue light flattens the room." }
+      ],
+      "weather_default": "storm",
+      "soundscape_refs": ["aud_fog_horn"],
+      "reference_images": ["assets/environments/lamp_room_01.png"],
+      "props_present": ["prop_watch"]
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_lighthouse",
+      "name": "Point Merrow Lighthouse",
+      "description": "A 19th-century cast-iron lighthouse on a cliff above Wreck Beach, Maine coast.",
+      "reference_images": ["assets/locations/point_merrow.png"],
+      "notes": "One physical place; env_lighthouse_storm is its storm-night interior dressing."
+    }
+  ],
+  "props": [
+    {
+      "id": "prop_watch",
+      "name": "Brass pocket watch",
+      "description": "Tarnished brass pocket watch, cracked crystal, engraved \"E.M.\"",
+      "significance": "plot_critical",
+      "first_appearance": "sh_1",
+      "carried_by": "char_harlan",
+      "reference_image": "assets/props/watch.png",
+      "notes": "The engraving is the S01 finale reveal — keep it unreadable until then."
+    }
+  ],
+  "audio_assets": [
+    { "id": "aud_theme", "name": "Main theme — 'The Last Signal'", "type": "music" },
+    { "id": "aud_fog_horn", "name": "Fog horn, distant, storm-filtered", "type": "sfx" }
+  ],
+  "music_cues": [
+    {
+      "id": "cue_theme_reveal",
+      "audio_ref": "aud_theme",
+      "in": { "shot_ref": "sh_1", "offset_seconds": 0 },
+      "out": { "shot_ref": "sh_3", "offset_seconds": 2.5 },
+      "volume": 0.8,
+      "notes": "Swells under the decode, ducks for the dialogue exchange, resolves over the flashback."
+    }
+  ],
+  "story_analysis": {
+    "themes": ["guilt", "inheritance", "signal versus noise"],
+    "motifs": ["synchronized rhythms", "the watch", "voices through machines"],
+    "character_arcs": [
+      { "character_ref": "char_harlan", "arc": "Denial to confession", "notes": "The decode forces the words he never said." },
+      { "character_ref": "char_eli", "arc": "Prosecutor to witness", "notes": "Came for an admission; leaves with the tape." }
+    ],
+    "emotional_curve": [
+      { "scene_ref": "sc_1", "emotion": "dread", "intensity": 0.8 },
+      { "scene_ref": "sc_2", "emotion": "grief", "intensity": 0.6 }
+    ],
+    "pacing_notes": "Hold sh_1 longer than comfortable; the sync reveal earns the stillness."
+  },
+  "production": {
+    "schedule": { "boards_due": "2026-08-01", "renders_due": "2026-08-15" },
+    "budget": { "currency": "USD", "per_bone_estimates": { "seedance-2": 0.85, "flux-dev": 0.04 } },
+    "crew": [
+      { "role": "Director", "name": "M. Vance" },
+      { "role": "Board artist", "name": "genlock" }
+    ],
+    "generation_stats": { "renders_total": 41, "approved": 12 }
+  },
+  "key_file": {
+    "version": "2.9",
+    "custom": [
+      {
+        "token": "x-genlock-dreamy",
+        "label": "Dreamy",
+        "category": "light",
+        "description": "Soft-focus haze with blooming highlights."
+      }
+    ]
+  }
+}

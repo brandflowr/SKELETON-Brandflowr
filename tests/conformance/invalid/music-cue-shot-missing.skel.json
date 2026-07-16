@@ -1,0 +1,59 @@
+{
+  "skel_version": "2.0",
+  "metadata": {
+    "story_id": "fixture-011",
+    "title": "Fixture 11",
+    "lifecycle": "production"
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "Act One",
+      "scene_refs": [
+        "sc_1"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "header": "INT. ROOM - DAY",
+      "loc": {
+        "type": "INT",
+        "name": "ROOM",
+        "tod": "DAY"
+      },
+      "shot_refs": [
+        "sh_1"
+      ]
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "action": "A thing happens.",
+      "v_setup": {
+        "size": "ms",
+        "angle": "eye"
+      }
+    }
+  ],
+  "audio_assets": [
+    {
+      "id": "aud_a",
+      "name": "Theme",
+      "type": "music"
+    }
+  ],
+  "music_cues": [
+    {
+      "id": "cue_1",
+      "audio_ref": "aud_a",
+      "in": {
+        "shot_ref": "sh_ghost"
+      }
+    }
+  ]
+}

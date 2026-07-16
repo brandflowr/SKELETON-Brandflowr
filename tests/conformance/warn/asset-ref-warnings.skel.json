@@ -1,0 +1,62 @@
+{
+  "skel_version": "2.0",
+  "metadata": {
+    "story_id": "fixture-031",
+    "title": "Fixture 31",
+    "lifecycle": "production"
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "Act One",
+      "scene_refs": [
+        "sc_1"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "header": "INT. ROOM - DAY",
+      "loc": {
+        "type": "INT",
+        "name": "ROOM",
+        "tod": "DAY"
+      },
+      "shot_refs": [
+        "sh_1"
+      ]
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "action": "A thing happens.",
+      "v_setup": {
+        "size": "ms",
+        "angle": "eye"
+      },
+      "character_refs": [
+        "char_a"
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "id": "char_a",
+      "name": "Aya",
+      "first_appearance": "sh_ghost",
+      "wardrobe_variants": [
+        {
+          "id": "w1",
+          "label": "Coat",
+          "scene_refs": [
+            "sc_ghost"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/bone.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "BONE — Base Object Narrative Export",
   "description": "A plugin definition format for attaching AI generation config to SKEL story entities.",
   "type": "object",
@@ -21,8 +22,8 @@
     },
     "bone_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+$",
-      "description": "Semver MAJOR.MINOR version."
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Semver version. MAJOR.MINOR required; PATCH optional."
     },
     "label": {
       "type": "string",
@@ -46,10 +47,10 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["metadata", "act", "scene", "shot"]
+        "enum": ["metadata", "act", "scene", "shot", "character", "environment"]
       },
       "minItems": 1,
-      "description": "Which SKEL entity types this BONE can attach to."
+      "description": "Which SKEL entity types this BONE can attach to. character/environment attachment targets studio-registry or embedded asset entities (e.g. a per-character reference sheet)."
     },
     "fields": {
       "type": "object",
@@ -92,9 +93,61 @@
       "type": "object",
       "description": "Vendor-specific extension data. Keys should be x- namespaced.",
       "additionalProperties": true
+    },
+    "requires": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Capability ids this BONE needs in order to fire. Hosts join these against their capability matrix to mark the BONE armed / needs-setup / unavailable."
+    },
+    "pipeline_stage": {
+      "type": "string",
+      "description": "Optional pipeline stage this BONE participates in (e.g. proposal, scene_plan, generation, review)."
+    },
+    "authoring_mode": {
+      "type": "string",
+      "anyOf": [
+        { "enum": ["templated", "atelier", "hybrid"] },
+        { "pattern": "^x-" }
+      ],
+      "description": "Templated (fast, consistent, reusable), Atelier/Bespoke (hand-crafted, higher distinctiveness), or Hybrid (templated base with bespoke passes). Absence = unset."
+    },
+    "render_runtime": {
+      "type": "string",
+      "anyOf": [
+        { "enum": ["native", "remotion", "hyperframes", "ffmpeg"] },
+        { "pattern": "^x-" }
+      ],
+      "description": "Preferred composition runtime. Governance/selector metadata only — does not execute a render."
+    },
+    "style_tokens": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional color/typography/motion/grading/caption/a11y tokens for style-family BONEs."
+    },
+    "decision_log_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "IDs of host decision-log entries that motivated or constrain this BONE."
+    },
+    "quality_gates": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/QualityGate" },
+      "description": "Optional quality gates this BONE must satisfy — governance metadata for host reviewer surfaces."
     }
   },
   "definitions": {
+    "QualityGate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["severity", "message"],
+      "description": "A quality gate a BONE declares it must satisfy, shaped like a reviewer finding (inlined to keep this schema self-contained). Runtime-only fields (id/timestamp) are optional because a BONE declares gates rather than emitting findings.",
+      "properties": {
+        "severity": { "type": "string" },
+        "message": { "type": "string" },
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
+    },
     "PromptAssembly": {
       "type": "object",
       "required": ["strategy"],

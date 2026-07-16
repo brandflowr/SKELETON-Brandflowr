@@ -1,0 +1,50 @@
+{
+  "skel_version": "2.0",
+  "metadata": {
+    "story_id": "fixture-017",
+    "title": "Fixture 17",
+    "lifecycle": "production"
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "Act One",
+      "scene_refs": [
+        "sc_1"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "header": "INT. ROOM - DAY",
+      "loc": {
+        "type": "INT",
+        "name": "ROOM",
+        "tod": "DAY"
+      },
+      "shot_refs": [
+        "sh_1"
+      ],
+      "location_ref": "loc_ghost"
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "action": "A thing happens.",
+      "v_setup": {
+        "size": "ms",
+        "angle": "eye"
+      }
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_a",
+      "name": "The Room"
+    }
+  ]
+}

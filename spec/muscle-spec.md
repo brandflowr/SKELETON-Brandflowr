@@ -1,8 +1,10 @@
-# MUSCLE Specification v1.0
+# MUSCLE Specification v1.1
 
 **Modular User-Scripted Companion Logic Extension**
 
 > A behavior plugin format for SKEL. MUSCLEs inject logic at named points in the story workflow — import, validation, prompt assembly, generation, render write-back, and export — without ever touching `story.skel` directly.
+
+Conformance language (MUST/SHOULD/MAY) follows skel-spec.md §1.1 (BCP 14).
 
 ---
 
@@ -28,10 +30,10 @@ Staying with the skeleton metaphor: `.skel` is the body layout, `.bone` files ar
 | Property       | Value                      |
 | -------------- | -------------------------- |
 | File extension | `.muscle.json`             |
-| MIME type      | `application/muscle+json`  |
+| Media type     | `application/vnd.skel.muscle+json` |
 | Encoding       | UTF-8                      |
 | Project folder | `muscles/` (workspace or project scope) |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/muscle.schema.json` |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
 
 ---
 
@@ -207,6 +209,7 @@ Capability strings scope what a MUSCLE may see and change.
 | `patch:acts` \| `patch:scenes` \| `patch:shots` | Patch those entity arrays' core fields. |
 | `patch:shot.bones` \| `patch:scene.bones` | Patch BONE data on those entities. |
 | `patch:v_setup` | Patch shot `v_setup` tokens. |
+| `patch:characters` \| `patch:environments` \| `patch:props` | Patch the embedded asset collections (added in v1.1 for continuity/casting plugins). |
 | `patch:extensions.x-<ns>` | Patch only the named extension namespace on any entity. |
 | `patch:sidecars` | Patch audio/video map sidecars. |
 | `write:renders` | Write files under `renders/` (for `render.complete` post-processing). |
@@ -260,6 +263,7 @@ metadata:
 - `muscle_version` is semver and versions the manifest.
 - `payload_version` versions the hook envelope/result contract. Hosts and MUSCLEs negotiate on major version: a host MUST NOT invoke a MUSCLE expecting a higher major payload version than the host implements.
 - Hook payload changes follow the same rule as SKEL: additive within a major version, breaking changes bump the major.
+- Current payload version: **1.1** (additive over 1.0: `entity.changed` subjects and `filter.entities` may name `character`/`environment`). Envelopes declaring `1.0` remain valid.
 
 ---
 
@@ -273,6 +277,36 @@ metadata:
 | Mutates document | Never (it *is* data) | Never directly — returns patches the host applies |
 
 A generator integration typically ships both: a `.bone.json` (prompt contract + output spec) and, optionally, a `.muscle.json` (custom routing, post-processing, sync).
+
+---
+
+## 10. Security Model
+
+MUSCLE executes external tools declared by manifests. The manifest is **untrusted input**; these obligations are normative for hosts.
+
+### 10.1 Enablement Is Consent
+
+- Hosts MUST NOT auto-enable discovered manifests. Discovery (§6.1) only lists; enablement (§6.2) is an explicit per-project user action.
+- Before enabling, hosts MUST show the manifest's declared `capabilities` and `execution_routes` (what it may touch, what will be executed).
+- When a manifest's `capabilities` grow across a version update, hosts SHOULD re-prompt for consent rather than carrying the old grant forward.
+
+### 10.2 Invocation Hygiene
+
+- `cli` routes MUST be invoked argv-style with the envelope on stdin. Hosts MUST NOT interpolate envelope or document data into a shell command line (no shell metacharacter surface).
+- Hook envelope and result sizes SHOULD be capped (RECOMMENDED default: 32 MiB) and `timeout_ms` MUST be enforced (§3.1); a result exceeding limits is a MUSCLE failure per §3.3.
+- Patch sets SHOULD be bounded (RECOMMENDED default: 1000 operations); oversized sets are rejected as failures, not truncated.
+
+### 10.3 Filesystem Boundaries
+
+- `write:renders` grants writes **only** under `{workspace_root}/projects/{slug}/renders/`. Resolved paths MUST stay inside the workspace root; hosts MUST reject `..` segments, absolute paths, and symlink escapes in any path derived from plugin data (same rules as skel-spec.md §10.3).
+
+### 10.4 Privacy
+
+- The hook envelope can carry the full document and the absolute `workspace_root` to a third-party tool. `read:document` is the gate: hosts MUST omit or reduce `document` for MUSCLEs without it, and SHOULD treat `read:document` + a network-using route as worth flagging to the user at consent time.
+
+### 10.5 Existing Guarantees
+
+The patch pipeline already fails safe: capability-scoped paths, `creative_status: locked` protection, host-owned `metadata.plugins`, atomic apply with post-validation rollback (§4.3), and mode enforcement (§3.3). A hostile or buggy plugin's worst case is a rejected, logged patch set.
 
 ---
 

@@ -146,10 +146,11 @@ When an external generator or LLM writes a rendered file back to a project, it u
 The `renders/` folders are created by the Render Output Protocol card in the Showrunner page. They are distinct from the `assets/` folders used for user-imported media.
 
 After writing a render file, the generator or LLM updates:
-- **Image renders** → `shot.extensions.x-genlock.startFrameImage` (or `endFrameImage` / `image`) in `story.skel`
+- **Image renders** (`still`/`start_frame`/`end_frame` targets) → the host's mapped image slot; in Genlock: `shot.extensions.x-genlock.startFrameImage` (or `endFrameImage` / `image`) in `story.skel`
 - **Video renders** → `video-map.json`: append a new take with `isActive: true`, set all prior takes for that shot to `isActive: false`
 - **Audio renders** → `audio-map.json`: assign the file as `dialogue`, `sfx`, or `music` per the BONE's target
-- **Production status** → `shot.extensions.x-genlock.production_status.image` or `.video` set to `"review"`
+- **Production status** → core `shot.status.image` or `.video` set to `"review"` (`"failed"` on error). Core status is canonical since SKEL 2.9; `x-genlock.production_status` is a deprecated mirror (MIGRATIONS.md)
+- **Provenance** → record `{bone_id, provider, model, prompt, params, generated_at, job_id}` alongside the render (BONE Spec §2.8)
 
 Genlock's Refresh Outputs action scans `renders/` folders and re-attaches any outputs that match shot IDs found in filenames.
 
@@ -178,9 +179,11 @@ Genlock's Refresh Outputs action scans `renders/` folders and re-attaches any ou
   1. Parse `.skel` YAML, or `.skel.json` export input when explicitly requested.
   2. Determine lifecycle from `metadata.lifecycle`, defaulting to `draft`, unless an explicit CLI/tool override is provided.
   3. Run JSON Schema validation against the parsed data model.
-  4. Run referential integrity checks for IDs, act/scene/shot refs, and lifecycle-specific structure.
-  5. Resolve BONE registry references and validate required BONE fields after inheritance.
-  6. Optionally validate sidecar files (`audio-map.json`, `video-map.json`, canvas layout) against shot IDs.
+  4. Run referential integrity checks for IDs, act/scene/shot refs, music-cue anchors, and lifecycle-specific structure.
+  5. Resolve asset references (characters, environments, locations, props, audio) against embedded collections and, when supplied, the studio registry (skel-spec §3.4 dual-severity rule).
+  6. Resolve BONE registry references and validate required BONE fields after inheritance (defaults → metadata → act → scene → shot).
+  7. Optionally validate sidecar files (`audio-map.json`, `video-map.json`, canvas layout) against shot IDs.
+- Error codes and severities are normative: `spec/errors.md`.
 - Required result shape:
 
 ```ts
@@ -192,9 +195,9 @@ type SKELValidationResult = {
 }
 
 type SKELError = {
-  code: string
+  code: string      // stable code from spec/errors.md (MUSCLE codes are <muscle_id>.<code>)
   severity: 'error' | 'warning'
-  path: string
+  path: string      // RFC 6901 JSON Pointer, e.g. /shots/3/bones/flux-dev
   message: string
 }
 ```
@@ -307,7 +310,7 @@ Genlock UI State (Pinia)
 | Spec Section | Implementation |
 |---|---|
 | §2 Document Structure | `types.ts` — all interfaces |
-| §3.1 Front-Loading | `fountain-to-skel.ts` — shot actions derive from source beats |
+| §3.2 Front-Loading | `fountain-to-skel.ts` — shot actions derive from source beats |
 | §3.3 ID Uniqueness | `validator.ts` — duplicate ID detection |
 | §3.4 Referential Integrity | `validator.ts` — cross-reference validation |
 | §3.5 Character Limits | `skel.schema.json` — `maxLength` on `action`, `prompt`, `logline` |

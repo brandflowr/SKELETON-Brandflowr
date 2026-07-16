@@ -256,7 +256,9 @@ LLM integration docs specify that agents must read `intent` before rewriting `ac
 ## ADR-014: MUSCLE — Behavior Plugins Separate From BONE
 
 **Date:** 2026-07-07
-**Status:** Accepted
+**Status:** Accepted (amended 2026-07-16)
+
+> **Amendment (2026-07-16):** the `token.resolve` hook named in the Decision below was removed before the first public MUSCLE release — its result contract was never defined. The v1.x hook set is the ten hooks in muscle-spec.md §3.2; `token.resolve` may return in a later minor version. This note preserves the original text as history.
 
 **Context:** BONE answers "what data/config attaches to this entity" but not "who gets to run logic when something happens in the workflow." Users need to inject behavior — custom validators, prompt post-processors, render post-processing, external-app sync, format adapters — without forking Genlock or the spec. Overloading BONE with behavior would blur its role as a portable, embeddable data contract (code cannot be safely embedded on export the way field definitions can).
 
@@ -308,3 +310,66 @@ Format adapters are implemented as MUSCLEs on `import.*`/`export.*` hooks, makin
 - ADR-005's "ignore unknown namespaces" is strengthened to "preserve unknown namespaces" for all conforming tools.
 - `metadata.source` and `metadata.plugins` are the only core schema additions; everything format-specific stays in extensions.
 - Second and later round-trips do not duplicate entities, because IDs are stable.
+
+---
+
+## ADR-017: The Asset & Series Layer — Characters as the Richest Object
+
+**Date:** 2026-07-16
+**Status:** Accepted
+
+**Context:** SKEL's flagship use case is character-locked AI filmmaking, yet `Character`, `Environment`, and `AudioAsset` were `{id, name, anything-goes}` stubs; the `studio.json` the schema referenced three times was specified nowhere; and nothing could express "this file is episode 3 of a show that shares its cast." The identity-lock text every pipeline depends on lived ad hoc in per-shot BONE fields.
+
+**Decision:** SKEL 2.9 ships a full asset layer, all additive:
+1. **Rich `Character`** — identity, appearance (`identity_lock` as THE canonical 30–60-word contract that `CharacterInjection: consistency_modifier` emits verbatim), wardrobe variants with scene refs, voice profile, machine identity anchors (`identity_refs`: lora/embedding/soul_id/face_ref), narrative fields (want/need/flaw/arc/relationships), and continuity state (`first_appearance`, `props_carried`, per-scene `state_overrides`).
+2. **`Environment` vs `Location` defined** — a location is the physical place; an environment is a dressed/lit variant of it (`style_lock`, `geography`, `tod_variants`, `weather_default`); scenes point at environments, environments at their parent location.
+3. **`Prop`** — first-class continuity objects with `significance`; plot-critical props are machine-checkable (`PROP_CONTINUITY` lint).
+4. **Studio registry specified** — `studio-spec.md` + `studio.schema.json`, with asset definitions `$ref`'d from `skel.schema.json` (single source, no drift), snapshot/precedence rules, and voices/skins/palettes registries.
+5. **Series** — `metadata.series` in episode documents + `Series` documents (seasons → episodes, arcs, `cast_refs`) in the registry.
+6. **Plugin surface extended** — `attaches_to` gains `character`/`environment`; MUSCLE capabilities gain `patch:characters`/`patch:environments`/`patch:props`; proposal types gain `add_character`/`rewrite_character`/`continuity_note`.
+
+**Consequences:**
+- Cross-episode identity lock is a data guarantee, not a convention: one registry character, one `identity_lock`, many episodes.
+- `Character`/`Environment` keep `additionalProperties: true` for pre-2.9 loose snapshots; new closed defs (`Prop`, `Location`, `MusicCue`, `Delivery`, `SeriesRef`) validate strictly.
+- Continuity becomes lintable: props, wardrobe, and chronology (`story_time`, `narrative_mode`) give validators and LLMs machine-checkable state.
+- All changes are optional fields / widened `oneOf`s → a 2.x MINOR release per the versioning policy.
+
+---
+
+## ADR-018: Vendor-Neutral Core — Neutral Output Targets, Canonical Status, Host Profiles
+
+**Date:** 2026-07-16
+**Status:** Accepted
+
+**Context:** The vendor-neutral core spec had Genlock hard-wired into it: BONE `output.target` values were literal Genlock storage fields (`startFrameImage` → `extensions.x-genlock.startFrameImage`), and production status had two competing homes — core `shot.status` (defined by the spec) vs `extensions.x-genlock.production_status` (what the write-back protocol actually updated). A third-party tool reading core `status` never saw what the pipeline wrote, and every evaluator would read the format as single-vendor.
+
+**Decision:**
+1. **Neutral output targets**: `still`, `start_frame`, `end_frame`, `video_take`, `audio_track`. A *host profile* document maps slots to storage (`GENLOCK_HOST_PROFILE.md` maps `start_frame` → `x-genlock.startFrameImage`). Pre-1.1 target names are read-accepted aliases; writers emit neutral names.
+2. **Core `shot.status` is canonical** for production status. The write-back protocol updates it; `x-genlock.production_status` is a deprecated mirror (sunset SKEL 3.0, MIGRATIONS.md). Both status enums gain `not_started` and `failed` so every pipeline state — including failure — is representable.
+3. **Genlock specifics move to the host profile doc**; core specs say "hosts", with Genlock as the worked example.
+
+**Consequences:**
+- Third-party pipelines and Genlock read/write the same status field; no more invisible writes.
+- `failed` closes the loop with the `renders/failures/` protocol that previously had no representable state.
+- First-party bones bumped to 1.1 with neutral targets; hosts keep working via the alias rule.
+- The core spec no longer normatively references one vendor's storage layout.
+
+---
+
+## ADR-019: Conformance Machinery — Versioned Schema URLs, Error Catalog, Test Corpus
+
+**Date:** 2026-07-16
+**Status:** Accepted
+
+**Context:** Every schema `$id` pointed at the mutable `main` branch, so validation results could change under documents pinned to it; there were zero git tags, no CI, no objective conformance test — while TRADEMARKS.md conditions use of the marks on conformance that could not be tested; and error codes were "recommended", with two competing path syntaxes in the docs.
+
+**Decision:**
+1. **Versioned, immutable schema URLs**: every release is tagged (`v2.9.0`) and `$id`s point at the tagged URL; `main` stays as "latest". Release process in GOVERNANCE.md.
+2. **Normative error catalog** (`spec/errors.md`): stable codes, severities, and the single path syntax — RFC 6901 JSON Pointers — everywhere (validators, MUSCLE results, LLM tooling).
+3. **Conformance classes** (Reader / Writer / Validator / Full Host, skel-spec §9) with MUST checklists, plus a **test corpus** (`tests/conformance/` with a machine-readable manifest) that CI runs via the reference CLI (`reference/cli/`). Implementers self-certify against the corpus; the trademark policy becomes enforceable.
+
+**Consequences:**
+- Old documents validate identically forever; `main` remains convenient for humans.
+- The corpus is the executable meaning of "conforms to the published specification."
+- CI (`.github/workflows/ci.yml`) machine-validates every shipped artifact, meta-validates schemas, runs the muscle-host demo, the conformance corpus, and the Fountain round-trip on every push.
+- Release discipline: cut changelog, bump `$id`s, tag — enforced by checklist, verified by CI.

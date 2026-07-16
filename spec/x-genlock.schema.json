@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/x-genlock.schema.json",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/x-genlock.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Extension Data",
-  "description": "Supplementary schema for data stored under extensions.x-genlock. `x-spore` is the pre-rename alias of this namespace and is still accepted by readers. The core SKEL schema remains vendor-neutral and does not require this schema.",
+  "description": "Supplementary schema for data stored under extensions.x-genlock. `x-spore` is the pre-rename alias of this namespace and is still accepted by readers (sunset: SKEL 3.0, see MIGRATIONS.md). The core SKEL schema remains vendor-neutral and does not require this schema. Host-mapping details live in GENLOCK_HOST_PROFILE.md.",
   "type": "object",
   "additionalProperties": true,
   "properties": {
@@ -10,16 +11,29 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9\\-]*$"
     },
-    "startFrameImage": { "type": "string" },
-    "endFrameImage": { "type": "string" },
-    "image": { "type": "string" },
+    "startFrameImage": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'start_frame'." },
+    "endFrameImage": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'end_frame'." },
+    "image": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'still'." },
+    "startFramePrompt": { "type": "string", "description": "Prompt text that produced startFrameImage (legacy provenance; new writers SHOULD also populate provenance.start_frame)." },
+    "endFramePrompt": { "type": "string", "description": "Prompt text that produced endFrameImage (legacy provenance; new writers SHOULD also populate provenance.end_frame)." },
     "hero_shot": { "type": "boolean" },
     "production_status": {
       "type": "object",
       "additionalProperties": false,
+      "description": "DEPRECATED mirror of the core shot.status field. Since SKEL 2.9 the core field is canonical: pipelines write shot.status; hosts MAY maintain this mirror for pre-2.9 readers and MUST treat the core field as the source of truth on conflict. Removal target: SKEL 3.0 (see MIGRATIONS.md).",
       "properties": {
-        "image": { "type": "string", "enum": ["pending", "generating", "review", "approved", "rejected"] },
-        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected"] }
+        "image": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected", "failed"] },
+        "video": { "type": "string", "enum": ["not_started", "pending", "generating", "review", "approved", "rejected", "failed"] }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Generation provenance for image renders stored in this namespace, keyed by which image field the render landed in.",
+      "properties": {
+        "start_frame": { "$ref": "#/definitions/Provenance" },
+        "end_frame": { "$ref": "#/definitions/Provenance" },
+        "still": { "$ref": "#/definitions/Provenance" }
       }
     },
     "proposals": {
@@ -41,8 +55,11 @@
         "add_shots",
         "rewrite_shot",
         "add_bone_prompts",
+        "add_character",
+        "rewrite_character",
         "structure_note",
-        "continuity_fix"
+        "continuity_fix",
+        "continuity_note"
       ]
     },
     "ProposalPatch": {
@@ -76,7 +93,7 @@
           "additionalProperties": false,
           "description": "Optional explicit target when the proposal is stored above or outside the entity it affects.",
           "properties": {
-            "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "project"] },
+            "entity": { "type": "string", "enum": ["metadata", "act", "scene", "shot", "character", "environment", "project"] },
             "id": { "type": "string" }
           }
         },
@@ -85,6 +102,24 @@
         "created_at": { "type": "string", "format": "date-time" },
         "updated_at": { "type": "string", "format": "date-time" },
         "resolved_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this render was made: enough to reproduce it, audit it, and disclose it. Hosts SHOULD write this block for every AI-generated image.",
+      "properties": {
+        "bone_id": { "type": "string", "description": "BONE that generated this render." },
+        "provider": { "type": "string", "description": "Provider namespace, e.g. flux, higgsfield." },
+        "model": { "type": "string", "description": "Exact model identifier, e.g. flux-dev." },
+        "prompt": { "type": "string", "description": "The final assembled prompt sent to the generator." },
+        "params": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Generation parameters: seed, guidance, aspect, ..."
+        },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "job_id": { "type": "string", "description": "Provider job/request ID for audit trails." }
       }
     }
   }

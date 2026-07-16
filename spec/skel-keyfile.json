@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "2.9",
   "size": [
     {
       "token": "ws",
@@ -45,6 +45,36 @@
       "token": "2s",
       "label": "Two Shot",
       "description": "Two subjects framed together."
+    },
+    {
+      "token": "est",
+      "label": "Establishing Shot",
+      "description": "Opens a scene by showing where the action takes place. Typically very wide."
+    },
+    {
+      "token": "fs",
+      "label": "Full Shot",
+      "description": "Subject visible head to toe, filling the frame vertically."
+    },
+    {
+      "token": "cowboy",
+      "label": "Cowboy Shot",
+      "description": "Subject from mid-thigh up. Classic western holster framing."
+    },
+    {
+      "token": "ins",
+      "label": "Insert Shot",
+      "description": "Tight cutaway of an object or detail that carries story information."
+    },
+    {
+      "token": "3s",
+      "label": "Three Shot",
+      "description": "Three subjects framed together."
+    },
+    {
+      "token": "group",
+      "label": "Group Shot",
+      "description": "Four or more subjects framed together."
     }
   ],
   "angle": [
@@ -77,6 +107,16 @@
       "token": "worm",
       "label": "Worm's Eye",
       "description": "Camera at ground level looking up. Extreme low angle."
+    },
+    {
+      "token": "profile",
+      "label": "Profile",
+      "description": "Subject framed side-on at 90 degrees. Formal, observational."
+    },
+    {
+      "token": "three_quarter",
+      "label": "Three-Quarter",
+      "description": "Subject turned roughly 45 degrees from camera. The standard portrait and reference-sheet angle."
     }
   ],
   "lens": [
@@ -146,6 +186,56 @@
       "token": "drone",
       "label": "Drone",
       "description": "Aerial camera movement. Sweeping or hovering."
+    },
+    {
+      "token": "zoom_in",
+      "label": "Zoom In",
+      "description": "Focal length increases during the shot. Subject grows in frame without camera travel."
+    },
+    {
+      "token": "zoom_out",
+      "label": "Zoom Out",
+      "description": "Focal length decreases during the shot. Frame widens without camera travel."
+    },
+    {
+      "token": "dolly_zoom",
+      "label": "Dolly Zoom",
+      "description": "Dolly and zoom in opposition (Vertigo effect). Background perspective warps around a constant subject."
+    },
+    {
+      "token": "arc",
+      "label": "Arc / Orbit",
+      "description": "Camera circles the subject on a curved path."
+    },
+    {
+      "token": "truck",
+      "label": "Truck",
+      "description": "Camera travels laterally, parallel to the subject."
+    },
+    {
+      "token": "pedestal",
+      "label": "Pedestal",
+      "description": "Camera raises or lowers vertically without tilting."
+    },
+    {
+      "token": "whip_pan",
+      "label": "Whip Pan",
+      "description": "Violently fast pan that blurs the frame. Energy or transition device."
+    },
+    {
+      "token": "roll",
+      "label": "Roll",
+      "description": "Camera rotates on its lens axis during the shot."
+    },
+    {
+      "token": "push_in",
+      "label": "Push In",
+      "description": "Slow forward move toward the subject. Builds intensity or intimacy."
+    },
+    {
+      "token": "pull_out",
+      "label": "Pull Out",
+      "description": "Slow backward move away from the subject. Reveals context or isolates."
     }
   ],
   "light": [
@@ -190,6 +280,51 @@
       "token": "neon",
       "label": "Neon",
       "description": "Saturated colored light. Urban, cyberpunk aesthetic."
+    },
+    {
+      "token": "silhouette",
+      "label": "Silhouette",
+      "description": "Subject rendered as a dark shape against a brighter background. Identity concealed, gesture emphasized."
+    },
+    {
+      "token": "backlit",
+      "label": "Backlit",
+      "description": "Key light behind the subject. Rim glow, haloed edges, atmospheric depth."
+    },
+    {
+      "token": "rembrandt",
+      "label": "Rembrandt",
+      "description": "Classic portrait key: one side lit, a triangle of light on the shadowed cheek."
+    },
+    {
+      "token": "moonlight",
+      "label": "Moonlight",
+      "description": "Cool, dim, directional night light with soft shadows."
+    },
+    {
+      "token": "firelight",
+      "label": "Firelight",
+      "description": "Warm flickering light from flames. Restless shadows, orange cast."
+    },
+    {
+      "token": "overcast",
+      "label": "Overcast",
+      "description": "Soft, diffuse, shadowless daylight under cloud cover."
+    },
+    {
+      "token": "harsh_sun",
+      "label": "Harsh Sun",
+      "description": "Direct midday sunlight. Hard shadows, squinting brightness, bleached highlights."
+    },
+    {
+      "token": "strobe",
+      "label": "Strobe",
+      "description": "Pulsing intermittent light. Club scenes, alarms, staccato motion."
+    },
+    {
+      "token": "volumetric",
+      "label": "Volumetric",
+      "description": "Visible light rays through atmosphere: god rays, dusty beams, fog-scattered shafts."
     }
   ],
   "tod": [
@@ -214,9 +349,34 @@
       "description": "Late evening, post-sunset."
     },
     {
+      "token": "MORNING",
+      "label": "Morning",
+      "description": "Post-sunrise morning hours."
+    },
+    {
+      "token": "AFTERNOON",
+      "label": "Afternoon",
+      "description": "Midday to late-day hours."
+    },
+    {
+      "token": "EVENING",
+      "label": "Evening",
+      "description": "Early night, after dusk."
+    },
+    {
+      "token": "LATER",
+      "label": "Later",
+      "description": "An unspecified jump forward in time from the previous scene."
+    },
+    {
+      "token": "SAME",
+      "label": "Same",
+      "description": "Same time as the previous scene, resuming after a cutaway."
+    },
+    {
       "token": "CONT",
       "label": "Continuous",
-      "description": "Same time as previous scene. No time jump."
+      "description": "Continuous with the previous scene. No time jump. Previous scene = previous by act order, then scene_refs order."
     }
   ],
   "dof": [
@@ -234,6 +394,63 @@
       "token": "rack",
       "label": "Rack Focus",
       "description": "Focus shifts between planes during the shot."
+    },
+    {
+      "token": "split",
+      "label": "Split Diopter",
+      "description": "Two planes sharp at once with a soft seam between them. Foreground and background both in focus."
+    },
+    {
+      "token": "tilt_shift",
+      "label": "Tilt-Shift",
+      "description": "Selective plane of focus that miniaturizes the scene."
+    }
+  ],
+  "aspect": [
+    {
+      "token": "16:9",
+      "label": "Widescreen 16:9",
+      "description": "Standard HD/streaming frame."
+    },
+    {
+      "token": "9:16",
+      "label": "Vertical 9:16",
+      "description": "Portrait frame for mobile and shorts."
+    },
+    {
+      "token": "1:1",
+      "label": "Square 1:1",
+      "description": "Square frame for social feeds."
+    },
+    {
+      "token": "4:3",
+      "label": "Classic 4:3",
+      "description": "Academy-adjacent TV frame. Retro or intimate feel."
+    },
+    {
+      "token": "2.39:1",
+      "label": "Anamorphic Scope 2.39:1",
+      "description": "Widescreen theatrical scope."
+    },
+    {
+      "token": "21:9",
+      "label": "Ultra-Wide 21:9",
+      "description": "Ultra-wide cinematic display ratio."
+    },
+    {
+      "token": "4:5",
+      "label": "Portrait 4:5",
+      "description": "Tall social-delivery frame (feed-optimized portrait)."
+    },
+    {
+      "token": "1.85:1",
+      "label": "Theatrical Flat 1.85:1",
+      "description": "Standard theatrical flat widescreen."
+    },
+    {
+      "token": "3:2",
+      "label": "Stills 3:2",
+      "description": "Classic 35mm stills ratio."
     }
   ],
   "color": [
@@ -246,6 +463,41 @@
       "token": "cool",
       "label": "Cool",
       "description": "Cool color temperature."
+    },
+    {
+      "token": "teal_orange",
+      "label": "Teal & Orange",
+      "description": "Complementary blockbuster grade: teal shadows, orange skin tones."
+    },
+    {
+      "token": "monochrome",
+      "label": "Monochrome",
+      "description": "Black and white. Full desaturation."
+    },
+    {
+      "token": "sepia",
+      "label": "Sepia",
+      "description": "Brown-toned monochrome. Archival or period feel."
+    },
+    {
+      "token": "desaturated",
+      "label": "Desaturated",
+      "description": "Muted, drained color. Bleak or gritty grading."
+    },
+    {
+      "token": "vibrant",
+      "label": "Vibrant",
+      "description": "Saturated, punchy color."
+    },
+    {
+      "token": "pastel",
+      "label": "Pastel",
+      "description": "Soft, light, low-contrast candy palette."
+    },
+    {
+      "token": "bleach_bypass",
+      "label": "Bleach Bypass",
+      "description": "Silver-retained look: high contrast, crushed saturation, metallic sheen."
     }
   ],
   "mood": [
@@ -258,6 +510,177 @@
       "token": "romantic",
       "label": "Romantic",
       "description": "A dreamy or romantic mood."
+    },
+    {
+      "token": "eerie",
+      "label": "Eerie",
+      "description": "Uncanny, quietly wrong. Horror-adjacent stillness."
+    },
+    {
+      "token": "melancholic",
+      "label": "Melancholic",
+      "description": "Wistful sadness. Loss and memory."
+    },
+    {
+      "token": "hopeful",
+      "label": "Hopeful",
+      "description": "Rising optimism. Light after difficulty."
+    },
+    {
+      "token": "foreboding",
+      "label": "Foreboding",
+      "description": "Dread of what is coming. Storm-front tension."
+    },
+    {
+      "token": "serene",
+      "label": "Serene",
+      "description": "Calm, unhurried peace."
+    },
+    {
+      "token": "chaotic",
+      "label": "Chaotic",
+      "description": "Overwhelming disorder and energy."
+    },
+    {
+      "token": "nostalgic",
+      "label": "Nostalgic",
+      "description": "Warm longing for the past."
+    },
+    {
+      "token": "oppressive",
+      "label": "Oppressive",
+      "description": "Crushing weight. Claustrophobic pressure."
+    },
+    {
+      "token": "whimsical",
+      "label": "Whimsical",
+      "description": "Playful, light, storybook charm."
+    },
+    {
+      "token": "triumphant",
+      "label": "Triumphant",
+      "description": "Victory and release. Earned catharsis."
+    }
+  ],
+  "weather": [
+    {
+      "token": "clear",
+      "label": "Clear",
+      "description": "Cloudless sky, unobstructed light."
+    },
+    {
+      "token": "rain",
+      "label": "Rain",
+      "description": "Steady rainfall. Wet surfaces, reflections."
+    },
+    {
+      "token": "heavy_rain",
+      "label": "Heavy Rain",
+      "description": "Downpour. Sheeting water, reduced visibility."
+    },
+    {
+      "token": "snow",
+      "label": "Snow",
+      "description": "Falling or settled snow. Muffled sound, high albedo."
+    },
+    {
+      "token": "fog",
+      "label": "Fog",
+      "description": "Thick atmospheric haze. Depth cues compressed, shapes dissolve."
+    },
+    {
+      "token": "storm",
+      "label": "Storm",
+      "description": "Active storm: wind, lightning, driving rain."
+    },
+    {
+      "token": "wind",
+      "label": "Wind",
+      "description": "Strong wind. Moving hair, fabric, vegetation, debris."
+    },
+    {
+      "token": "overcast",
+      "label": "Overcast",
+      "description": "Full cloud cover. Flat gray sky."
+    },
+    {
+      "token": "heat_haze",
+      "label": "Heat Haze",
+      "description": "Shimmering air distortion above hot surfaces."
+    }
+  ],
+  "texture": [
+    {
+      "token": "film_35mm",
+      "label": "35mm Film",
+      "description": "35mm film-stock emulation: fine grain, halation, organic color response."
+    },
+    {
+      "token": "film_16mm",
+      "label": "16mm Film",
+      "description": "16mm film-stock emulation: coarse grain, documentary energy."
+    },
+    {
+      "token": "digital_clean",
+      "label": "Digital Clean",
+      "description": "Pristine digital capture. No grain, clinical sharpness."
+    },
+    {
+      "token": "vhs",
+      "label": "VHS",
+      "description": "Analog tape artifacts: tracking noise, chroma bleed, soft scanlines."
+    },
+    {
+      "token": "grainy",
+      "label": "Grainy",
+      "description": "Pronounced visible grain without a specific stock reference."
+    }
+  ],
+  "transition": [
+    {
+      "token": "cut",
+      "label": "Cut",
+      "description": "Instant transition to the next shot. The default."
+    },
+    {
+      "token": "dissolve",
+      "label": "Dissolve",
+      "description": "Outgoing and incoming images cross-fade. Signals passage of time or connection."
+    },
+    {
+      "token": "fade_in",
+      "label": "Fade In",
+      "description": "Image emerges from black (or white). Openings and awakenings."
+    },
+    {
+      "token": "fade_out",
+      "label": "Fade Out",
+      "description": "Image sinks to black (or white). Endings and finality."
+    },
+    {
+      "token": "smash_cut",
+      "label": "Smash Cut",
+      "description": "Abrupt cut across strong contrast: loud to silent, calm to chaos."
+    },
+    {
+      "token": "match_cut",
+      "label": "Match Cut",
+      "description": "Cut where composition, shape, or motion matches across the edit."
+    },
+    {
+      "token": "wipe",
+      "label": "Wipe",
+      "description": "Incoming image pushes the outgoing one off along an edge or shape."
+    },
+    {
+      "token": "iris",
+      "label": "Iris",
+      "description": "Circular aperture opens or closes over the frame. Silent-era flourish."
+    },
+    {
+      "token": "whip",
+      "label": "Whip",
+      "description": "Whip-pan blur bridges two shots as one continuous motion."
     }
   ],
   "custom": []

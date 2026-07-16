@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
+  "skel_version": "2.9",
+  "metadata": {
+    "story_id": "str-e02-pattern",
+    "title": "The Last Signal — S01E02: The Pattern",
+    "lifecycle": "production",
+    "logline": "Harlan maps the signal against thirty years of logbooks.",
+    "language": "en-US",
+    "skin_key": "noir_v1",
+    "series": {
+      "series_id": "srs_lastsignal",
+      "series_title": "The Last Signal",
+      "season": 1,
+      "episode": 2,
+      "episode_code": "S01E02",
+      "arc_refs": ["arc_signal_origin"],
+      "previously": ["str-e01-landfall"]
+    },
+    "delivery": { "frame_rate": 24, "aspect": "2.39:1" },
+    "extensions": { "x-genlock": { "project_slug": "last-signal-e02" } }
+  },
+  "acts": [
+    { "id": "act_1", "order": 0, "title": "The Pattern", "scene_refs": ["sc_1"] }
+  ],
+  "scenes": [
+    {
+      "id": "sc_1",
+      "act_id": "act_1",
+      "order": 0,
+      "header": "INT. LIGHTHOUSE - DAWN",
+      "loc": { "type": "INT", "name": "LIGHTHOUSE", "tod": "DAWN" },
+      "location_ref": "loc_lighthouse",
+      "environment_ref": "env_lighthouse_storm",
+      "shot_refs": ["sh_1", "sh_2"],
+      "narrative": "All night with the logbooks; the pattern will not go away.",
+      "story_time": "1998-10-01T05:30:00",
+      "time_elapsed_since_previous": "the same night, hours later",
+      "creative_status": "drafted"
+    }
+  ],
+  "shots": [
+    {
+      "id": "sh_1",
+      "scene_id": "sc_1",
+      "order": 0,
+      "action": "Dawn light over a bench buried in open logbooks. Harlan, unslept, aligns dates with a shaking finger.",
+      "v_setup": { "size": "ms", "angle": "high", "light": "blue", "color": "desaturated", "texture": "film_35mm" },
+      "character_refs": ["char_harlan"],
+      "prop_refs": ["prop_watch"],
+      "duration": 6,
+      "status": { "image": "not_started", "video": "not_started" }
+    },
+    {
+      "id": "sh_2",
+      "scene_id": "sc_1",
+      "order": 1,
+      "action": "Insert: two log entries, decades apart, the same five-beat rhythm circled in pencil.",
+      "v_setup": { "size": "ins", "angle": "bird", "lens": "macro", "light": "natural", "dof": "shallow" },
+      "duration": 4,
+      "status": { "image": "not_started", "video": "not_started" },
+      "audio_description": "Two handwritten log entries side by side; the same rhythmic mark circled in both, twenty years apart.",
+      "transition_out": "match_cut"
+    }
+  ]
+}

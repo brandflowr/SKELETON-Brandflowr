@@ -1,0 +1,123 @@
+{
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/studio.schema.json",
+  "studio_version": "1.0",
+  "studio_id": "studio_pointmerrow",
+  "name": "Point Merrow Pictures",
+  "description": "Workspace registry for The Last Signal. One cast, many episodes: the characters below are the single source of identity for every .skel in this folder.",
+  "created_at": "2026-06-01T10:00:00Z",
+  "modified_at": "2026-07-16T12:00:00Z",
+  "characters": [
+    {
+      "id": "char_harlan",
+      "name": "Harlan Morse",
+      "pronouns": "he/him",
+      "age_range": "55-65",
+      "role": "protagonist",
+      "identity_lock": "Weathered white man in his early sixties, heavy build, salt-and-pepper beard, deep-set gray eyes, wind-burned skin, navy wool keeper's coat over a cable-knit sweater, brass pocket watch on a chain.",
+      "distinguishing_marks": ["scar through left eyebrow", "missing tip of right ring finger"],
+      "default_wardrobe": "Navy wool keeper's coat over cable-knit sweater",
+      "voice": {
+        "description": "Low, gravelled, deliberate; long pauses",
+        "accent": "Maine coastal",
+        "voice_settings": { "voice_ref": "voice_harlan" }
+      },
+      "identity_refs": { "lora": "loras/harlan_v3.safetensors", "soul_id": "hf_abc123" },
+      "reference_sheet": "assets/characters/harlan_refsheet.png",
+      "want": "To keep the light running and be left alone.",
+      "need": "To admit the signal is his own guilt, encoded.",
+      "relationships": [
+        { "character_ref": "char_eli", "type": "estranged_son", "description": "Blames Harlan for the wreck." }
+      ],
+      "props_carried": ["prop_watch"],
+      "creative_status": "locked"
+    },
+    {
+      "id": "char_eli",
+      "name": "Eli Morse",
+      "pronouns": "he/him",
+      "age_range": "30-38",
+      "role": "deuteragonist",
+      "identity_lock": "Lean white man in his mid-thirties, storm-gray parka over a fisherman's sweater, short dark beard, his father's gray eyes, a radio operator's headset worn around the neck.",
+      "relationships": [
+        { "character_ref": "char_harlan", "type": "father", "description": "Came back with proof, not forgiveness." }
+      ],
+      "creative_status": "approved"
+    }
+  ],
+  "environments": [
+    {
+      "id": "env_lighthouse_storm",
+      "name": "Lighthouse Interior — Storm Night",
+      "loc_type": "INT",
+      "location_ref": "loc_lighthouse",
+      "style_lock": "Cramped octagonal lamp room, brass and salt-pitted iron, rain hammering black windows, single practical desk lamp and the rotating beam bleeding through the floor hatch, teal-orange storm grade, 35mm grain.",
+      "geography": "Radio bench against the north window; stair hatch center floor; the beam sweeps clockwise, crossing the bench every eight seconds; door to the gallery on the seaward east side.",
+      "weather_default": "storm"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_lighthouse",
+      "name": "Point Merrow Lighthouse",
+      "description": "A 19th-century cast-iron lighthouse on a cliff above Wreck Beach, Maine coast."
+    }
+  ],
+  "props": [
+    {
+      "id": "prop_watch",
+      "name": "Brass pocket watch",
+      "description": "Tarnished brass pocket watch, cracked crystal, engraved \"E.M.\"",
+      "significance": "plot_critical",
+      "carried_by": "char_harlan"
+    }
+  ],
+  "audio_assets": [
+    { "id": "aud_theme", "name": "Main theme — 'The Last Signal'", "type": "music" }
+  ],
+  "voices": [
+    {
+      "id": "voice_harlan",
+      "label": "Harlan — principal",
+      "provider": "elevenlabs",
+      "voice_id": "vx_harlan_01",
+      "settings": { "stability": 0.7, "similarity": 0.9 }
+    }
+  ],
+  "skins": [
+    {
+      "id": "noir_v1",
+      "label": "Signal Noir",
+      "style_text": "Teal-orange storm grade over hard noir contrast, 35mm grain, practical-source lighting, black rain-streaked windows.",
+      "palette_ref": "pal_signal",
+      "v_setup_defaults": { "light": "noir", "color": "teal_orange", "texture": "film_35mm" }
+    }
+  ],
+  "palettes": [
+    {
+      "id": "pal_signal",
+      "label": "Signal storm palette",
+      "colors": ["#0b1d26", "#123c4a", "#c96f2e", "#e8d5b5", "#7a1e1e"]
+    }
+  ],
+  "series": [
+    {
+      "series_id": "srs_lastsignal",
+      "title": "The Last Signal",
+      "format": "limited",
+      "logline": "A lighthouse keeper discovers the signal he has been logging for thirty years is his own confession, encoded.",
+      "seasons": [
+        {
+          "season": 1,
+          "episodes": [
+            { "episode_code": "S01E01", "story_id": "str-e01-landfall", "project_slug": "last-signal-e01", "title": "Landfall", "logline": "Eli comes home with a tape that should not exist.", "status": "boarded" },
+            { "episode_code": "S01E02", "story_id": "str-e02-pattern", "project_slug": "last-signal-e02", "title": "The Pattern", "logline": "Harlan maps the signal against thirty years of logbooks.", "status": "outlined" }
+          ]
+        }
+      ],
+      "arcs": [
+        { "id": "arc_signal_origin", "title": "Where the signal comes from", "description": "The season spine: the signal is Harlan's own keyed confession.", "spans": ["S01E01", "S01E02"] }
+      ],
+      "cast_refs": ["char_harlan", "char_eli"]
+    }
+  ]
+}
