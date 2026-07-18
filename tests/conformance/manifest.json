@@ -302,5 +302,25 @@
         "ASSET_SCENE_REF_MISSING"
       ]
     }
+  },
+  {
+    "file": "invalid/sidecar-schema-error/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SIDECAR_SCHEMA_ERROR"
+      ]
+    }
+  },
+  {
+    "file": "invalid/sidecar-parse-error/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": [
+        "SIDECAR_PARSE_ERROR"
+      ]
+    }
   }
 ]

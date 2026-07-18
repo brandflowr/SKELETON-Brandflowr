@@ -382,6 +382,9 @@ export function validateDocument(doc, opts = {}) {
   const sc = opts.sidecars ?? {};
   const v = validators();
   const allEntityIds = new Set([...actIds, ...sceneIds, ...shotIds]);
+  for (const key of ["videoMapParseError", "audioMapParseError", "canvasParseError"]) {
+    if (sc[key]) report(sc[key]);
+  }
   if (sc.videoMap) {
     if (!v.videoMap(sc.videoMap)) for (const e of v.videoMap.errors ?? []) report(err("SIDECAR_SCHEMA_ERROR", `video-map.json#${e.instancePath}`, e.message ?? "schema violation"));
     for (const key of Object.keys(sc.videoMap)) if (!shotIds.has(key)) report(err("SIDECAR_SHOT_MISSING", `video-map.json#/${key}`, `video-map key '${key}' matches no shot.`));

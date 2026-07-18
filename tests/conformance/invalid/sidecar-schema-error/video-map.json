@@ -1,0 +1,7 @@
+{
+  "sh_1": {
+    "takes": [
+      { "id": "V1", "file": "renders/video/sh_1.v1.mp4" }
+    ]
+  }
+}

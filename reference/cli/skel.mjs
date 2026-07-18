@@ -83,12 +83,6 @@ switch (command) {
       opts.sidecars = sc;
     }
     const result = validateDocument(doc, opts);
-    if (withSidecars && opts.sidecars) {
-      for (const key of ["videoMapParseError", "audioMapParseError", "canvasParseError"]) {
-        if (opts.sidecars[key]) result.errors.push(opts.sidecars[key]);
-      }
-      result.valid = result.errors.length === 0;
-    }
     printResult(result, asJson);
     process.exit(result.valid ? 0 : 1);
   }

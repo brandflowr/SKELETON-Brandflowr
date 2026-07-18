@@ -6,6 +6,9 @@ All notable changes to the SKEL specification and implementation.
 
 ## [Unreleased]
 
+- Conformance corpus: added the two fixtures the 2.9.0 registry shipped without — `invalid/sidecar-schema-error/` (`SIDECAR_SCHEMA_ERROR`) and `invalid/sidecar-parse-error/` (`SIDECAR_PARSE_ERROR`), completing one-fixture-per-code coverage (errors.md §11).
+- Reference validator: sidecar parse errors are now reported by `validateDocument` itself (previously merged in by the CLI only), so the CLI and the conformance runner behave identically.
+
 ---
 
 ## [2.9.0] — 2026-07-16
