@@ -1,6 +1,6 @@
 {
   "name": "@skel/spec",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "SKEL (Story Keyframe Extensible Layout) — JSON Schemas, default token key file, TypeScript types, and reference tooling for the open storyboard data format.",
   "license": "MIT",
   "type": "module",
@@ -11,6 +11,8 @@
   "keywords": ["skel", "bone", "muscle", "storyboard", "screenplay", "json-schema", "ai-filmmaking"],
   "files": [
     "spec/**",
+    "profiles/**",
+    "reference/cli/lib/**",
     "types/**",
     "README.md",
     "LICENSE",
@@ -21,7 +23,9 @@
     ".": {
       "types": "./types/skel.d.ts"
     },
+    "./validator": "./reference/cli/lib/validate.mjs",
     "./spec/*": "./spec/*",
+    "./profiles/*": "./profiles/*",
     "./package.json": "./package.json"
   },
   "workspaces": [
@@ -36,7 +40,7 @@
     "roundtrip": "node reference/fountain-adapter/test-roundtrip.mjs",
     "links": "node scripts/check-links.mjs"
   },
-  "devDependencies": {
+  "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "js-yaml": "^4.1.0"

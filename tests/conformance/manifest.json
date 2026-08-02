@@ -322,5 +322,37 @@
         "SIDECAR_PARSE_ERROR"
       ]
     }
+  },
+  {
+    "file": "invalid/sidecar-duplicate-id/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": ["SIDECAR_DUPLICATE_ID"]
+    }
+  },
+  {
+    "file": "invalid/video-multiple-active-takes/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": ["VIDEO_MULTIPLE_ACTIVE_TAKES"]
+    }
+  },
+  {
+    "file": "invalid/media-fade-duration-conflict/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": ["MEDIA_FADE_DURATION_CONFLICT"]
+    }
+  },
+  {
+    "file": "invalid/media-provenance-mismatch/story.skel.json",
+    "sidecars": true,
+    "expect": {
+      "valid": false,
+      "codes": ["MEDIA_PROVENANCE_MISMATCH"]
+    }
   }
 ]

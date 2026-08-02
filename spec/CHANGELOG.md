@@ -6,8 +6,28 @@ All notable changes to the SKEL specification and implementation.
 
 ## [Unreleased]
 
-- Conformance corpus: added the two fixtures the 2.9.0 registry shipped without — `invalid/sidecar-schema-error/` (`SIDECAR_SCHEMA_ERROR`) and `invalid/sidecar-parse-error/` (`SIDECAR_PARSE_ERROR`), completing one-fixture-per-code coverage (errors.md §11).
-- Reference validator: sidecar parse errors are now reported by `validateDocument` itself (previously merged in by the CLI only), so the CLI and the conformance runner behave identically.
+- No unreleased changes.
+
+---
+
+## [2.10.0] — 2026-08-02
+
+### Genlock contract alignment
+
+- Standardized the Genlock 1.0 media sidecars actually used by the desktop runtime: `{version, takes}` for video and `{version, tracks}` for audio, with workspace-relative `path`, stable IDs, rich edit fields, structured prompts, status, and provenance. The immutable 2.9 direct-map schemas remain available at the `v2.9.0` tag; explicit migration is documented in MIGRATIONS.md §9.
+- Added structured `AssetPrompt` support and the resolved writing-context snapshot to `x-genlock.schema.json` while retaining legacy prompt strings.
+- Added the declarative BONE `prompt_skill` binding used by Genlock provider packs.
+- Corrected the Genlock registry location to `.genlock/studio.json` and added `genlock-studio.schema.json` for its current camelCase runtime shape. The portable `studio.schema.json` remains separate.
+
+### Host packaging and conformance
+
+- Added `host-profile.schema.json` plus `profiles/genlock/profile.json`, declaring storage paths, schema authority, read/write versions, migration policy, and honest conformance status.
+- Exported the reference validator from `@skel/spec/validator`, included profiles and validator runtime files in the package, and promoted its runtime libraries to package dependencies.
+- Updated public TypeScript definitions for Genlock sidecars, `AssetPrompt`, `prompt_skill`, the runtime Studio registry, and host profiles.
+- Added semantic sidecar codes and fixtures: `SIDECAR_DUPLICATE_ID`, `VIDEO_MULTIPLE_ACTIVE_TAKES`, `MEDIA_FADE_DURATION_CONFLICT`, and `MEDIA_PROVENANCE_MISMATCH`.
+- Added the two missing 2.9 sidecar parse/schema fixtures and unified parse-error reporting in the reference validator.
+
+> **Release checklist reminder:** create and push the `v2.10.0` tag on the release commit so every new schema `$id` resolves to immutable release bytes.
 
 ---
 

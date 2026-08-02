@@ -1,0 +1,49 @@
+{
+  "$schema": "../../spec/host-profile.schema.json",
+  "profile_version": "1.0",
+  "host_id": "genlock-studio",
+  "host_version": "1.0.0",
+  "label": "Genlock Studio Desktop",
+  "skel": {
+    "read_versions": ["2.x"],
+    "write_version": "2.0",
+    "canonical_target": "2.10.0",
+    "migration_mode": "explicit",
+    "preserves_unknown_extensions": true
+  },
+  "storage": {
+    "story": "projects/{slug}/story.skel",
+    "studio_registry": ".genlock/studio.json",
+    "video_map": "projects/{slug}/video-map.json",
+    "audio_map": "projects/{slug}/audio-map.json",
+    "canvas_layout": "projects/{slug}/canvas/layout.json"
+  },
+  "schemas": {
+    "story": "spec/skel.schema.json",
+    "studio_registry": "spec/genlock-studio.schema.json",
+    "portable_studio_registry": "spec/studio.schema.json",
+    "video_map": "spec/video-map.schema.json",
+    "audio_map": "spec/audio-map.schema.json",
+    "canvas_layout": "spec/canvas-layout.schema.json",
+    "extension": "spec/x-genlock.schema.json",
+    "bone": "spec/bone.schema.json"
+  },
+  "conformance": {
+    "reader": {
+      "status": "partial",
+      "notes": "Reads current SKEL 2.x structures but must add an explicit unsupported-major rejection before claiming Reader."
+    },
+    "writer": {
+      "status": "partial",
+      "notes": "Preserves known 2.10 fields but currently emits skel_version 2.0."
+    },
+    "validator": {
+      "status": "partial",
+      "notes": "The desktop validator implements schema and core structural checks; the packaged reference validator implements the full error catalog."
+    },
+    "full_host": {
+      "status": "not_implemented",
+      "notes": "BONE execution is implemented; MUSCLE discovery, consent, and hook execution are not yet implemented in the desktop runtime."
+    }
+  }
+}

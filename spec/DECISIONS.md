@@ -373,3 +373,29 @@ Format adapters are implemented as MUSCLEs on `import.*`/`export.*` hooks, makin
 - The corpus is the executable meaning of "conforms to the published specification."
 - CI (`.github/workflows/ci.yml`) machine-validates every shipped artifact, meta-validates schemas, runs the muscle-host demo, the conformance corpus, and the Fountain round-trip on every push.
 - Release discipline: cut changelog, bump `$id`s, tag — enforced by checklist, verified by CI.
+
+---
+
+## ADR-020: Genlock 1.0 Media Sidecars — Versioned Envelopes
+
+**Date:** 2026-08-02
+**Status:** Accepted
+
+**Context:** The 2.9 direct-map audio/video sidecars were not the format implemented by Genlock Studio. The desktop reader, writer, timeline, render review flow, Quick Ingest contract, and production fixtures use versioned envelopes with rich take/track arrays. Keeping both contracts under the same immutable 2.9 schema IDs made validation depend on which checkout supplied the schema.
+
+**Decision:** SKEL 2.10 adopts the implemented Genlock 1.0 envelopes as `video-map.schema.json` and `audio-map.schema.json`. Stored media references use workspace-relative `path`; take/track IDs are stable; rich edit, prompt, status, and provenance fields remain first-class. The 2.9 tagged schemas stay frozen and MIGRATIONS.md defines explicit conversion.
+
+**Consequences:** Genlock's persisted bytes and the current spec agree. The migration is never write-on-open. Semantic validation supplements JSON Schema for single-active-take, stable identity, fade duration, shot reference, and provenance rules.
+
+---
+
+## ADR-021: Machine-Readable Host Profiles and Registry Separation
+
+**Date:** 2026-08-02
+**Status:** Accepted
+
+**Context:** An informative host-profile document could not tell tools which schemas were authoritative or prevent a product from implying Full Host conformance. Genlock also used `.genlock/studio.json` as though it were the portable `studio.schema.json` registry even though their names, required fields, and casing differ.
+
+**Decision:** Add `host-profile.schema.json` and publish `profiles/genlock/profile.json`, including storage paths, read/write versions, schema bindings, migration mode, and explicit Reader/Writer/Validator/Full Host status. Add `genlock-studio.schema.json` for the live camelCase registry while retaining `studio.schema.json` as the portable cross-host contract.
+
+**Consequences:** Application behavior can be standardized without weakening the portable registry. Conformance is declared rather than inferred. A future Genlock release can update its profile from partial to claimed as runtime gaps close, without redefining SKEL core documents.

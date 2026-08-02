@@ -95,6 +95,10 @@ Reported only when sidecar validation is requested (`--with-sidecars` / `include
 | `SIDECAR_SHOT_MISSING` | error | A shot-ID key in `video-map.json` / `audio-map.json` / `canvas/layout.json` matches no shot in the document. (Canvas keys MAY also be scene/act IDs; only keys matching no entity at all are errors — stale canvas nodes are tolerated by hosts per canvas-layout.schema.json.) |
 | `SIDECAR_SCHEMA_ERROR` | error | A sidecar file fails its schema (`video-map.schema.json`, `audio-map.schema.json`, `canvas-layout.schema.json`). |
 | `SIDECAR_PARSE_ERROR` | error | A sidecar file is not parseable JSON. |
+| `SIDECAR_DUPLICATE_ID` | error | A video take or audio track `id` appears more than once for the same shot. IDs are stable within a shot's take or track collection. |
+| `VIDEO_MULTIPLE_ACTIVE_TAKES` | error | More than one video take for a shot has `isActive: true`. Empty and all-inactive take lists remain valid. |
+| `MEDIA_FADE_DURATION_CONFLICT` | error | An audio track's `fadeInSeconds + fadeOutSeconds` exceeds its declared `durationSeconds`. |
+| `MEDIA_PROVENANCE_MISMATCH` | error | Compatibility fields (`boneId`, `model`, or `prompt`) disagree with the corresponding canonical `provenance` value on the same take or track. |
 
 ## 10. MUSCLE-Contributed Codes
 

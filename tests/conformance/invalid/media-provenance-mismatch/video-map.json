@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "takes": {
+    "sh_1": [{
+      "id": "take-1",
+      "path": "projects/test/renders/video/a.mp4",
+      "label": "V1",
+      "isActive": true,
+      "model": "model-a",
+      "provenance": { "model": "model-b" }
+    }]
+  }
+}

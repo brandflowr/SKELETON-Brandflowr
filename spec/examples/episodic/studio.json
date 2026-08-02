@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/studio.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/studio.schema.json",
   "studio_version": "1.0",
   "studio_id": "studio_pointmerrow",
   "name": "Point Merrow Pictures",

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json
 #
 # example.skel — "The Last Signal" in native SKEL YAML.
 # This is the same story as example.skel.json (the JSON export form); the YAML

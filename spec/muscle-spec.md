@@ -33,7 +33,7 @@ Staying with the skeleton metaphor: `.skel` is the body layout, `.bone` files ar
 | Media type     | `application/vnd.skel.muscle+json` |
 | Encoding       | UTF-8                      |
 | Project folder | `muscles/` (workspace or project scope) |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/muscle.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
 
 ---
 

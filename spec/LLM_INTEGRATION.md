@@ -330,9 +330,10 @@ After saving the file, write back:
 **For video_take targets** — edit `video-map.json`:
 ```json
 {
-  "{shot_id}": {
-    "takes": [
-      { "id": "v1", "file": "projects/{slug}/renders/video/{shot_id}.v1.mp4", "isActive": true }
+  "version": "1.0",
+  "takes": {
+    "{shot_id}": [
+      { "id": "take-v1", "path": "projects/{slug}/renders/video/{shot_id}.v1.mp4", "label": "V1", "isActive": true }
     ]
   }
 }
@@ -342,8 +343,15 @@ If a take already exists, append as `v2`, `v3`, etc. Set the new take as `isActi
 **For audio_track targets** — edit `audio-map.json`:
 ```json
 {
-  "{shot_id}": {
-    "dialogue": "projects/{slug}/renders/audio/{shot_id}.{bone_id}.wav"
+  "version": "1.0",
+  "tracks": {
+    "{shot_id}": [{
+      "id": "{shot_id}-dialogue-1",
+      "type": "dialogue",
+      "path": "projects/{slug}/renders/audio/{shot_id}.{bone_id}.wav",
+      "label": "Dialogue",
+      "volume": 1
+    }]
   }
 }
 ```

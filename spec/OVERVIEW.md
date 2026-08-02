@@ -56,7 +56,7 @@ SKEL uses the term **Acts** for the top-level story grouping. Genlock Studio sur
 | [`skel-keyfile.json`](./skel-keyfile.json) | Default token dictionary. Maps shorthand tokens to full production definitions. |
 | [`example.skel.json`](./example.skel.json) | Complete export/interchange example. "The Last Signal" - 2 acts, 3 scenes, 9 shots with BONE data. |
 | [`example.skel`](./example.skel) | The same example in native YAML with comments — the annotated read-first file. |
-| [`examples/`](./examples/) | `kitchen-sink.skel.json` (every 2.9 feature) + `episodic/` (two episodes sharing one `studio.json`). |
+| [`examples/`](./examples/) | `kitchen-sink.skel.json` (the complete portable 2.10 model) + `episodic/` (two episodes sharing one `studio.json`). |
 | [`bones/`](./bones/) | Starter BONE definitions: `flux-dev`, `runway-gen3`, `kling-v1`, `seedance-2`, `character-reference-sheet`, `storyboard-grid-9`. |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture map. Data flow, module responsibilities, integration points. |
 | [`LLM_INTEGRATION.md`](./LLM_INTEGRATION.md) | How LLMs read, write, and act on SKEL/BONE. The full generation loop: prompt → generator → storage → write-back. MCP tool map. |
@@ -83,8 +83,8 @@ These files live in each Genlock project folder and carry data that extends SKEL
 
 | File | Purpose |
 |---|---|
-| `audio-map.json` | Maps shot IDs → assigned audio tracks (dialogue, SFX, music). One entry per shot. |
-| `video-map.json` | Maps shot IDs → numbered video takes (V1–V4) with an active take flag. Supports multi-take per shot. |
+| `audio-map.json` | Versioned `tracks` envelope mapping shot IDs to typed dialogue, SFX, and music arrays. |
+| `video-map.json` | Versioned `takes` envelope mapping shot IDs to numbered video takes with at most one active take. |
 
 Additional Genlock extension contracts:
 
@@ -189,10 +189,10 @@ Shots carry a `status` object with separate image and video production states. B
 The core `status` field is the canonical home of production status (since 2.9); `extensions.x-genlock.production_status` is a deprecated mirror (see MIGRATIONS.md §4).
 
 ### Audio Map (Genlock extension)
-`audio-map.json` maps each shot ID to up to three track types — `dialogue`, `sfx`, `music`. Persisted outside the SKEL document to keep media references decoupled from story structure.
+`audio-map.json` stores a `version: "1.0"` envelope whose `tracks` object maps each shot ID to typed `dialogue`, `sfx`, and `music` track arrays. It is persisted outside the SKEL document to keep media references decoupled from story structure.
 
 ### Video Takes (Genlock extension)
-`video-map.json` maps each shot ID to numbered video takes (V1–V4). One take is flagged as active; the timeline dynamically creates track lanes for each take level used in the project.
+`video-map.json` stores a `version: "1.0"` envelope whose `takes` object maps each shot ID to numbered video takes. At most one take is active; the timeline dynamically creates track lanes for each take level used in the project.
 
 ---
 
@@ -200,16 +200,16 @@ The core `status` field is the canonical home of production status (since 2.9); 
 
 | Aspect | Status |
 |---|---|
-| Specification | ✅ v2.9 complete |
+| Specification | ✅ v2.10 complete |
 | JSON Schema | ✅ Draft 7, validated (AJV strict-clean) |
 | Key File | ✅ 13 categories, 131 tokens |
-| Asset layer (characters/environments/locations/props) | ✅ v2.9 (`identity_lock`, `style_lock`, continuity state) |
+| Asset layer (characters/environments/locations/props) | ✅ v2.10 (`identity_lock`, `style_lock`, continuity state) |
 | Studio registry (`studio.json`) | ✅ `studio-spec.md` + `studio.schema.json` |
 | Series & episodes | ✅ `metadata.series` + registry series documents |
-| Music cues / transitions / temporal model / delivery facts | ✅ v2.9 |
+| Music cues / transitions / temporal model / delivery facts | ✅ v2.10 |
 | Normative error catalog | ✅ `errors.md` |
 | Conformance classes + corpus | ✅ spec §9 + `tests/conformance/` |
-| Versioned schema URLs | ✅ tagged `$id`s (`v2.9.0`), `main` = latest |
+| Versioned schema URLs | ✅ tagged `$id`s (`v2.10.0`), `main` = latest |
 | TypeScript types | ✅ Matches schema |
 | Validator | ✅ Schema + referential integrity |
 | Key resolver | ✅ With spec-compliant fallbacks |

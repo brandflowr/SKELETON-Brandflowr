@@ -13,6 +13,8 @@
 | Supplementary schema | [`x-genlock.schema.json`](./x-genlock.schema.json) |
 | Native story file | `story.skel` (YAML) per project; `story.json` is legacy/migration input only |
 | Workspace config | `.genlock/` |
+| Machine-readable profile | [`profiles/genlock/profile.json`](../profiles/genlock/profile.json) |
+| Runtime registry schema | [`genlock-studio.schema.json`](./genlock-studio.schema.json) |
 
 **Terminology:** SKEL "acts" surface as **Chapters** in the Genlock UI. Same entity, different label.
 
@@ -40,8 +42,8 @@ Stored alongside `story.skel` in each project folder:
 
 | File | Schema | Purpose |
 |---|---|---|
-| `video-map.json` | [`video-map.schema.json`](./video-map.schema.json) | Shot → numbered video takes with one active take; take-level `provenance`. |
-| `audio-map.json` | [`audio-map.schema.json`](./audio-map.schema.json) | Shot → dialogue/sfx/music track assignments; per-track `provenance`. |
+| `video-map.json` | [`video-map.schema.json`](./video-map.schema.json) | Versioned `takes` envelope keyed by shot; numbered video takes with at most one active take and optional take-level `provenance`. |
+| `audio-map.json` | [`audio-map.schema.json`](./audio-map.schema.json) | Versioned `tracks` envelope keyed by shot; typed dialogue/sfx/music track arrays with optional track-level `provenance`. |
 | `canvas/layout.json` | [`canvas-layout.schema.json`](./canvas-layout.schema.json) | Presentational canvas node positions + viewport. Never story data. |
 
 ## 5. Render Output Protocol
@@ -67,7 +69,13 @@ Image-render provenance lives at `extensions.x-genlock.provenance.{start_frame|e
 
 ## 8. Studio Registry
 
-Genlock resolves asset references against `{workspace_root}/studio.json` per `studio-spec.md`, embeds snapshots on export, and treats the registry as canonical for cross-project identity (`identity_lock`, `style_lock`, series cast).
+Genlock resolves live desktop resources against `{workspace_root}/.genlock/studio.json`, whose camelCase runtime contract is defined by `genlock-studio.schema.json`. The portable cross-host registry remains `{workspace_root}/studio.json` under `studio.schema.json`. Exporters translate runtime records into portable snapshots rather than treating the two schemas as interchangeable.
+
+## 9. Version and Conformance Status
+
+The machine-readable profile is the authority for current implementation status. Genlock 1.0 reads SKEL 2.x documents, currently writes `skel_version: "2.0"`, and targets a future explicit migration to the complete 2.10 contract. It does not migrate on open.
+
+Genlock's desktop implementation is currently partial Reader, Writer, and Validator. It is not yet a Full Host because MUSCLE discovery, consent, and hook execution are not implemented. These declarations prevent product copy or integrations from inferring conformance merely because schema files are bundled.
 
 ---
 

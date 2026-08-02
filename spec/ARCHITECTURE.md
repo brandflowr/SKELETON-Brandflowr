@@ -95,20 +95,22 @@ Genlock stores sidecar files alongside `story.skel`, the native SKEL document. T
 ```
 project/
   story.skel          ← native SKEL YAML document (acts, scenes, shots, bones)
-  audio-map.json      ← x-genlock: shot ID → dialogue/SFX/music track assignments
-  video-map.json      ← x-genlock: shot ID → V1/V2/V3/V4 takes + active take flag
+  audio-map.json      ← x-genlock: versioned tracks envelope keyed by shot ID
+  video-map.json      ← x-genlock: versioned takes envelope keyed by shot ID
 ```
 
 ### audio-map.json
 
-Maps shot IDs to up to three audio track types. Used by the Audio page, the Timeline, and the Production Player for synced playback.
+Maps shot IDs to typed audio-track arrays. Used by the Audio page, the Timeline, and the Production Player for synced playback.
 
 ```json
 {
-  "sh_abc123": {
-    "dialogue": "assets/audio/voiceover_01.mp3",
-    "sfx": "assets/audio/ambient_rain.wav",
-    "music": null
+  "version": "1.0",
+  "tracks": {
+    "sh_abc123": [
+      { "id": "dialogue-1", "type": "dialogue", "path": "assets/audio/voiceover_01.mp3", "label": "Voiceover", "volume": 1 },
+      { "id": "sfx-1", "type": "sfx", "path": "assets/audio/ambient_rain.wav", "label": "Rain", "volume": 0.8 }
+    ]
   }
 }
 ```
@@ -119,16 +121,17 @@ Maps shot IDs to numbered video takes. One take is flagged as active. The Timeli
 
 ```json
 {
-  "sh_abc123": {
-    "takes": [
-      { "id": "V1", "file": "assets/video/take1.mp4", "isActive": false },
-      { "id": "V2", "file": "assets/video/take2.mp4", "isActive": true }
+  "version": "1.0",
+  "takes": {
+    "sh_abc123": [
+      { "id": "take-1", "path": "assets/video/take1.mp4", "label": "V1", "isActive": false },
+      { "id": "take-2", "path": "assets/video/take2.mp4", "label": "V2", "isActive": true }
     ]
   }
 }
 ```
 
-The `isActive` flag marks exactly one take per shot as the active take. User-imported video takes use paths under `assets/video/`; AI-generated video renders use paths under `renders/video/` (see Render Output Protocol below). Both types coexist in `video-map.json` — the path prefix distinguishes their origin.
+The `isActive` flag marks at most one take per shot as active. User-imported video takes use paths under `assets/video/`; AI-generated video renders use paths under `renders/video/` (see Render Output Protocol below). Both types coexist in `video-map.json` — the path prefix distinguishes their origin.
 
 ---
 

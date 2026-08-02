@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "takes": {
+    "sh_a": [
+      { "id": "take-1", "path": "projects/test/renders/video/a.mp4", "label": "V1", "isActive": true },
+      { "id": "take-1", "path": "projects/test/renders/video/b.mp4", "label": "V2", "isActive": false }
+    ]
+  }
+}

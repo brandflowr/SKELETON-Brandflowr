@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/host-profile.schema.json",
+  "title": "SKEL Host Profile",
+  "description": "Machine-readable declaration of how a host stores SKEL projects, which schema versions it reads and writes, and which conformance classes it claims.",
+  "type": "object",
+  "required": ["profile_version", "host_id", "host_version", "skel", "storage", "schemas", "conformance"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "profile_version": { "const": "1.0" },
+    "host_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "host_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
+    "label": { "type": "string" },
+    "skel": {
+      "type": "object",
+      "required": ["read_versions", "write_version", "canonical_target", "migration_mode"],
+      "additionalProperties": false,
+      "properties": {
+        "read_versions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "write_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
+        "canonical_target": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
+        "migration_mode": { "enum": ["none", "explicit", "on-save", "on-open"] },
+        "preserves_unknown_extensions": { "type": "boolean" }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "required": ["story", "studio_registry", "video_map", "audio_map"],
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "story": { "type": "string" },
+        "studio_registry": { "type": "string" },
+        "video_map": { "type": "string" },
+        "audio_map": { "type": "string" },
+        "canvas_layout": { "type": "string" }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string" }
+    },
+    "conformance": {
+      "type": "object",
+      "required": ["reader", "writer", "validator", "full_host"],
+      "additionalProperties": false,
+      "properties": {
+        "reader": { "$ref": "#/definitions/ConformanceStatus" },
+        "writer": { "$ref": "#/definitions/ConformanceStatus" },
+        "validator": { "$ref": "#/definitions/ConformanceStatus" },
+        "full_host": { "$ref": "#/definitions/ConformanceStatus" }
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^x-" },
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "ConformanceStatus": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["claimed", "partial", "not_implemented"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

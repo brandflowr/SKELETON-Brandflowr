@@ -1,62 +1,88 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/audio-map.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/audio-map.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Audio Map",
-  "description": "Per-project mapping of shot IDs to audio track assignments. Stored at projects/{slug}/audio-map.json. Each shot may have up to three track types: dialogue, sfx, and music. Used by the Audio page, Timeline, and Production Player for synced playback.",
+  "description": "Per-project mapping of shot IDs to typed audio-track arrays. Stored at projects/{slug}/audio-map.json. Paths on disk are relative to the workspace root.",
   "type": "object",
-  "patternProperties": {
-    "^[a-zA-Z0-9_][a-zA-Z0-9_-]*$": {
-      "$ref": "#/definitions/ShotAudioEntry"
+  "required": ["version", "tracks"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "1.0"
+    },
+    "tracks": {
+      "type": "object",
+      "description": "Audio tracks keyed by shot ID.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/AudioTrack" }
+      }
     }
   },
-  "additionalProperties": false,
   "definitions": {
-    "ShotAudioEntry": {
+    "AudioTrack": {
       "type": "object",
+      "required": ["id", "type", "path", "label", "volume"],
       "additionalProperties": false,
-      "description": "Audio track assignments for a single shot. All three track types are optional; a null value explicitly clears an assignment.",
       "properties": {
-        "dialogue": {
-          "type": ["string", "null"],
-          "description": "Path to the dialogue or voiceover audio file for this shot, relative to the workspace root. Null clears the assignment."
+        "id": {
+          "type": "string",
+          "minLength": 1
         },
-        "sfx": {
-          "type": ["string", "null"],
-          "description": "Path to the sound effects audio file for this shot, relative to the workspace root. Null clears the assignment."
+        "type": {
+          "type": "string",
+          "enum": ["dialogue", "sfx", "music"]
         },
-        "music": {
-          "type": ["string", "null"],
-          "description": "Path to the music audio file for this shot, relative to the workspace root. Null clears the assignment."
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "not": { "pattern": "^(?:[A-Za-z]:[\\\\/]|/|\\\\\\\\)" },
+          "description": "Audio path relative to the workspace root."
         },
-        "provenance": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "volume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "offsetSeconds": { "type": "number", "minimum": 0 },
+        "fadeInSeconds": { "type": "number", "minimum": 0 },
+        "fadeOutSeconds": { "type": "number", "minimum": 0 },
+        "prompt": { "type": "string" },
+        "model": { "type": "string" },
+        "source": {
+          "type": "string",
+          "enum": ["imported", "generated", "seeaudio", "ai"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["generated", "review", "approved", "rejected", "superseded"]
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "provenance": { "$ref": "#/definitions/Provenance" },
+        "extensions": {
           "type": "object",
-          "additionalProperties": false,
-          "description": "Optional per-track generation provenance for AI-generated audio, keyed by track type.",
-          "properties": {
-            "dialogue": { "$ref": "#/definitions/Provenance" },
-            "sfx": { "$ref": "#/definitions/Provenance" },
-            "music": { "$ref": "#/definitions/Provenance" }
-          }
+          "propertyNames": { "pattern": "^x-" },
+          "additionalProperties": true
         }
       }
     },
     "Provenance": {
       "type": "object",
       "additionalProperties": false,
-      "description": "How this render was made: enough to reproduce it, audit it, and disclose it. Hosts SHOULD write this block for every AI-generated track.",
       "properties": {
-        "bone_id": { "type": "string", "description": "BONE that generated this render." },
-        "provider": { "type": "string", "description": "Provider namespace, e.g. elevenlabs, sonilo, mirelo." },
-        "model": { "type": "string", "description": "Exact model identifier." },
-        "prompt": { "type": "string", "description": "The final assembled prompt sent to the generator." },
-        "params": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Generation parameters: seed, voice_id, duration, ..."
-        },
+        "bone_id": { "type": "string" },
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "prompt": { "type": "string" },
+        "params": { "type": "object", "additionalProperties": true },
         "generated_at": { "type": "string", "format": "date-time" },
-        "job_id": { "type": "string", "description": "Provider job/request ID for audit trails." }
+        "job_id": { "type": "string" }
       }
     }
   }

@@ -387,11 +387,47 @@ export function validateDocument(doc, opts = {}) {
   }
   if (sc.videoMap) {
     if (!v.videoMap(sc.videoMap)) for (const e of v.videoMap.errors ?? []) report(err("SIDECAR_SCHEMA_ERROR", `video-map.json#${e.instancePath}`, e.message ?? "schema violation"));
-    for (const key of Object.keys(sc.videoMap)) if (!shotIds.has(key)) report(err("SIDECAR_SHOT_MISSING", `video-map.json#/${key}`, `video-map key '${key}' matches no shot.`));
+    for (const [key, takes] of Object.entries(sc.videoMap.takes ?? {})) {
+      if (!shotIds.has(key)) report(err("SIDECAR_SHOT_MISSING", `video-map.json#/takes/${key}`, `video-map key '${key}' matches no shot.`));
+      if (!Array.isArray(takes)) continue;
+      if (takes.filter((take) => take?.isActive === true).length > 1) {
+        report(err("VIDEO_MULTIPLE_ACTIVE_TAKES", `video-map.json#/takes/${key}`, `Shot '${key}' has more than one active video take.`));
+      }
+      const takeIds = new Set();
+      takes.forEach((take, index) => {
+        if (take?.id) {
+          if (takeIds.has(take.id)) report(err("SIDECAR_DUPLICATE_ID", `video-map.json#/takes/${key}/${index}/id`, `Video take id '${take.id}' is duplicated.`));
+          takeIds.add(take.id);
+        }
+        for (const [compat, canonical] of [["boneId", "bone_id"], ["model", "model"], ["prompt", "prompt"]]) {
+          if (take?.[compat] != null && take?.provenance?.[canonical] != null && take[compat] !== take.provenance[canonical]) {
+            report(err("MEDIA_PROVENANCE_MISMATCH", `video-map.json#/takes/${key}/${index}/${compat}`, `${compat} disagrees with provenance.${canonical}.`));
+          }
+        }
+      });
+    }
   }
   if (sc.audioMap) {
     if (!v.audioMap(sc.audioMap)) for (const e of v.audioMap.errors ?? []) report(err("SIDECAR_SCHEMA_ERROR", `audio-map.json#${e.instancePath}`, e.message ?? "schema violation"));
-    for (const key of Object.keys(sc.audioMap)) if (!shotIds.has(key)) report(err("SIDECAR_SHOT_MISSING", `audio-map.json#/${key}`, `audio-map key '${key}' matches no shot.`));
+    for (const [key, tracks] of Object.entries(sc.audioMap.tracks ?? {})) {
+      if (!shotIds.has(key)) report(err("SIDECAR_SHOT_MISSING", `audio-map.json#/tracks/${key}`, `audio-map key '${key}' matches no shot.`));
+      if (!Array.isArray(tracks)) continue;
+      const trackIds = new Set();
+      tracks.forEach((track, index) => {
+        if (track?.id) {
+          if (trackIds.has(track.id)) report(err("SIDECAR_DUPLICATE_ID", `audio-map.json#/tracks/${key}/${index}/id`, `Audio track id '${track.id}' is duplicated.`));
+          trackIds.add(track.id);
+        }
+        if (typeof track?.durationSeconds === "number" && (track.fadeInSeconds ?? 0) + (track.fadeOutSeconds ?? 0) > track.durationSeconds) {
+          report(err("MEDIA_FADE_DURATION_CONFLICT", `audio-map.json#/tracks/${key}/${index}`, "Audio fades exceed the declared track duration."));
+        }
+        for (const field of ["model", "prompt"]) {
+          if (track?.[field] != null && track?.provenance?.[field] != null && track[field] !== track.provenance[field]) {
+            report(err("MEDIA_PROVENANCE_MISMATCH", `audio-map.json#/tracks/${key}/${index}/${field}`, `${field} disagrees with provenance.${field}.`));
+          }
+        }
+      });
+    }
   }
   if (sc.canvas) {
     if (!v.canvas(sc.canvas)) for (const e of v.canvas.errors ?? []) report(err("SIDECAR_SCHEMA_ERROR", `canvas/layout.json#${e.instancePath}`, e.message ?? "schema violation"));

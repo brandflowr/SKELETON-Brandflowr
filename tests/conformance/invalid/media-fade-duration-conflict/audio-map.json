@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "tracks": {
+    "sh_1": [{
+      "id": "track-1",
+      "type": "music",
+      "path": "projects/test/renders/audio/a.wav",
+      "label": "Score",
+      "volume": 1,
+      "durationSeconds": 5,
+      "fadeInSeconds": 3,
+      "fadeOutSeconds": 3
+    }]
+  }
+}

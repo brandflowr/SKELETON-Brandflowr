@@ -1,4 +1,4 @@
-# SKEL Specification v2.9
+# SKEL Specification v2.10
 
 **Story Keyframe Extensible Layout**
 
@@ -49,12 +49,12 @@ Conformance classes for implementations are defined in §9.
 | Format         | YAML (UTF-8)                                            |
 | Media type     | `application/vnd.skel+yaml` (interim vendor-tree type; IANA registration of `application/skel+yaml` under RFC 9512 is the intended end state) |
 | JSON export    | `.skel.json` - portability format, same structure       |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json` (versioned, immutable; `main` carries the latest — see §8.1) |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json` (versioned, immutable; `main` carries the latest — see §8.1) |
 
 **Editor modeline (RECOMMENDED):** placing this comment as the first line of a `.skel` file gives every VS Code / yaml-language-server user validation and token autocomplete for free:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json
 skel_version: "2.0"
 ```
 
@@ -818,10 +818,10 @@ The `skel_version` field in documents MAY omit the patch component (e.g., `"2.0"
 
 ### 8.1 Versioned Schema URLs
 
-Every release is tagged (`v2.9.0`) and each schema's `$id` points at its **tagged, immutable** URL:
+Every release is tagged (`v2.10.0`) and each schema's `$id` points at its **tagged, immutable** URL:
 
 ```
-https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json   ← immutable
+https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json   ← immutable
 https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/main/spec/skel.schema.json      ← latest
 ```
 

@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/genlock-studio.schema.json",
+  "title": "Genlock Studio Runtime Registry",
+  "description": "The Genlock 1.0 runtime registry stored at .genlock/studio.json. This host schema is distinct from the portable SKEL studio.schema.json registry.",
+  "type": "object",
+  "required": ["characters", "locations", "environments"],
+  "additionalProperties": true,
+  "properties": {
+    "characters": { "type": "array", "items": { "$ref": "#/definitions/Character" } },
+    "locations": { "type": "array", "items": { "$ref": "#/definitions/Location" } },
+    "environments": { "type": "array", "items": { "$ref": "#/definitions/Environment" } }
+  },
+  "definitions": {
+    "Character": {
+      "type": "object",
+      "required": ["id", "name", "description", "referenceImages", "createdAt", "updatedAt"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "age": { "type": "string" },
+        "gender": { "type": "string" },
+        "voiceId": { "type": "string" },
+        "referenceImages": { "type": "array", "items": { "type": "string" } },
+        "characterSheet": { "type": "string" },
+        "motionSheet": { "type": "string" },
+        "expressionSheet": { "type": "string" },
+        "aiConsistencyModifier": { "type": "string" },
+        "notes": { "type": "string" },
+        "providerRefs": { "type": "object", "additionalProperties": true },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "required": ["id", "name", "description", "referenceImages", "createdAt", "updatedAt"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "referenceImages": { "type": "array", "items": { "type": "string" } },
+        "referenceSheet": { "type": "string" },
+        "detailSheet": { "type": "string" },
+        "aiConsistencyModifier": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Environment": {
+      "type": "object",
+      "required": ["id", "name", "description", "createdAt", "updatedAt"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "mood": { "type": "string" },
+        "lighting": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

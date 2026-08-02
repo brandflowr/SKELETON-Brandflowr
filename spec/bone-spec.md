@@ -29,7 +29,7 @@ BONEs exist because the AI generation landscape changes faster than any spec can
 | File extension | `.bone.json`               |
 | Media type     | `application/vnd.skel.bone+json` |
 | Encoding       | UTF-8                      |
-| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
+| Schema URI     | `https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/bone.schema.json` (versioned, immutable; `main` carries the latest — see skel-spec.md §8.1) |
 
 ---
 
@@ -69,6 +69,7 @@ A `.bone.json` file describes a single tool, generator, or pipeline attachment. 
 | `description`  | string   | no       | What this BONE does.                                           |
 | `target`       | string   | yes      | Primary category: `image`, `video`, `audio`, `style`, `custom`.|
 | `provider`     | string   | no       | Provider namespace used for grouping/configuration, e.g. `higgsfield`, `runway`, `kling`, `flux`. |
+| `prompt_skill` | string   | no       | Skill package that supplies provider-specific prompt-authoring guidance. The binding is declarative and does not itself execute the skill. |
 | `attaches_to`  | string[] | yes      | Which SKEL entities this can attach to: `metadata`, `act`, `scene`, `shot`, `character`, `environment`. |
 | `fields`       | object   | yes      | Field definitions (see §2.3).                                  |
 | `defaults`     | object   | no       | Default values for fields.                                     |
@@ -282,7 +283,7 @@ Renders should carry enough metadata to be reproduced, audited, and disclosed as
 | `generated_at` | ISO 8601 timestamp. |
 | `job_id` | Provider job/request ID. |
 
-Three wins: **reproducibility** (re-render the same take), **auditability** (which model made this frame — increasingly a disclosure requirement for AI content), and a stable home for the prompt-per-render guarantee. Schema homes: `video-map.schema.json` (`VideoTake.provenance`), `audio-map.schema.json` (`ShotAudioEntry.provenance`), and host image-slot namespaces (Genlock: `x-genlock.provenance`, see `x-genlock.schema.json`).
+Three wins: **reproducibility** (re-render the same take), **auditability** (which model made this frame — increasingly a disclosure requirement for AI content), and a stable home for the prompt-per-render guarantee. Schema homes: `video-map.schema.json` (`VideoTake.provenance`), `audio-map.schema.json` (`AudioTrack.provenance`), and host image-slot namespaces (Genlock: `x-genlock.provenance`, see `x-genlock.schema.json`).
 
 ---
 

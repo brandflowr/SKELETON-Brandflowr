@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/x-genlock.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/x-genlock.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "Genlock Extension Data",
   "description": "Supplementary schema for data stored under extensions.x-genlock. `x-spore` is the pre-rename alias of this namespace and is still accepted by readers (sunset: SKEL 3.0, see MIGRATIONS.md). The core SKEL schema remains vendor-neutral and does not require this schema. Host-mapping details live in GENLOCK_HOST_PROFILE.md.",
   "type": "object",
@@ -14,8 +14,20 @@
     "startFrameImage": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'start_frame'." },
     "endFrameImage": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'end_frame'." },
     "image": { "type": "string", "description": "Genlock's storage field for the neutral BONE output target 'still'." },
-    "startFramePrompt": { "type": "string", "description": "Prompt text that produced startFrameImage (legacy provenance; new writers SHOULD also populate provenance.start_frame)." },
-    "endFramePrompt": { "type": "string", "description": "Prompt text that produced endFrameImage (legacy provenance; new writers SHOULD also populate provenance.end_frame)." },
+    "startFramePrompt": {
+      "oneOf": [
+        { "type": "string" },
+        { "$ref": "#/definitions/AssetPrompt" }
+      ],
+      "description": "Prompt that produced startFrameImage. Strings are accepted for legacy files; current Genlock writers persist an AssetPrompt object."
+    },
+    "endFramePrompt": {
+      "oneOf": [
+        { "type": "string" },
+        { "$ref": "#/definitions/AssetPrompt" }
+      ],
+      "description": "Prompt that produced endFrameImage. Strings are accepted for legacy files; current Genlock writers persist an AssetPrompt object."
+    },
     "hero_shot": { "type": "boolean" },
     "production_status": {
       "type": "object",
@@ -40,9 +52,53 @@
       "type": "array",
       "description": "AI-authored or user-authored proposed changes for the entity that owns this extension object.",
       "items": { "$ref": "#/definitions/Proposal" }
+    },
+    "writing": {
+      "type": "object",
+      "required": ["schema_version", "profile", "voice", "craft_skills", "resolved_at", "source_hash"],
+      "additionalProperties": false,
+      "description": "Pinned Writer Profile, Voice, and Craft Skill snapshot used by both the in-app Brain and external agents. The full artifact validates against writing/resolved-writing-context.schema.json.",
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "profile": { "type": "object" },
+        "voice": { "type": "object" },
+        "craft_skills": { "type": "array", "items": { "type": "object" } },
+        "resolved_at": { "type": "string", "format": "date-time" },
+        "source_hash": { "type": "string", "pattern": "^fnv1a-[a-f0-9]{8}$" },
+        "visual_prompt_flavor_enabled": { "type": "boolean" },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scope", "ref"],
+            "additionalProperties": true,
+            "properties": {
+              "scope": { "enum": ["act", "scene"] },
+              "ref": { "type": "string" }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "AssetPrompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The prompt payload kept with a generated image by current Genlock writers.",
+      "properties": {
+        "text": { "type": "string" },
+        "json": { "type": "object", "additionalProperties": true },
+        "promptTemplate": { "type": "object", "additionalProperties": true },
+        "boneId": { "type": "string" },
+        "model": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "anyOf": [
+        { "required": ["text"] },
+        { "required": ["json"] }
+      ]
+    },
     "ProposalStatus": {
       "type": "string",
       "enum": ["pending", "accepted", "rejected", "superseded"]

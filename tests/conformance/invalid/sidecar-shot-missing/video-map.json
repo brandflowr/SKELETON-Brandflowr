@@ -1,9 +1,11 @@
 {
-  "sh_ghost": {
-    "takes": [
+  "version": "1.0",
+  "takes": {
+    "sh_ghost": [
       {
         "id": "V1",
-        "file": "assets/video/x.mp4",
+        "path": "assets/video/x.mp4",
+        "label": "V1",
         "isActive": true
       }
     ]

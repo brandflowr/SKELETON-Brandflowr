@@ -55,6 +55,8 @@ const compileTargets = [
   ["hook-payload.schema.json", "#/definitions/HookResult"],
 ];
 if (schemas["studio.schema.json"]) compileTargets.push(["studio.schema.json", ""]);
+if (schemas["genlock-studio.schema.json"]) compileTargets.push(["genlock-studio.schema.json", ""]);
+if (schemas["host-profile.schema.json"]) compileTargets.push(["host-profile.schema.json", ""]);
 const compiled = {};
 for (const [file, frag] of compileTargets) {
   const id = schemas[file].$id + frag;
@@ -129,6 +131,25 @@ if (schemas["studio.schema.json"]) {
   for (const p of studioFiles) {
     const doc = readJson(p);
     studioValidator(doc) ? pass(rel(p)) : fail(rel(p), studioValidator.errors);
+  }
+}
+
+// ── 7. Machine-readable host profiles ───────────────────────────────────────
+if (schemas["host-profile.schema.json"]) {
+  console.log("Host profiles:");
+  const profileValidator = validatorFor("host-profile.schema.json");
+  const profilesDir = join(root, "profiles");
+  const profileFiles = [];
+  if (existsSync(profilesDir)) {
+    const walk = (dir) =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+        d.isDirectory() ? walk(join(dir, d.name)) : d.name === "profile.json" ? [join(dir, d.name)] : []
+      );
+    profileFiles.push(...walk(profilesDir));
+  }
+  for (const p of profileFiles) {
+    const profile = readJson(p);
+    profileValidator(profile) ? pass(rel(p)) : fail(rel(p), profileValidator.errors);
   }
 }
 

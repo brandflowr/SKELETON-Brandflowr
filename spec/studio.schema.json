@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/studio.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md. Asset definitions are $ref'd from skel.schema.json so embedded snapshots and registry records can never drift apart. Validators must load both schemas.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/studio.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md. Asset definitions are $ref'd from skel.schema.json so embedded snapshots and registry records can never drift apart. Validators must load both schemas.",
   "title": "SKEL Studio Registry",
   "description": "The studio registry (studio.json) — the story bible. Canonical, cross-project home of characters, environments, locations, props, voices, skins, palettes, and series. SKEL documents reference these assets by ID; on export, hosts copy referenced records into the document as embedded snapshots. See studio-spec.md for precedence and snapshot rules.",
   "type": "object",

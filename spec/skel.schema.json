@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
-  "$comment": "This $id is a versioned, immutable release URL (git tag v2.9.0). The same path under 'main' always carries the latest published schema. Pin the tagged URL in documents; see skel-spec.md §8 and GOVERNANCE.md for the release policy.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json",
+  "$comment": "This $id is a versioned, immutable release URL (git tag v2.10.0). The same path under 'main' always carries the latest published schema. Pin the tagged URL in documents; see skel-spec.md §8 and GOVERNANCE.md for the release policy.",
   "title": "SKEL — Skeleton",
   "description": "A flat, relational SKEL data model for representing visual narratives. Native files are YAML; JSON is used for validation and export.",
   "type": "object",

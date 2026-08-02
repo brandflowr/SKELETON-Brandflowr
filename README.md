@@ -1,6 +1,6 @@
 # SKEL — Story Keyframe Extensible Layout
 
-**v2.9** | An open storyboard data format
+**v2.10** | An open storyboard data format
 
 > A flat, relational YAML format for encoding visual narratives into machine-readable, validatable story data.
 
@@ -31,6 +31,8 @@ Designed for:
 | [`spec/bone.schema.json`](./spec/bone.schema.json) | JSON Schema for validating `.bone.json` files |
 | [`spec/muscle.schema.json`](./spec/muscle.schema.json) | JSON Schema for validating `.muscle.json` manifests |
 | [`spec/studio.schema.json`](./spec/studio.schema.json) | JSON Schema for validating `studio.json` registries |
+| [`spec/genlock-studio.schema.json`](./spec/genlock-studio.schema.json) | Genlock 1.0 runtime registry at `.genlock/studio.json` (distinct from portable `studio.json`) |
+| [`spec/host-profile.schema.json`](./spec/host-profile.schema.json) | Machine-readable host storage, version, schema, and conformance declaration |
 | [`spec/hook-payload.schema.json`](./spec/hook-payload.schema.json) | Hook invocation contract (envelope/result shapes for MUSCLE hooks) |
 | [`spec/errors.md`](./spec/errors.md) | Normative validation error catalog (stable codes, severities, RFC 6901 paths) |
 | [`spec/MUSCLE_AUTHORING.md`](./spec/MUSCLE_AUTHORING.md) | How to write a MUSCLE plugin, step by step |
@@ -45,7 +47,9 @@ Designed for:
 | [`spec/bones/`](./spec/bones/) | Starter BONE definitions: flux-dev, runway-gen3, kling-v1, seedance-2, character-reference-sheet, storyboard-grid-9 |
 | [`spec/x-genlock.schema.json`](./spec/x-genlock.schema.json) | Schema for Genlock-owned `x-genlock` extension data (proposals, frame images) |
 | [`spec/GENLOCK_HOST_PROFILE.md`](./spec/GENLOCK_HOST_PROFILE.md) | How Genlock Studio maps the neutral spec onto its storage (the model for writing your own host profile) |
+| [`profiles/genlock/profile.json`](./profiles/genlock/profile.json) | Current machine-readable Genlock implementation profile and conformance status |
 | [`spec/MIGRATIONS.md`](./spec/MIGRATIONS.md) | Every rename and structural change, with migration paths and sunsets |
+| [`spec/PACKAGING.md`](./spec/PACKAGING.md) | npm package contents, host integration, vendored-sync transition, and release verification |
 | [`spec/audio-map.schema.json`](./spec/audio-map.schema.json) | Schema for the `audio-map.json` sidecar (shot → audio track assignments) |
 | [`spec/video-map.schema.json`](./spec/video-map.schema.json) | Schema for the `video-map.json` sidecar (shot → video takes) |
 | [`spec/canvas-layout.schema.json`](./spec/canvas-layout.schema.json) | Schema for the `canvas-layout.json` sidecar (canvas node positions) |
@@ -74,7 +78,7 @@ skel inspect story.skel                          # structure, cast, coverage at 
 Get live validation + token autocomplete in VS Code by starting your `.skel` file with the modeline:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json
 skel_version: "2.0"
 ```
 

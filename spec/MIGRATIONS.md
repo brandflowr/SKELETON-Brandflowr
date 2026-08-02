@@ -75,3 +75,30 @@ Pre-2.9 `$id`s pointed at the mutable `main` branch. From 2.9.0, `$id`s point at
 | — | `application/vnd.skel.studio+json` |
 
 Tools matching on media types SHOULD accept both spellings until registration resolves the final names.
+
+## 9. Genlock Media Sidecars: Direct Maps → Versioned Envelopes (2.10.0)
+
+SKEL 2.9 published a direct-map sidecar design that the Genlock desktop runtime never wrote. SKEL 2.10 standardizes the bytes used by Genlock 1.0:
+
+- video: `{ "version": "1.0", "takes": { "<shot-id>": VideoTake[] } }`
+- audio: `{ "version": "1.0", "tracks": { "<shot-id>": AudioTrack[] } }`
+
+The 2.9 tagged schemas remain immutable. A 2.10 migration wraps video entries under `takes`, moves each prior `ShotVideoEntry.takes` array directly under its shot key, and renames `file` → `path`, `duration` → `durationSeconds`, `created_at` → `createdAt`, and `bone_id` → `boneId`.
+
+For audio, each non-null `dialogue`, `sfx`, or `music` assignment becomes one typed track with a stable generated `id`, `path` equal to the old string, a human-readable `label`, and `volume: 1`. Per-type provenance moves onto that track. Hosts MUST preview and explicitly commit this migration; they MUST NOT rewrite sidecars merely because a project was opened.
+
+## 10. Portable Studio Registry vs Genlock Runtime Registry (2.10.0)
+
+`studio.schema.json` remains the portable, snake_case, cross-host story-bible format. Genlock 1.0's live `.genlock/studio.json` uses a smaller camelCase runtime model defined by `genlock-studio.schema.json`. They are distinct contracts.
+
+Adapters map stable IDs and known fields explicitly (`referenceImages` ↔ `reference_images`, `createdAt` ↔ `created_at`, `updatedAt` ↔ `modified_at`, and `aiConsistencyModifier` ↔ an appropriate portable identity/style-lock field). Unmapped fields MUST be reported or preserved in an `x-genlock` extension; silent loss is non-conformant. Export embeds portable snapshots, not raw runtime records.
+
+## 11. Structured Genlock Prompt and Writing Snapshots (2.10.0)
+
+`startFramePrompt` and `endFramePrompt` now accept either a legacy string or a structured `AssetPrompt` object. Readers continue accepting strings. Current Genlock writers may emit `{text, json, promptTemplate, boneId, model, createdAt}`; at least `text` or `json` is required.
+
+The optional `extensions.x-genlock.writing` block records the resolved Writer Profile, Voice, Craft Skills, resolution timestamp, and source hash. It is a pinned reproducibility snapshot, not a pointer to mutable host configuration.
+
+## 12. BONE Prompt-Skill Binding (2.10.0)
+
+`prompt_skill` is an optional declarative skill-package identifier on a BONE. It tells a host or agent where provider-specific prompt guidance lives. It grants no capability, triggers no execution, and does not replace MUSCLE consent or execution rules.

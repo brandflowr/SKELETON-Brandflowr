@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/bone.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/bone.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "BONE — Base Object Narrative Export",
   "description": "A plugin definition format for attaching AI generation config to SKEL story entities.",
   "type": "object",
@@ -42,6 +42,10 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9\\-]*$",
       "description": "Optional provider namespace, such as higgsfield, runway, kling, or flux."
+    },
+    "prompt_skill": {
+      "type": "string",
+      "description": "Optional skill package that supplies provider-specific prompt authoring guidance."
     },
     "attaches_to": {
       "type": "array",

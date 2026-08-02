@@ -1,5 +1,5 @@
 # sync-spec.ps1
-# Syncs format spec files from SKELETON-Spec/spec → SPORE-Desktop/spec
+# Syncs format spec files from SKELETON-Spec/spec → GenlockStudio-Desktop/spec
 # Run from the SKELETON-Spec root: .\sync-spec.ps1
 # Dry run (preview only):          .\sync-spec.ps1 -DryRun
 
@@ -20,6 +20,7 @@ if ($Destination) {
     $dst = $Destination
 } else {
     $candidates = @(
+        (Join-Path $scriptDir "..\GenlockStudio-Desktop\spec"),
         (Join-Path $scriptDir "..\SPORE-Desktop\spec"),
         (Join-Path $scriptDir "..\theDesktopApp\spec")
     )
@@ -45,6 +46,8 @@ $formatFiles = @(
     "MUSCLE_AUTHORING.md",
     "studio-spec.md",
     "studio.schema.json",
+    "genlock-studio.schema.json",
+    "host-profile.schema.json",
     "errors.md",
     "GENLOCK_HOST_PROFILE.md",
     "MIGRATIONS.md",
@@ -103,7 +106,7 @@ function Sync-File($srcPath, $dstPath, $label) {
 # ── Run ───────────────────────────────────────────────────────────────────────
 $mode = if ($DryRun) { " [DRY RUN — no files written]" } else { "" }
 Write-Host ""
-Write-Host "SKELETON-Spec  ->  SPORE-Desktop/spec$mode" -ForegroundColor Yellow
+Write-Host "SKELETON-Spec  ->  host spec directory$mode" -ForegroundColor Yellow
 Write-Host "src: $src"
 Write-Host "dst: $dst"
 Write-Host ""
@@ -151,6 +154,6 @@ if ($changed -eq 0) {
 } elseif ($DryRun) {
     Write-Host "$changed file(s) would be updated. Run without -DryRun to apply." -ForegroundColor Cyan
 } else {
-    Write-Host "$changed file(s) updated. Commit SPORE-Desktop to finish." -ForegroundColor Green
+    Write-Host "$changed file(s) updated. Commit the host repository to finish." -ForegroundColor Green
 }
 Write-Host ""

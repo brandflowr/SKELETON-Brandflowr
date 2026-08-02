@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/muscle.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/muscle.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "MUSCLE Manifest",
   "description": "Validates .muscle.json behavior-plugin manifests. MUSCLE Spec v1.0.",
   "type": "object",

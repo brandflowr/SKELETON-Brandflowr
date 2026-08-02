@@ -1,6 +1,6 @@
 {
   "name": "@skel/cli",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Reference CLI for the SKEL format: validate, convert (YAML/JSON), and inspect .skel documents.",
   "license": "MIT",
   "type": "module",

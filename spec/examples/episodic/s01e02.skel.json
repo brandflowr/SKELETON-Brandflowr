@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/skel.schema.json",
+  "$schema": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/skel.schema.json",
   "skel_version": "2.9",
   "metadata": {
     "story_id": "str-e02-pattern",

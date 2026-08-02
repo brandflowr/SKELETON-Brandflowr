@@ -503,6 +503,8 @@ export interface BoneRegistryEntry {
   description?: string;
   target: BoneTarget;
   provider?: string;
+  /** Skill package that supplies provider-specific prompt-authoring guidance. */
+  prompt_skill?: string;
   attaches_to?: AttachTarget[];
   fields: Record<string, Partial<BoneFieldDef>>;
   defaults?: Record<string, unknown>;
@@ -529,6 +531,16 @@ export interface Provenance {
   job_id?: string;
 }
 
+/** Structured prompt payload persisted by the Genlock host profile. */
+export interface AssetPrompt {
+  text?: string;
+  json?: Record<string, unknown>;
+  promptTemplate?: Record<string, unknown>;
+  boneId?: string;
+  model?: string;
+  createdAt?: string;
+}
+
 // ── Validation (ARCHITECTURE.md / spec/errors.md) ─────────────────────────────
 
 export interface SKELError {
@@ -551,29 +563,55 @@ export interface SKELValidationResult {
 
 export interface VideoTake {
   id: string;
-  file: string;
+  path: string;
+  label: string;
   isActive: boolean;
-  label?: string;
-  bone_id?: string;
-  duration?: number;
-  created_at?: string;
-  /** Legacy provenance (pre-2.9 writers). */
+  source?: "imported" | "generated" | "ai";
+  status?: "generated" | "review" | "approved" | "rejected" | "superseded";
+  durationSeconds?: number;
+  width?: number;
+  height?: number;
+  fps?: number;
+  replacesTakeId?: string;
+  notes?: string;
+  createdAt?: string;
   prompt?: string;
   promptJson?: Record<string, unknown>;
+  promptTemplate?: Record<string, unknown>;
+  boneId?: string;
+  model?: string;
   provenance?: Provenance;
   extensions?: Extensions;
 }
 
-export type VideoMap = Record<string, { takes: VideoTake[] }>;
-
-export interface ShotAudioEntry {
-  dialogue?: string | null;
-  sfx?: string | null;
-  music?: string | null;
-  provenance?: { dialogue?: Provenance; sfx?: Provenance; music?: Provenance };
+export interface VideoMap {
+  version: "1.0";
+  takes: Record<string, VideoTake[]>;
 }
 
-export type AudioMap = Record<string, ShotAudioEntry>;
+export interface AudioTrack {
+  id: string;
+  type: "dialogue" | "sfx" | "music";
+  path: string;
+  label: string;
+  volume: number;
+  durationSeconds?: number;
+  offsetSeconds?: number;
+  fadeInSeconds?: number;
+  fadeOutSeconds?: number;
+  prompt?: string;
+  model?: string;
+  source?: "imported" | "generated" | "seeaudio" | "ai";
+  status?: "generated" | "review" | "approved" | "rejected" | "superseded";
+  createdAt?: string;
+  provenance?: Provenance;
+  extensions?: Extensions;
+}
+
+export interface AudioMap {
+  version: "1.0";
+  tracks: Record<string, AudioTrack[]>;
+}
 
 // ── Studio registry (studio.schema.json) ─────────────────────────────────────
 
@@ -660,5 +698,80 @@ export interface StudioRegistry {
   palettes?: StudioPalette[];
   series?: Series[];
   notes?: string;
+  extensions?: Extensions;
+}
+
+// ── Genlock runtime registry (genlock-studio.schema.json) ────────────────────
+
+export interface GenlockCharacter {
+  id: string;
+  name: string;
+  description: string;
+  age?: string;
+  gender?: string;
+  voiceId?: string;
+  referenceImages: string[];
+  characterSheet?: string;
+  motionSheet?: string;
+  expressionSheet?: string;
+  aiConsistencyModifier?: string;
+  notes?: string;
+  providerRefs?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+export interface GenlockLocation {
+  id: string;
+  name: string;
+  description: string;
+  referenceImages: string[];
+  referenceSheet?: string;
+  detailSheet?: string;
+  aiConsistencyModifier?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+export interface GenlockEnvironment {
+  id: string;
+  name: string;
+  description: string;
+  mood?: string;
+  lighting?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+export interface GenlockStudioRegistry {
+  characters: GenlockCharacter[];
+  locations: GenlockLocation[];
+  environments: GenlockEnvironment[];
+  [key: string]: unknown;
+}
+
+export type ConformanceStatus = "claimed" | "partial" | "not_implemented";
+
+export interface HostProfile {
+  $schema?: string;
+  profile_version: "1.0";
+  host_id: string;
+  host_version: string;
+  label?: string;
+  skel: {
+    read_versions: string[];
+    write_version: string;
+    canonical_target: string;
+    migration_mode: "none" | "explicit" | "on-save" | "on-open";
+    preserves_unknown_extensions?: boolean;
+  };
+  storage: Record<string, string>;
+  schemas: Record<string, string>;
+  conformance: Record<"reader" | "writer" | "validator" | "full_host", { status: ConformanceStatus; notes?: string }>;
   extensions?: Extensions;
 }

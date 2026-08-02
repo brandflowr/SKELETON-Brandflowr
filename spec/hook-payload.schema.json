@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.9.0/spec/hook-payload.schema.json",
-  "$comment": "Versioned, immutable release URL (git tag v2.9.0); 'main' carries the latest. See GOVERNANCE.md.",
+  "$id": "https://raw.githubusercontent.com/brandflowr/SKELETON-Brandflowr/v2.10.0/spec/hook-payload.schema.json",
+  "$comment": "Versioned, immutable release URL (git tag v2.10.0); 'main' carries the latest. See GOVERNANCE.md.",
   "title": "MUSCLE Hook Payload Contract",
   "description": "Envelope (host to MUSCLE) and result (MUSCLE to host) for hook invocations. MUSCLE Spec v1.1, payload_version 1.1 (additive over 1.0: entity.changed subjects and entity filters may name character/environment). Validate an envelope against #/definitions/HookEnvelope and a result against #/definitions/HookResult.",
   "definitions": {
