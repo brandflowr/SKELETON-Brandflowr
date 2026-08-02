@@ -4,13 +4,25 @@
 
 > A flat, relational YAML format for encoding visual narratives into machine-readable, validatable story data.
 
+[**OpenSKELETON — Official Format Site**](https://openskeleton.dev/) · [**Genlock Studio — Create with SKEL**](https://genlockstudio.com/) · [**SKEL X-Ray — Free Format Viewer**](https://xray.openskeleton.dev/)
+
+---
+
+## SKEL Ecosystem
+
+| | Product | Purpose |
+|---|---|---|
+| **Create** | [**Genlock Studio**](https://genlockstudio.com/) | A first-class desktop studio for authoring storyboards and visual narratives with SKEL as its native story format. |
+| **View** | [**SKEL X-Ray**](https://xray.openskeleton.dev/) | A free web viewer for opening and inspecting SKEL format files. |
+| **Learn** | [**OpenSKELETON**](https://openskeleton.dev/) | The official home of the SKEL format, documentation, ecosystem, and releases. |
+
 ---
 
 ## What Is SKEL?
 
 SKEL (Story Keyframe Extensible Layout) is an open format that represents screenplays, storyboards, and visual narratives as flat, relational data. The native authoring format is YAML (`.skel`); `.skel.json` is the JSON export/interchange form of the same data model. Instead of deeply nested trees, SKEL stores acts, scenes, and shots as top-level arrays linked by ID references — like a relational database for stories.
 
-SKEL is the native story format of **Genlock Studio**, the desktop storyboard studio, and is designed to be read and written by any tool.
+SKEL is the native story format of [**Genlock Studio**](https://genlockstudio.com/), the desktop storyboard studio, and is designed to be read and written by any tool. You can inspect SKEL files without installing a desktop application using the free [**SKEL X-Ray viewer**](https://xray.openskeleton.dev/).
 
 Designed for:
 - AI-driven image/video generation pipelines (Flux, Kling, Runway, WAN, etc.)
