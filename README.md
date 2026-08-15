@@ -67,6 +67,7 @@ Designed for:
 | [`spec/canvas-layout.schema.json`](./spec/canvas-layout.schema.json) | Schema for the `canvas-layout.json` sidecar (canvas node positions) |
 | [`spec/TOKEN_REFERENCE.md`](./spec/TOKEN_REFERENCE.md) | All valid tokens, defaults, and constraints at a glance |
 | [`spec/LLM_INTEGRATION.md`](./spec/LLM_INTEGRATION.md) | How LLM agents read, edit, and validate SKEL projects |
+| [`docs/NEXT-GENERATION-PRODUCTION-ROADMAP.md`](./docs/NEXT-GENERATION-PRODUCTION-ROADMAP.md) | Proposed sequence contracts, typed references, take lineage, OTIO, production packages, and the SKEL/BONE/MUSCLE ownership boundary |
 | [`spec/ARCHITECTURE.md`](./spec/ARCHITECTURE.md) | System architecture and data flows |
 | [`spec/DECISIONS.md`](./spec/DECISIONS.md) | Architecture Decision Records |
 | [`spec/CHANGELOG.md`](./spec/CHANGELOG.md) | Version history |
