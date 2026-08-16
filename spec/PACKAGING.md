@@ -18,7 +18,7 @@ Pin an exact release:
 ```json
 {
   "dependencies": {
-    "@openskeleton/spec": "2.10.0"
+    "@openskeleton/spec": "2.10.1"
   }
 }
 ```

@@ -1,12 +1,12 @@
 {
   "name": "@openskeleton/spec",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "SKEL (Story Keyframe Extensible Layout) — JSON Schemas, default token key file, TypeScript types, and reference tooling for the open storyboard data format.",
   "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brandflowr/SKELETON-Brandflowr.git"
+    "url": "git+https://github.com/brandflowr/SKELETON-Brandflowr.git"
   },
   "keywords": ["skel", "bone", "muscle", "storyboard", "screenplay", "json-schema", "ai-filmmaking"],
   "files": [

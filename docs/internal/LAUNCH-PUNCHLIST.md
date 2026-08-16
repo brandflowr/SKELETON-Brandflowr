@@ -1,7 +1,7 @@
 # SKEL Launch Punchlist
 
 > Owner-facing operational checklist for the initial npm release. Status as of 2026-08-16.
-> Spec work itself is done — see [PRODUCTION-ROADMAP.md](../PRODUCTION-ROADMAP.md) (all P0–P3 implemented; npm release target 2.10.0).
+> Spec work itself is done — see [PRODUCTION-ROADMAP.md](../PRODUCTION-ROADMAP.md) (all P0–P3 implemented; current npm release target 2.10.1).
 
 ---
 
@@ -18,11 +18,11 @@
 
 ## 1. Publish under the claimed npm `@openskeleton` scope
 
-Registry status (checked 2026-08-16): the `openskeleton` organization is claimed; `@openskeleton/spec` and `@openskeleton/cli` are both unpublished.
+Registry status (verified 2026-08-16): the `openskeleton` organization is claimed; `@openskeleton/spec` and `@openskeleton/cli` are published at 2.10.1.
 
 - [ ] **Account** — sign up at <https://www.npmjs.com/signup> (skip if you have one), verify email, then enable 2FA under **Account Settings → Two-Factor Authentication** *before* publishing (npm prompts for an OTP at publish time).
 - [x] **Create the org — claimed.** npm organization: `openskeleton`; scope: `@openskeleton`; plan: **Unlimited public packages — Free**.
-- [ ] **Publish `@openskeleton/spec`** (soon after — a published spec package is a far stronger claim than an empty org; preview the final tarball before publishing):
+- [x] **Publish `@openskeleton/spec`** (preview the final tarball before publishing):
 
   ```powershell
   npm login                      # opens browser auth
@@ -31,7 +31,7 @@ Registry status (checked 2026-08-16): the `openskeleton` organization is claimed
   ```
 
   Notes: `--access public` is required — scoped packages default to private and fail without it. The org must exist first or the publish 404s. `npm pack --dry-run` previews the tarball.
-- [ ] **Publish `@openskeleton/cli`** so `npx @openskeleton/cli validate story.skel` works anywhere:
+- [x] **Publish `@openskeleton/cli`** so `npx @openskeleton/cli validate story.skel` works anywhere:
 
   ```powershell
   cd reference\cli
@@ -39,7 +39,7 @@ Registry status (checked 2026-08-16): the `openskeleton` organization is claimed
   ```
 
 - [ ] **Org hygiene** (npmjs.com → org settings): require 2FA for all members; set publishing access to "Require two-factor authentication."
-- [ ] **Verify**: `npm view @openskeleton/spec` shows 2.10.0; `npx @openskeleton/cli@latest validate spec/example.skel` works on a cold machine.
+- [x] **Verify**: `npm view @openskeleton/spec` shows 2.10.1; `npx @openskeleton/cli@latest validate spec/example.skel` works on a cold machine.
 
 ---
 

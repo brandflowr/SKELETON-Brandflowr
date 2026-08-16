@@ -10,6 +10,15 @@ All notable changes to the SKEL specification and implementation.
 
 ---
 
+## [2.10.1] — 2026-08-16
+
+### Packaging fix
+
+- Made `@openskeleton/cli` depend on `@openskeleton/spec` and resolve schemas through the installed package, fixing `npx @openskeleton/cli` outside a repository checkout.
+- Normalized npm repository and executable metadata so published manifests no longer require npm auto-correction.
+
+---
+
 ## [2.10.0] — 2026-08-02
 
 ### Genlock contract alignment

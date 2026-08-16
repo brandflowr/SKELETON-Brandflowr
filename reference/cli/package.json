@@ -1,16 +1,16 @@
 {
   "name": "@openskeleton/cli",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "Reference CLI for the SKEL format: validate, convert (YAML/JSON), and inspect .skel documents.",
   "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brandflowr/SKELETON-Brandflowr.git",
+    "url": "git+https://github.com/brandflowr/SKELETON-Brandflowr.git",
     "directory": "reference/cli"
   },
   "bin": {
-    "skel": "./skel.mjs"
+    "skel": "skel.mjs"
   },
   "files": [
     "skel.mjs",
@@ -21,6 +21,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@openskeleton/spec": "^2.10.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "js-yaml": "^4.1.0"

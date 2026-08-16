@@ -13,6 +13,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import yaml from "js-yaml";
@@ -20,11 +21,14 @@ import yaml from "js-yaml";
 // ── Spec directory resolution: repo checkout first, installed package second ──
 function findSpecDir() {
   const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    join(here, "..", "..", "..", "spec"),
-    join(here, "..", "node_modules", "@skel", "spec", "spec"),
-    join(here, "..", "..", "..", "node_modules", "@skel", "spec", "spec"),
-  ];
+  const candidates = [join(here, "..", "..", "..", "spec")];
+  try {
+    const require = createRequire(import.meta.url);
+    const packageJson = require.resolve("@openskeleton/spec/package.json");
+    candidates.push(join(dirname(packageJson), "spec"));
+  } catch {
+    // The repository checkout candidate above remains available during development.
+  }
   for (const c of candidates) if (existsSync(join(c, "skel.schema.json"))) return c;
   throw new Error("Cannot locate the SKEL spec directory (skel.schema.json).");
 }
