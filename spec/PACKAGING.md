@@ -1,13 +1,13 @@
 # Packaging and Host Consumption
 
-`@skel/spec` is the release artifact for schemas, public TypeScript types, host profiles, and the reference validator. Tagged GitHub schema URLs remain immutable; the npm version and Git tag use the same version.
+`@openskeleton/spec` is the release artifact for schemas, public TypeScript types, host profiles, and the reference validator. Tagged GitHub schema URLs remain immutable; the npm version and Git tag use the same version.
 
 ## Package contents
 
 - `spec/**` — current schemas, specifications, examples, and starter BONE/MUSCLE manifests
 - `types/skel.d.ts` — public document, sidecar, registry, and host-profile types
 - `profiles/**` — machine-readable host implementation profiles
-- `reference/cli/lib/validate.mjs` — the Validator-class reference implementation, exported as `@skel/spec/validator`
+- `reference/cli/lib/validate.mjs` — the Validator-class reference implementation, exported as `@openskeleton/spec/validator`
 
 AJV, `ajv-formats`, and `js-yaml` are runtime dependencies because the validator export imports them.
 
@@ -18,7 +18,7 @@ Pin an exact release:
 ```json
 {
   "dependencies": {
-    "@skel/spec": "2.10.0"
+    "@openskeleton/spec": "2.10.0"
   }
 }
 ```
@@ -26,9 +26,9 @@ Pin an exact release:
 Import schemas directly when the host bundler supports JSON modules:
 
 ```js
-import skelSchema from "@skel/spec/spec/skel.schema.json" with { type: "json" };
-import videoMapSchema from "@skel/spec/spec/video-map.schema.json" with { type: "json" };
-import { validateDocument } from "@skel/spec/validator";
+import skelSchema from "@openskeleton/spec/spec/skel.schema.json" with { type: "json" };
+import videoMapSchema from "@openskeleton/spec/spec/video-map.schema.json" with { type: "json" };
+import { validateDocument } from "@openskeleton/spec/validator";
 ```
 
 An application may initially keep vendored schema files to avoid a runtime refactor. In that mode, the package/repository is still the authority: run `sync-spec.ps1 -Destination <host>/spec`, then enforce byte equality against the installed package in host CI. Do not hand-edit a generated mirror.

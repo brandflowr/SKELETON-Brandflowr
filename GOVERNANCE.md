@@ -30,11 +30,11 @@ Semver per [CONTRIBUTING.md](./CONTRIBUTING.md) and skel-spec §8: additive = MI
 
 1. Cut `spec/CHANGELOG.md`: move `[Unreleased]` into a dated `[X.Y.Z]` section.
 2. Bump every schema `$id` (and doc Schema-URI references, modeline examples) from the previous tag to `vX.Y.Z`.
-3. Update `package.json` versions (`@skel/spec`, `@skel/cli`).
+3. Update `package.json` versions (`@openskeleton/spec`, `@openskeleton/cli`).
 4. Run `npm run check` — everything green.
 5. Commit, then **tag `vX.Y.Z`** on that commit and push the tag. The tagged raw URLs referenced by the `$id`s become live and immutable at that moment.
 6. Create a GitHub release with notes cut from the changelog section.
-7. (When publishing) `npm publish` for `@skel/spec` and `@skel/cli`.
+7. (When publishing) `npm publish` for `@openskeleton/spec` and `@openskeleton/cli`.
 8. Optionally sync consuming apps (`sync-spec.ps1` for Genlock Studio).
 
 `main` always carries the latest published schema at the same paths — documents may pin either the tag (immutable) or `main` (tracking).

@@ -1,5 +1,5 @@
 /**
- * @skel/spec — TypeScript types for SKEL 2.9 (Story Keyframe Extensible Layout).
+ * @openskeleton/spec — TypeScript types for SKEL 2.9 (Story Keyframe Extensible Layout).
  * Mirrors spec/skel.schema.json (+ studio.schema.json, sidecar schemas).
  *
  * Token fields are typed as their core enum union OR an `x-` custom token

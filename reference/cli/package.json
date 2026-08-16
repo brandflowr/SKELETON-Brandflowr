@@ -1,5 +1,5 @@
 {
-  "name": "@skel/cli",
+  "name": "@openskeleton/cli",
   "version": "2.10.0",
   "description": "Reference CLI for the SKEL format: validate, convert (YAML/JSON), and inspect .skel documents.",
   "license": "MIT",

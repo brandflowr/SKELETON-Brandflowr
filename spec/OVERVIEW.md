@@ -65,7 +65,7 @@ SKEL uses the term **Acts** for the top-level story grouping. Genlock Studio sur
 
 ### Implementation
 
-Reference implementations in this repo: [`reference/cli/`](../reference/cli/) (validator/converter/inspector, published as `@skel/cli`), [`reference/muscle-host/`](../reference/muscle-host/), [`reference/fountain-adapter/`](../reference/fountain-adapter/), [`reference/continuity-guard/`](../reference/continuity-guard/), plus TypeScript types in [`types/skel.d.ts`](../types/skel.d.ts) (published as `@skel/spec`).
+Reference implementations in this repo: [`reference/cli/`](../reference/cli/) (validator/converter/inspector, published as `@openskeleton/cli`), [`reference/muscle-host/`](../reference/muscle-host/), [`reference/fountain-adapter/`](../reference/fountain-adapter/), [`reference/continuity-guard/`](../reference/continuity-guard/), plus TypeScript types in [`types/skel.d.ts`](../types/skel.d.ts) (published as `@openskeleton/spec`).
 
 The Genlock Studio host implementation lives in the app repo (`app/utils/skel/`):
 

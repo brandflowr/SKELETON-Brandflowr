@@ -322,7 +322,7 @@ The native format is YAML and the repo contains **zero YAML examples** — every
 ## P3 — Ecosystem & Launch Assets
 
 ### P3-1. `skel` CLI as a launch artifact
-The external validator contract is fully specified (ARCHITECTURE.md, LLM_INTEGRATION.md) but only implemented inside the app. Ship a standalone reference CLI in this repo (like `reference/muscle-host/`): `skel validate` (with `--lifecycle`, `--json`, `--with-sidecars`), `skel convert` (yaml↔json), `skel inspect`. `npx @skel/cli validate story.skel` is the single best adoption hook an open format can have.
+The external validator contract is fully specified (ARCHITECTURE.md, LLM_INTEGRATION.md) but only implemented inside the app. Ship a standalone reference CLI in this repo (like `reference/muscle-host/`): `skel validate` (with `--lifecycle`, `--json`, `--with-sidecars`), `skel convert` (yaml↔json), `skel inspect`. `npx @openskeleton/cli validate story.skel` is the single best adoption hook an open format can have.
 
 ### P3-2. CI — automate exactly what this review ran by hand
 GitHub Actions (there is currently **no `.github/`**):
@@ -334,7 +334,7 @@ GitHub Actions (there is currently **no `.github/`**):
 6. (After P2-10) YAML-lint `.skel` examples.
 
 ### P3-3. Publish the schemas/types as a package
-ADR-007 said "extract later" — launch is *later*. `@skel/spec` npm package exporting the JSON Schemas + generated TypeScript types (currently `types.ts` lives only in the app repo, so every third party will hand-roll their own drifting types).
+ADR-007 said "extract later" — launch is *later*. `@openskeleton/spec` npm package exporting the JSON Schemas + generated TypeScript types (currently `types.ts` lives only in the app repo, so every third party will hand-roll their own drifting types).
 
 ### P3-4. OSS repo hygiene for a spec that wants adopters
 `SECURITY.md` (disclosure policy — you're specifying a plugin system that executes commands), `GOVERNANCE.md` (who accepts spec changes, how tokens get added — CONTRIBUTING has the seed), issue/PR templates (spec-change template requiring schema+changelog+example updates in one PR, mirroring CONTRIBUTING rules), `CODE_OF_CONDUCT.md`, tagged releases with release notes cut from the changelog, and GitHub Pages rendering of the spec.

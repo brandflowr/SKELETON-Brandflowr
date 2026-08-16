@@ -1,7 +1,7 @@
 # SKEL Launch Punchlist
 
-> Owner-facing operational checklist, post-2.9.0. Status as of 2026-07-16.
-> Spec work itself is done — see [PRODUCTION-ROADMAP.md](../PRODUCTION-ROADMAP.md) (all P0–P3 implemented, released as 2.9.0).
+> Owner-facing operational checklist for the initial npm release. Status as of 2026-08-16.
+> Spec work itself is done — see [PRODUCTION-ROADMAP.md](../PRODUCTION-ROADMAP.md) (all P0–P3 implemented; npm release target 2.10.0).
 
 ---
 
@@ -16,14 +16,13 @@
 
 ---
 
-## 1. Claim the npm `@skel` scope — first-come, do soon
+## 1. Publish under the claimed npm `@openskeleton` scope
 
-Availability signals (checked 2026-07-16): `@skel/spec` unpublished; **zero packages by any maintainer named `skel`** — scope very likely free. The unscoped package name `skel` is a parked 2013 placeholder (v0.0.0, owner `moll`) — it blocks only the *unscoped* name, not the scope, and would be disputable under npm's squatting policy if ever wanted.
+Registry status (checked 2026-08-16): the `openskeleton` organization is claimed; `@openskeleton/spec` and `@openskeleton/cli` are both unpublished.
 
 - [ ] **Account** — sign up at <https://www.npmjs.com/signup> (skip if you have one), verify email, then enable 2FA under **Account Settings → Two-Factor Authentication** *before* publishing (npm prompts for an OTP at publish time).
-- [ ] **Create the org — this is the claim.** <https://www.npmjs.com/org/create> → organization name: `skel` → plan: **Unlimited public packages — Free** → Create. The scope is yours the moment the org exists; nothing needs to be published and nothing is charged. npm validates the name instantly (this is also the definitive availability check).
-  - *If `skel` is taken*, fallbacks in order: `skelformat`, `skel-spec`, `brandflowr` — then update the `name` in both `package.json` and `reference/cli/package.json` to match.
-- [ ] **Publish `@skel/spec`** (soon after — a published spec package is a far stronger claim than an empty org, and the tarball is verified clean: 44 files, 142.5 kB — schemas, key file, `types/skel.d.ts`, README/LICENSE/TRADEMARKS):
+- [x] **Create the org — claimed.** npm organization: `openskeleton`; scope: `@openskeleton`; plan: **Unlimited public packages — Free**.
+- [ ] **Publish `@openskeleton/spec`** (soon after — a published spec package is a far stronger claim than an empty org; preview the final tarball before publishing):
 
   ```powershell
   npm login                      # opens browser auth
@@ -32,7 +31,7 @@ Availability signals (checked 2026-07-16): `@skel/spec` unpublished; **zero pack
   ```
 
   Notes: `--access public` is required — scoped packages default to private and fail without it. The org must exist first or the publish 404s. `npm pack --dry-run` previews the tarball.
-- [ ] **Publish `@skel/cli`** so `npx @skel/cli validate story.skel` works anywhere:
+- [ ] **Publish `@openskeleton/cli`** so `npx @openskeleton/cli validate story.skel` works anywhere:
 
   ```powershell
   cd reference\cli
@@ -40,7 +39,7 @@ Availability signals (checked 2026-07-16): `@skel/spec` unpublished; **zero pack
   ```
 
 - [ ] **Org hygiene** (npmjs.com → org settings): require 2FA for all members; set publishing access to "Require two-factor authentication."
-- [ ] **Verify** (or ask Claude to): `npm view @skel/spec` shows 2.9.0; `npx @skel/cli@latest validate spec/example.skel` works on a cold machine.
+- [ ] **Verify**: `npm view @openskeleton/spec` shows 2.10.0; `npx @openskeleton/cli@latest validate spec/example.skel` works on a cold machine.
 
 ---
 

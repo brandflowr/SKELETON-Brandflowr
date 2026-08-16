@@ -1,5 +1,5 @@
 {
-  "name": "@skel/spec",
+  "name": "@openskeleton/spec",
   "version": "2.10.0",
   "description": "SKEL (Story Keyframe Extensible Layout) — JSON Schemas, default token key file, TypeScript types, and reference tooling for the open storyboard data format.",
   "license": "MIT",

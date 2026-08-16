@@ -21,8 +21,9 @@ All notable changes to the SKEL specification and implementation.
 
 ### Host packaging and conformance
 
+- Established the official OpenSKELETON npm namespace: the specification package is `@openskeleton/spec` and the reference CLI is `@openskeleton/cli`.
 - Added `host-profile.schema.json` plus `profiles/genlock/profile.json`, declaring storage paths, schema authority, read/write versions, migration policy, and honest conformance status.
-- Exported the reference validator from `@skel/spec/validator`, included profiles and validator runtime files in the package, and promoted its runtime libraries to package dependencies.
+- Exported the reference validator from `@openskeleton/spec/validator`, included profiles and validator runtime files in the package, and promoted its runtime libraries to package dependencies.
 - Updated public TypeScript definitions for Genlock sidecars, `AssetPrompt`, `prompt_skill`, the runtime Studio registry, and host profiles.
 - Added semantic sidecar codes and fixtures: `SIDECAR_DUPLICATE_ID`, `VIDEO_MULTIPLE_ACTIVE_TAKES`, `MEDIA_FADE_DURATION_CONFLICT`, and `MEDIA_PROVENANCE_MISMATCH`.
 - Added the two missing 2.9 sidecar parse/schema fixtures and unified parse-error reporting in the reference validator.
@@ -78,9 +79,9 @@ The launch-readiness release: every P0–P3 item from `docs/PRODUCTION-ROADMAP.m
 - **Ordering precedence** (§3.6): refs arrays canonical, `order` derived, `ORDER_MISMATCH` warning.
 
 ### P3 — ecosystem & launch assets
-- **Reference `skel` CLI** (`reference/cli/`, `@skel/cli`): `validate` (full contract: lifecycle, RFC 6901 paths, `--json`, `--with-sidecars`, `--studio`), `convert` (YAML⇄JSON), `inspect`. The validator library (`lib/validate.mjs`) implements `spec/errors.md` end to end.
-- **CI** (`.github/workflows/ci.yml`): validates every shipped artifact against its schema, AJV-strict meta-validation, conformance corpus, MUSCLE host demo with sanity assertion, continuity-guard test, Fountain round-trip, markdown link check. Root `package.json` (`@skel/spec`) with `npm run check` running the same suite locally.
-- **`@skel/spec` package**: schemas + key file + hand-maintained TypeScript types (`types/skel.d.ts`) covering the full 2.9 model, sidecars, studio registry, and validation shapes.
+- **Reference `skel` CLI** (`reference/cli/`, `@openskeleton/cli`): `validate` (full contract: lifecycle, RFC 6901 paths, `--json`, `--with-sidecars`, `--studio`), `convert` (YAML⇄JSON), `inspect`. The validator library (`lib/validate.mjs`) implements `spec/errors.md` end to end.
+- **CI** (`.github/workflows/ci.yml`): validates every shipped artifact against its schema, AJV-strict meta-validation, conformance corpus, MUSCLE host demo with sanity assertion, continuity-guard test, Fountain round-trip, markdown link check. Root `package.json` (`@openskeleton/spec`) with `npm run check` running the same suite locally.
+- **`@openskeleton/spec` package**: schemas + key file + hand-maintained TypeScript types (`types/skel.d.ts`) covering the full 2.9 model, sidecars, studio registry, and validation shapes.
 - **OSS hygiene**: `SECURITY.md` (disclosure policy for a spec that executes plugins), `GOVERNANCE.md` (change + release process; tags make `$id` URLs live), `CODE_OF_CONDUCT.md`, issue templates (spec change / token proposal / bug) and a spec-change PR checklist.
 - **Working Fountain adapter** (`reference/fountain-adapter/`): import + export with per-element raw parking under `x-fountain`; round-trip test proves byte-identical export, schema-valid import, stable IDs across cycles, and edit-aware re-rendering (ADR-016 made demonstrable).
 - **Worked MUSCLE beyond lint**: `continuity-guard` (manifest + reference tool + test) cross-checks props/wardrobe/first-appearance against shots via the real veto-hook contract — dogfoods the P1 asset layer.

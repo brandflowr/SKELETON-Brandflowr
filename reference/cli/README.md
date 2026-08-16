@@ -7,7 +7,7 @@ The reference implementation of the [external validator contract](../../spec/ARC
 node reference/cli/skel.mjs validate spec/example.skel
 
 # as a package
-npx @skel/cli validate story.skel
+npx @openskeleton/cli validate story.skel
 ```
 
 ## Commands
@@ -38,7 +38,7 @@ One screen of truth: title, version, lifecycle, series code, structure counts, c
 ## As a library
 
 ```js
-import { loadDocument, validateDocument } from "@skel/cli/lib/validate.mjs";
+import { loadDocument, validateDocument } from "@openskeleton/cli/lib/validate.mjs";
 const result = validateDocument(loadDocument("story.skel"), { lifecycle: "production" });
 ```
 

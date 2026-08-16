@@ -50,7 +50,7 @@ Designed for:
 | [`spec/MUSCLE_AUTHORING.md`](./spec/MUSCLE_AUTHORING.md) | How to write a MUSCLE plugin, step by step |
 | [`spec/muscles/`](./spec/muscles/) | Example MUSCLE manifests: studio-style-guard, fountain-adapter, continuity-guard |
 | [`reference/muscle-host/`](./reference/muscle-host/) | Runnable reference host — discovery, hook invocation, capability-checked patch application |
-| [`reference/cli/`](./reference/cli/) | Reference `skel` CLI — validate / convert / inspect (`npx @skel/cli validate story.skel`) |
+| [`reference/cli/`](./reference/cli/) | Reference `skel` CLI — validate / convert / inspect (`npx @openskeleton/cli validate story.skel`) |
 | [`reference/fountain-adapter/`](./reference/fountain-adapter/) | Working Fountain round-trip adapter (ADR-016 proof) with byte-identical round-trip test |
 | [`spec/skel-keyfile.json`](./spec/skel-keyfile.json) | Default token dictionary (13 categories, 131 tokens) |
 | [`spec/example.skel.json`](./spec/example.skel.json) | Complete working example (JSON export form) — "The Last Signal" |
@@ -82,7 +82,7 @@ Designed for:
 Validate a document with the reference CLI:
 
 ```bash
-npx @skel/cli validate story.skel                # or: node reference/cli/skel.mjs validate story.skel
+npx @openskeleton/cli validate story.skel        # or: node reference/cli/skel.mjs validate story.skel
 skel validate story.skel --lifecycle export --json --with-sidecars
 skel convert story.skel story.skel.json          # YAML ⇄ JSON
 skel inspect story.skel                          # structure, cast, coverage at a glance
